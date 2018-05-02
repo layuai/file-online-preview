@@ -106,7 +106,7 @@ public class DownloadUtils {
      *          http://192.168.2.111:8013/demo/Handle中文.zip
      * @return
      */
-    private String encodeUrlParam(String urlAddress) {
+    public String encodeUrlParam(String urlAddress) {
         String newUrl = "";
         try {
             String path = "";

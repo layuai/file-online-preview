@@ -4,6 +4,7 @@ import cn.keking.service.FileConverQueueTask;
 import cn.keking.service.FilePreview;
 import cn.keking.service.FilePreviewFactory;
 
+import cn.keking.utils.DownloadUtils;
 import org.apache.commons.io.IOUtils;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RedissonClient;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +42,8 @@ public class OnlinePreviewController {
     @Autowired
     RedissonClient redissonClient;
 
+    @Autowired
+    DownloadUtils downloadUtils;
     /**
      * @param url
      * @param model
@@ -99,11 +103,14 @@ public class OnlinePreviewController {
         InputStream inputStream = null;
         try {
             String strUrl = urlPath.trim();
+            strUrl = downloadUtils.encodeUrlParam(strUrl);
             URL url = new URL(strUrl);
             //打开请求连接
             URLConnection connection = url.openConnection();
             HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
             httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            httpURLConnection.setRequestProperty("Charset", "UTF-8");
+
             inputStream = httpURLConnection.getInputStream();
             byte[] bs = new byte[1024];
             int len;
