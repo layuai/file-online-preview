@@ -16,6 +16,8 @@ import static org.artofsolving.jodconverter.process.ProcessManager.PID_NOT_FOUND
 import static org.artofsolving.jodconverter.process.ProcessManager.PID_UNKNOWN;
 import java.io.File;
 import java.io.IOException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -150,10 +152,22 @@ class OfficeProcess {
                 pathKey = key;
             }
         }
-        String path = environment.get(pathKey) + ";" + ureBin.getAbsolutePath() + ";" + basisProgram.getAbsolutePath();
+        String path = validMsg(environment.get(pathKey)) + ";" + ureBin.getAbsolutePath() + ";" + basisProgram.getAbsolutePath();
         logger.fine(String.format("setting %s to \"%s\"", pathKey, path));
         environment.put(pathKey, path);
     }
+
+    /**
+     * valid msg
+     *
+     * @param msg
+     * @return encodeMsg
+     */
+	public static String validMsg(String msg) {
+		String encodeMsg = Normalizer.normalize(msg, Form.NFKC);
+		encodeMsg = encodeMsg.replaceAll("(\r|\n|%0d|%0a)", "");
+		return encodeMsg;
+	}
 
     public boolean isRunning() {
         if (process == null) {

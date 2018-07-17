@@ -71,49 +71,49 @@ public class FileCharsetDetector {
     // The Notify() will be called when a matching charset is found.
     det.Init(observer);
 
-    BufferedInputStream imp = new BufferedInputStream(new FileInputStream(
-        file));
-    byte[] buf = new byte[1024];
-    int len;
-    boolean done = false;
-    boolean isAscii = false;
+    try(BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file))){
+    	byte[] buf = new byte[1024];
+	    int len;
+	    boolean done = false;
+	    boolean isAscii = false;
 
-    while ((len = imp.read(buf, 0, buf.length)) != -1) {
-      // Check if the stream is only ascii.
-      isAscii = det.isAscii(buf, len);
-      if (isAscii) {
-        break;
-      }
-      // DoIt if non-ascii and not done yet.
-      done = det.DoIt(buf, len, false);
-      if (done) {
-        break;
-      }
-    }
-    imp.close();
-    det.DataEnd();
+	    while ((len = imp.read(buf, 0, buf.length)) != -1) {
+	      // Check if the stream is only ascii.
+	      isAscii = det.isAscii(buf, len);
+	      if (isAscii) {
+	        break;
+	      }
+	      // DoIt if non-ascii and not done yet.
+	      done = det.DoIt(buf, len, false);
+	      if (done) {
+	        break;
+	      }
+	    }
+	    imp.close();
+	    det.DataEnd();
 
-    if (isAscii) {
-      observer.encoding = "ASCII";
-      observer.found = true;
-    }
+	    if (isAscii) {
+	      observer.encoding = "ASCII";
+	      observer.found = true;
+	    }
 
-    if (!observer.isFound()) {
-      String[] prob = det.getProbableCharsets();
-      // // 这里将可能的字符集组合起来返回
-      // for (int i = 0; i < prob.length; i++) {
-      // if (i == 0) {
-      // encoding = prob[i];
-      // } else {
-      // encoding += "," + prob[i];
-      // }
-      // }
-      if (prob.length > 0) {
-        // 在没有发现情况下,去第一个可能的编码
-        observer.encoding = prob[0];
-      } else {
-        observer.encoding = null;
-      }
+	    if (!observer.isFound()) {
+	      String[] prob = det.getProbableCharsets();
+	      // // 这里将可能的字符集组合起来返回
+	      // for (int i = 0; i < prob.length; i++) {
+	      // if (i == 0) {
+	      // encoding = prob[i];
+	      // } else {
+	      // encoding += "," + prob[i];
+	      // }
+	      // }
+	      if (prob.length > 0) {
+	        // 在没有发现情况下,去第一个可能的编码
+	        observer.encoding = prob[0];
+	      } else {
+	        observer.encoding = null;
+	      }
+	    }
     }
     return observer;
   }

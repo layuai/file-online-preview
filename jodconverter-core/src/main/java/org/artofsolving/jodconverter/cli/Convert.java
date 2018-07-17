@@ -30,6 +30,7 @@ import org.artofsolving.jodconverter.document.DocumentFormatRegistry;
 import org.artofsolving.jodconverter.document.JsonDocumentFormatRegistry;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
+import org.artofsolving.jodconverter.office.OfficeException;
 import org.json.JSONException;
 
 /**
@@ -119,7 +120,11 @@ public class Convert {
                 }
             }
         } finally {
-            officeManager.stop();
+        	try {
+        		officeManager.stop();
+			} catch (OfficeException e) {
+				e.printStackTrace();
+			}
         }
     }
     

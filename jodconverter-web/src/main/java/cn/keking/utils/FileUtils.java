@@ -201,9 +201,7 @@ public class FileUtils {
     public String getFileEncodeUTFGBK(String path){
         String enc = Charset.forName("GBK").name();
         File file = new File(path);
-        InputStream in= null;
-        try {
-            in = new FileInputStream(file);
+        try(InputStream in = new FileInputStream(file)){
             byte[] b = new byte[3];
             in.read(b);
             in.close();
