@@ -49,38 +49,40 @@ public class DownloadUtils {
         if (!dirFile.exists()) {
             dirFile.mkdirs();
         }
-        try {
-            URLConnection connection = url.openConnection();
-            InputStream in = connection.getInputStream();
+        if(url != null) {
+        	try {
+                URLConnection connection = url.openConnection();
+                InputStream in = connection.getInputStream();
 
-            FileOutputStream os = new FileOutputStream(realPath);
-            byte[] buffer = new byte[4 * 1024];
-            int read;
-            while ((read = in.read(buffer)) > 0) {
-                os.write(buffer, 0, read);
-            }
-            os.close();
-            in.close();
-            response.setContent(realPath);
-            // 同样针对类txt文件，如果成功msg包含的是转换后的文件名
-            response.setMsg(fileName);
+                FileOutputStream os = new FileOutputStream(realPath);
+                byte[] buffer = new byte[4 * 1024];
+                int read;
+                while ((read = in.read(buffer)) > 0) {
+                    os.write(buffer, 0, read);
+                }
+                os.close();
+                in.close();
+                response.setContent(realPath);
+                // 同样针对类txt文件，如果成功msg包含的是转换后的文件名
+                response.setMsg(fileName);
 
-             // txt转换文件编码为utf8
-            if("txt".equals(type)){
-                convertTextPlainFileCharsetToUtf8(realPath);
-            }
+                 // txt转换文件编码为utf8
+                if("txt".equals(type)){
+                    convertTextPlainFileCharsetToUtf8(realPath);
+                }
 
-            return response;
-        } catch (IOException e) {
-            e.printStackTrace();
-            response.setCode(1);
-            response.setContent(null);
-            if (e instanceof FileNotFoundException) {
-                response.setMsg("文件不存在!!!");
-            }else {
-                response.setMsg(e.getMessage());
+                return response;
+            } catch (IOException e) {
+                e.printStackTrace();
+                response.setCode(1);
+                response.setContent(null);
+                if (e instanceof FileNotFoundException) {
+                    response.setMsg("文件不存在!!!");
+                }else {
+                    response.setMsg(e.getMessage());
+                }
+                return response;
             }
-            return response;
         }
     }
 
