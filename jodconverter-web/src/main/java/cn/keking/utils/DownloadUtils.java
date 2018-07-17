@@ -50,18 +50,17 @@ public class DownloadUtils {
             dirFile.mkdirs();
         }
         if(url != null) {
+        	InputStream in = null;
+        	FileOutputStream os = null;
         	try {
                 URLConnection connection = url.openConnection();
-                InputStream in = connection.getInputStream();
-
-                FileOutputStream os = new FileOutputStream(realPath);
+                in = connection.getInputStream();
+                os = new FileOutputStream(realPath);
                 byte[] buffer = new byte[4 * 1024];
                 int read;
                 while ((read = in.read(buffer)) > 0) {
                     os.write(buffer, 0, read);
                 }
-                os.close();
-                in.close();
                 response.setContent(realPath);
                 // 同样针对类txt文件，如果成功msg包含的是转换后的文件名
                 response.setMsg(fileName);
@@ -82,6 +81,21 @@ public class DownloadUtils {
                     response.setMsg(e.getMessage());
                 }
                 return response;
+            }finally {
+            	if(os != null) {
+            		try{
+            			os.close();
+            		}catch (IOException e) {
+            			e.printStackTrace();
+            	    }
+            	}
+            	if(in != null) {
+            		try{
+            			in.close();
+            		}catch (IOException e) {
+            			e.printStackTrace();
+            	    }
+            	}
             }
         }
     }
@@ -180,15 +194,14 @@ public class DownloadUtils {
       if(encoding != null && !"UTF-8".equals(encoding)){
         // 不为utf8,进行转码
         File tmpUtf8File = new File(filePath+".utf8");
-        Writer writer = new OutputStreamWriter(new FileOutputStream(tmpUtf8File),"UTF-8");
-        Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile),encoding));
-        char[] buf = new char[1024];
-        int read;
-        while ((read = reader.read(buf)) > 0){
-          writer.write(buf, 0, read);
-        }
-        reader.close();
-        writer.close();
+        try(Writer writer = new OutputStreamWriter(new FileOutputStream(""),"UTF-8");
+				Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(""),"UTF-8"));){
+			char[] buf = new char[1024];
+	        int read;
+	        while ((read = reader.read(buf)) > 0){
+	          writer.write(buf, 0, read);
+	        }
+		}
         // 删除源文件
         sourceFile.delete();
         // 重命名
