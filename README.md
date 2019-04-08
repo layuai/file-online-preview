@@ -53,15 +53,13 @@ QQ群号：613025121
 - redisson 
 - jodconverter
 > 依赖外部环境
-- redis 
+- redis (可选，默认不用)
 - OpenOffice或者LibreOffice
 
 1. 第一步：pull项目https://github.com/kekingcn/file-online-preview.git
 
-2. 第二步：配置redis地址和OpenOffice目录，如
+2. 第二步：配置OpenOffice目录，如
 ```
-#=============================================#spring Redisson配置#===================================#
-spring.redisson.address = 192.168.1.204:6379
 ##资源映射路径(因为jar方式运行的原因)
 file.dir = C:\\Users\\yudian\\Desktop\\dev\\
 ## openoffice相关配置
@@ -75,6 +73,10 @@ file.dir为转换文件实际存储地址，注意要以/结尾
 ![输入图片说明](https://gitee.com/uploads/images/2017/1213/100221_ea15202e_492218.png "屏幕截图.png")
 
 ### 历史更新记录
+
+> 2019年04月08日 ：
+1. 缓存及队列实现抽象，提供JDK和REDIS两种实现(REDIS成为可选依赖)
+2. 打包方式提供zip和tar.gz包，并提供一键启动脚本
 
 > 2018年01月19日 ：
 

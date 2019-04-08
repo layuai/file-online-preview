@@ -57,15 +57,13 @@ Considering space issues, the pictures of other types of documents will not be s
 - Redisson 
 - Jodconverter
 > Dependencies
-- Redis 
+- Redis(Optional, Unnecessary by default)
 - OpenOffice or LibreOffice
 
 1. First step：`git pull https://github.com/kekingcn/file-online-preview.git`
 
 2. Second step：configure redis address and OpenOffice directory，such as
 ```
-#=============================================#Spring Redisson Configuration#===================================#
-spring.redisson.address = 192.168.1.204:6379
 ##The folder for files which are uploaded to the server(Because of running as jar)
 file.dir = C:\\Users\\yudian\\Desktop\\dev\\
 ## openoffice configuration
@@ -79,6 +77,10 @@ If everything is ok,you will see the picture below.
 ![输入图片说明](https://gitee.com/uploads/images/2017/1213/100221_ea15202e_492218.png "屏幕截图.png")
 
 ### Changelog
+
+> April 8th 2019
+1. Cache and queue implementations abstract, providing JDK and REDIS implementations (REDIS becomes optional dependencies)
+2. Provides zip and tar.gz packages, and provides a one-click startup script
 
 > January 17th 2018
 
