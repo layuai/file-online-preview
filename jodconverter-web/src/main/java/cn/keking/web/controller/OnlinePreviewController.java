@@ -1,10 +1,14 @@
 package cn.keking.web.controller;
 
+import cn.keking.model.FileAttribute;
 import cn.keking.service.FilePreview;
 import cn.keking.service.FilePreviewFactory;
 
 import cn.keking.service.cache.CacheService;
+import cn.keking.utils.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +31,8 @@ import java.util.List;
  */
 @Controller
 public class OnlinePreviewController {
+
+    private static final Logger logger = LoggerFactory.getLogger(OnlinePreviewController.class);
 
     @Autowired
     FilePreviewFactory previewFactory;
@@ -41,7 +49,7 @@ public class OnlinePreviewController {
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
         req.setAttribute("fileKey", req.getParameter("fileKey"));
         model.addAttribute("officePreviewType", req.getParameter("officePreviewType"));
-        model.addAttribute("originUrl",req.getRequestURL().toString());
+        logger.debug("Request URL: {}", url);
         FilePreview filePreview = previewFactory.get(url);
         return filePreview.filePreviewHandle(url, model);
     }
@@ -63,7 +71,7 @@ public class OnlinePreviewController {
         String[] imgs = decodedUrl.split("\\|");
         List imgurls = Arrays.asList(imgs);
         model.addAttribute("imgurls", imgurls);
-        model.addAttribute("currentUrl",decodedCurrentUrl);
+        model.addAttribute("currentUrl", decodedCurrentUrl);
         return "picture";
     }
 
@@ -78,9 +86,10 @@ public class OnlinePreviewController {
         String[] imgs = decodedUrl.split("\\|");
         List imgurls = Arrays.asList(imgs);
         model.addAttribute("imgurls", imgurls);
-        model.addAttribute("currentUrl",decodedCurrentUrl);
+        model.addAttribute("currentUrl", decodedCurrentUrl);
         return "picture";
     }
+
     /**
      * 根据url获取文件内容
      * 当pdfjs读取存在跨域问题的文件时将通过此接口读取
@@ -93,7 +102,15 @@ public class OnlinePreviewController {
         InputStream inputStream = null;
         try {
             String strUrl = urlPath.trim();
-            URL url = new URL(new URI(strUrl).toASCIIString());
+            // 获取文件名前的 /，作为分隔字符
+            int splitIndex = strUrl.lastIndexOf("/") + 1 ;
+            // 获取要跨域下载的文件名
+            String fileName = strUrl.substring(splitIndex);
+            // 编码文件名并拼接，解决因为URL中文乱码导致的404的问题
+            strUrl = strUrl.substring(0, splitIndex) + URLEncoder.encode(fileName, "UTF-8");
+
+            URL url = new URL(strUrl);
+
             //打开请求连接
             URLConnection connection = url.openConnection();
             HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
@@ -104,8 +121,8 @@ public class OnlinePreviewController {
             while (-1 != (len = inputStream.read(bs))) {
                 resp.getOutputStream().write(bs, 0, len);
             }
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error("文件下载失败：", e);
         } finally {
             if (inputStream != null) {
                 IOUtils.closeQuietly(inputStream);
@@ -115,6 +132,7 @@ public class OnlinePreviewController {
 
     /**
      * 通过api接口入队
+     *
      * @param url 请编码后在入队
      */
     @GetMapping("/addTask")
