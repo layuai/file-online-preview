@@ -29,7 +29,12 @@
 </body>
 <script src="js/watermark.js" type="text/javascript"></script>
 <script type="text/javascript">
-    document.getElementsByTagName('iframe')[0].src = "${baseUrl}pdfjs/web/viewer.html?base=${baseUrl}&file="+encodeURIComponent('${finalUrl}')+"&disabledownload=${pdfDownloadDisable}";
+	var src = "${baseUrl}pdfjs/web/viewer.html?base=${baseUrl}&file="+encodeURIComponent('${finalUrl}')+"&disabledownload=${pdfDownloadDisable}";
+
+	var protocol = window.location.protocol.replace(":","");
+	src = src.replace("http",protocol).replace("https",protocol);
+	
+    document.getElementsByTagName('iframe')[0].src = src;
     document.getElementsByTagName('iframe')[0].height = document.documentElement.clientHeight-10;
     /**
      * 页面变化调整高度
