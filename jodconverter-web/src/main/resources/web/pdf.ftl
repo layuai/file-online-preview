@@ -32,7 +32,7 @@
 	var src = "${baseUrl}pdfjs/web/viewer.html?base=${baseUrl}&file="+encodeURIComponent('${finalUrl}')+"&disabledownload=${pdfDownloadDisable}";
 
 	var protocol = window.location.protocol.replace(":","");
-	src = src.replace(/http/g, protocol).replace(/https/g, protocol);
+	src = src.replace(/http/g, protocol).replace(/https/g, protocol); // 根据父页面http协议进行加载
 	
     document.getElementsByTagName('iframe')[0].src = src;
     document.getElementsByTagName('iframe')[0].height = document.documentElement.clientHeight-10;
