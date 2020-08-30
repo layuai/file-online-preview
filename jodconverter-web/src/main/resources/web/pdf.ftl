@@ -23,13 +23,18 @@
         <#assign finalUrl="${baseUrl}${pdfUrl}">
     </#if>
     <iframe src="" width="100%" frameborder="0"></iframe>
-
+	<!--
     <img src="images/jpg.svg" width="63" height="63" style="position: fixed; cursor: pointer; top: 40%; right: 48px; z-index: 999;" alt="使用图片预览" title="使用图片预览" onclick="goForImage()"/>
-
+	-->
 </body>
 <script src="js/watermark.js" type="text/javascript"></script>
 <script type="text/javascript">
-    document.getElementsByTagName('iframe')[0].src = "${baseUrl}pdfjs/web/viewer.html?base=${baseUrl}&file="+encodeURIComponent('${finalUrl}')+"&disabledownload=${pdfDownloadDisable}";
+	var src = "${baseUrl}pdfjs/web/viewer.html?base=${baseUrl}&file="+encodeURIComponent('${finalUrl}')+"&disabledownload=${pdfDownloadDisable}";
+
+	var protocol = window.location.protocol.replace(":","");
+	src = src.replace(/http/g, protocol).replace(/https/g, protocol); // 根据父页面http协议进行加载
+	
+    document.getElementsByTagName('iframe')[0].src = src;
     document.getElementsByTagName('iframe')[0].height = document.documentElement.clientHeight-10;
     /**
      * 页面变化调整高度

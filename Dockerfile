@@ -9,6 +9,7 @@ RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe m
 	apt-get install -y tzdata && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &&\
 	apt-get install -y libxrender1 && apt-get install -y libxt6 && apt-get install -y libxext-dev && apt-get install -y libfreetype6-dev &&\
 	apt-get install -y wget && apt-get install -y ttf-mscorefonts-installer && apt-get install -y fontconfig &&\
+	apt-get install -y ttf-wqy-zenhei && apt-get install -y ttf-wqy-microhei && apt-get install -y xfonts-wqy &&\
 	cd /tmp &&\
 	wget https://kkfileview.keking.cn/server-jre-8u251-linux-x64.tar.gz &&\
 	wget https://kkfileview.keking.cn/Apache_OpenOffice_4.1.6_Linux_x86-64_install-deb_zh-CN.tar.gz -cO openoffice_deb.tar.gz &&\
