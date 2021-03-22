@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR_HOME=("/opt/openoffice.org3" "/opt/libreoffice" "/opt/openoffice4" "/usr/lib/openoffice" "/usr/lib/libreoffice")
+DIR_HOME=("/opt/openoffice.org3" "/opt/libreoffice" "/opt/libreoffice7.1 "/opt/openoffice4" "/usr/lib/openoffice" "/usr/lib/libreoffice")
 FLAG=
 OFFICE_HOME=
 KKFILEVIEW_BIN_FOLDER=$(cd "$(dirname "$0")";pwd)
@@ -9,7 +9,7 @@ echo "Using KKFILEVIEW_BIN_FOLDER $KKFILEVIEW_BIN_FOLDER"
 grep 'office\.home' ../config/application.properties | grep '!^#'
 if [ $? -eq 0 ]; then
   echo "Using customized office.home"
-else 
+else
  for i in ${DIR_HOME[@]}
   do
     if [ -f $i"/program/soffice.bin" ]; then
@@ -21,7 +21,7 @@ else
   if [ ! -n "${FLAG}" ]; then
     echo "Installing OpenOffice"
     sh ./install.sh
-  else 
+  else
     echo "Detected office component has been installed in $OFFICE_HOME"
   fi
 fi
