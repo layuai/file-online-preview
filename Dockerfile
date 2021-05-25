@@ -1,5 +1,5 @@
 FROM ubuntu:20.04
-MAINTAINER chenjh "842761733@qq.com"
+MAINTAINER opkcloud "3024371557@qq.com"
 ADD server/target/kkFileView-*.tar.gz /opt/
 COPY fonts/* /usr/share/fonts/chienes/
 RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse\ndeb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse\ndeb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse\ndeb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse\ndeb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse\ndeb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse\ndeb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse\ndeb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse\ndeb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse\ndeb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse" > /etc/apt/sources.list &&\
@@ -12,12 +12,13 @@ RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe m
 	apt-get install ttf-wqy-microhei &&\
 	apt-get install ttf-wqy-zenhei &&\
 	apt-get install xfonts-wqy &&\
+	apt-get install -y libxinerama1 libcairo2 libcups2 libx11-xcb1 &&\
     cd /tmp &&\
 	wget https://kkfileview.keking.cn/server-jre-8u251-linux-x64.tar.gz &&\
-	wget https://kkfileview.keking.cn/Apache_OpenOffice_4.1.6_Linux_x86-64_install-deb_zh-CN.tar.gz -cO openoffice_deb.tar.gz &&\
+	wget https://mirrors.cloud.tencent.com/libreoffice/libreoffice/stable/7.1.3/deb/x86_64/LibreOffice_7.1.3_Linux_x86-64_deb.tar.gz -cO libreoffice_deb.tar.gz &&\
 	tar -zxf /tmp/server-jre-8u251-linux-x64.tar.gz && mv /tmp/jdk1.8.0_251 /usr/local/ &&\
-	tar -zxf /tmp/openoffice_deb.tar.gz && cd /tmp/zh-CN/DEBS &&\
-	dpkg -i *.deb && dpkg -i desktop-integration/openoffice4.1-debian-menus_4.1.6-9790_all.deb &&\
+	tar -zxf /tmp/libreoffice_deb.tar.gz && cd /tmp/LibreOffice_7.1.3.2_Linux_x86-64_deb/DEBS &&\
+	dpkg -i *.deb &&\
 	rm -rf /tmp/* && rm -rf /var/lib/apt/lists/* &&\
     cd /usr/share/fonts/chienes &&\
     mkfontscale &&\
