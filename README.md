@@ -1,3 +1,15 @@
+# 我修改的地方
+1. 编写了基于 libreoffice 部署的 dockerfile；
+2. 移除原 dockerfile 配置中，openoffice 相关的内容；
+3. application.properties 配置中，office.home = /opt/libreoffice7.1 改为 libreoffice 在 docker 中安装的路径；
+4. 详细内容在 dockerfile、application.properties 代码中可见；
+
+dockerfile 修改内容：
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0525/174225_0b64581d_2083536.png "fix.png")
+
+application.properties 修改内容：
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0525/174237_67854916_2083536.png "config.png")
+
 # file-online-preview
 此项目为文件文档在线预览项目解决方案，对标业内付费产品有【[永中office](http://dcs.yozosoft.com/)】【[office365](http://www.officeweb365.com/)】【[idocv](https://www.idocv.com/)】等，在取得公司高层同意后以Apache协议开源出来反哺社区，在此特别感谢@唐老大的支持以及@端木详笑的贡献。该项目使用流行的spring boot搭建，易上手和部署，基本支持主流办公文档的在线预览，如doc,docx,Excel,pdf,txt,zip,rar,图片等等
 ### 项目特性
