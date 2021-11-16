@@ -17,6 +17,7 @@ public class WebUtils {
 
     /**
      * 获取标准的URL
+     *
      * @param urlStr url
      * @return 标准的URL
      */
@@ -112,10 +113,14 @@ public class WebUtils {
         int fileNameEndIndex = noQueryUrl.lastIndexOf('.');
         String encodedFileName;
         try {
-            encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
+            if (fileNameEndIndex > fileNameStartIndex) {
+                encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
+                return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);
+            } else {
+                return url;
+            }
         } catch (UnsupportedEncodingException e) {
-            return null;
+            return url;
         }
-        return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);
     }
 }
