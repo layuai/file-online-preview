@@ -112,10 +112,14 @@ public class WebUtils {
         int fileNameEndIndex = noQueryUrl.lastIndexOf('.');
         String encodedFileName;
         try {
-            encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
+            if (fileNameEndIndex > fileNameStartIndex) {
+                encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
+                return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);
+            } else {
+                return url;
+            }
+         } catch (UnsupportedEncodingException e) {
+            return url;
         }
-        return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);
     }
 }
