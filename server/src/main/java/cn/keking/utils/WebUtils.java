@@ -17,6 +17,7 @@ public class WebUtils {
 
     /**
      * 获取标准的URL
+     *
      * @param urlStr url
      * @return 标准的URL
      */
@@ -118,7 +119,7 @@ public class WebUtils {
             } else {
                 return url;
             }
-         } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             return url;
         }
     }
