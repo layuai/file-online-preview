@@ -2,7 +2,6 @@ package cn.keking.utils;
 
 import io.mola.galimatias.GalimatiasParseException;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -118,10 +117,14 @@ public class WebUtils {
         String noQueryUrl = url.substring(0, url.contains("?") ? url.indexOf("?") : url.length());
         int fileNameStartIndex = noQueryUrl.lastIndexOf('/') + 1;
         int fileNameEndIndex = noQueryUrl.lastIndexOf('.');
+        //url里没有文件名时处理。http://172.1.1.6:9999/fs/b884ff75-4aba-4a39-acfa-c7d48d0e16ad?fullfilename=yy.xlsx
+        if (fileNameEndIndex <= fileNameStartIndex) {
+            return url;
+        }
         String encodedFileName;
         try {
             encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (Throwable e) {
             return null;
         }
         return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);
