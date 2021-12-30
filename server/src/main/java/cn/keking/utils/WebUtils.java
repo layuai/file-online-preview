@@ -95,7 +95,6 @@ public class WebUtils {
         return noQueryUrl.substring(noQueryUrl.lastIndexOf("/") + 1);
     }
 
-
     /**
      * 从url中获取文件后缀
      *
@@ -108,22 +107,22 @@ public class WebUtils {
         return KkFileUtils.suffixFromFileName(fileName);
     }
 
+    static final Pattern pattern = Pattern.compile("[\u4e00-\u9fa5]+");
+
     /**
-     * 对url中的文件名进行UTF-8编码
-     *
+     * 对url中的中文进行编码
+     * 原来:遇到restful接口就报异常了,而且仅对文件名编码也不合适
      * @param url url
      * @return 文件名编码后的url
      */
     public static String encodeUrlFileName(String url) {
-        String noQueryUrl = url.substring(0, url.contains("?") ? url.indexOf("?") : url.length());
-        int fileNameStartIndex = noQueryUrl.lastIndexOf('/') + 1;
-        int fileNameEndIndex = noQueryUrl.lastIndexOf('.');
-        String encodedFileName;
-        try {
-            encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
-        return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);
+        Matcher matcher = pattern.matcher(url);
+		while (matcher.find()) {
+			int b = matcher.start();
+			int e = matcher.end();
+			url = url.substring(0, b) + URLEncoder.encode(url.substring(b, e), "utf-8") + url.substring(e);
+			matcher = pattern.matcher(url);
+		}
+		return url;
     }
 }
