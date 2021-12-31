@@ -2,7 +2,7 @@
 {
 	"code": 1,
 	"name": "PPT预览",
-	"totalSize": 0,
+	"totalSize": ${imgurls?size},
 	"curPage": 1,
 	"totalPage": 1,
 	"pageSize": 10,
@@ -10,21 +10,23 @@
 	"data": [
 <#assign index = 0>
 <#list imgurls as img>
-<#if index != 0>,</#if>{
-		"uuid": null,
-		"title": null,
-		"content": null,
-		"text": null,
-		"url": "${img}",
-		"destFile": null,
-		"viewCount": 0,
-		"downloadCount": 0,
-		"ctime": null,
-		"thumbUrl": "${img}",
-		"largeUrl": null,
-		"ratio": 0.5625,
-		"note": null
-	}<#assign index = index + 1>
+    <#if index != 0>,</#if>
+    {
+        "uuid": null,
+        "title": null,
+        "content": null,
+        "text": null,
+        "url": "${img}",
+        "destFile": null,
+        "viewCount": 0,
+        "downloadCount": 0,
+        "ctime": null,
+        "thumbUrl": "${img}",
+        "largeUrl": null,
+        "ratio": 0.5625,
+        "note": null
+    }
+	<#assign index = index + 1>
 </#list>],
 	"desc": "Success"
 }
@@ -132,7 +134,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="progress progress-striped active bottom-paging-progress">
       <div class="bar" style="width: 0%;"></div>
     </div>
