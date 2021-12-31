@@ -36,6 +36,7 @@ public class PictureFilePreviewImpl implements FilePreview {
             imgUrls.addAll(zipImgUrls);
         }
         // 不是http开头，浏览器不能直接访问，需下载到本地
+        // 建议增加配置参数,关闭前端预览图片,即同其他文件一样使用后端调取文件流交给前端处理, 这样就能够使用局域网地址,从而保护文件
         if (url != null && !url.toLowerCase().startsWith("http")) {
             ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
             if (response.isFailure()) {
