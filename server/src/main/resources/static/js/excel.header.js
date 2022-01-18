@@ -16,3 +16,43 @@ $(centerChildrenA).each(function (a, b) {
 });
 /**给所有的table添加class=table table-striped样式**/
 $("table").addClass("table table-striped");
+
+/**
+ * openoffice，只有一个 colgroup，用col子标签来描述列,liboffice 每一列都是一个colgroup 
+ * var meta = $("meta[name=generator]");
+ * LibreOffice  //OpenOffice
+ * console.log(meta[0].content);
+ */
+/**计算表头宽度----start**/
+function ______getColgroupWidth(colgroups){
+	var twidth = 0;
+	$(colgroups).each(function (i, g) {
+		var w = $(g).attr("width");
+		var s = $(g).attr("span");
+		if(null==s || undefined==s){
+			s=1;
+		}
+		twidth +=1*w*s;
+	});
+	return twidth;
+}
+$("table").each(function (a, b) {
+	var twidth = 0;
+    var tableChildrenColgroup = $(b).children("colgroup");
+    if(0==tableChildrenColgroup.length){
+    }else if(1==tableChildrenColgroup.length){
+    	var cols = tableChildrenColgroup.children("col");
+    	if(0==cols.length){
+    		twidth=______getColgroupWidth(tableChildrenColgroup);
+    	}else{
+    		$(cols).each(function (i, g) {
+        		var w = $(g).attr("width");
+        		twidth +=1*w;
+        	});
+    	}
+    }else{
+    	twidth = ______getColgroupWidth(tableChildrenColgroup);
+    }
+    $(b).css({"width":twidth});
+});
+/**计算表头宽度----end**/
