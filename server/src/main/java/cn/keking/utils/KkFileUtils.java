@@ -1,6 +1,7 @@
 package cn.keking.utils;
 
 import cpdetector.CharsetPrinter;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,6 +151,10 @@ public class KkFileUtils {
             return false;
         }
         return true;
+    }
+
+    public static String getOutFileName(String url, String fileExt) {
+        return DigestUtils.md5Hex(url) + "." + fileExt;
     }
 
 }
