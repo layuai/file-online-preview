@@ -103,10 +103,23 @@ pdf预览模式预览效果如下
 
 1. 第一步：pull 项目 https://github.com/kekingcn/file-online-preview.git
 
-3. 第二步：运行 ServerMain 的 main 方法，服务启动后，访问 http://localhost:8012/
+2. 第二步：使用maven编译打包 
+
+```
+cd file-online-preview
+mvn clean package -DskipTests
+```
+
+3. 第三步：运行 ServerMain 的 main 方法，服务启动后，访问 http://localhost:8012/
 会看到如下界面，代表服务启动成功
-   
+  
 ![输入图片说明](https://gitee.com/uploads/images/2017/1213/100221_ea15202e_492218.png "屏幕截图.png")
+
+4. 使用docker构建镜像
+
+```
+docker build -t keking/kkfileview:v4.0.0 .
+```
 
 ### 历史更新记录
 
