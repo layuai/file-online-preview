@@ -42,6 +42,7 @@ public class ConfigConstants {
     private static String pdfBookmarkDisable;
     private static Boolean fileUploadDisable;
     private static String tifPreviewType;
+    private static String serverPort;
 
     public static final String DEFAULT_CACHE_ENABLED = "true";
     public static final String DEFAULT_TXT_TYPE = "txt,html,htm,asp,jsp,xml,json,properties,md,gitignore,log,java,py,c,cpp,sql,sh,bat,m,bas,prg,cmd";
@@ -62,6 +63,8 @@ public class ConfigConstants {
     public static final String DEFAULT_PDF_BOOKMARK_DISABLE = "true";
     public static final String DEFAULT_FILE_UPLOAD_DISABLE = "false";
     public static final String DEFAULT_TIF_PREVIEW_TYPE = "tif";
+    
+    public static final String DEFAULT_SERVER_PORT = "8012";//默认端口
 
     public static Boolean isCacheEnabled() {
         return cacheEnabled;
@@ -353,4 +356,18 @@ public class ConfigConstants {
     public static void setTifPreviewTypeValue(String tifPreviewType) {
         ConfigConstants.tifPreviewType = tifPreviewType;
     }
+    //
+    public static String getServerPort() {
+        return serverPort;
+    }
+
+    @Value("${server.port:8012}")
+    public static void setServerPort(String serverPort) {
+    	setServerPortValue(serverPort);
+    }
+
+    public static void setServerPortValue(String serverPort) {
+        ConfigConstants.serverPort = serverPort;
+    }
+    
 }
