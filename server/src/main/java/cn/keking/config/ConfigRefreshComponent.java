@@ -79,6 +79,7 @@ public class ConfigRefreshComponent {
                     pdfBookmarkDisable = properties.getProperty("pdf.bookmark.disable", ConfigConstants.DEFAULT_PDF_BOOKMARK_DISABLE);
                     fileUploadDisable = Boolean.parseBoolean(properties.getProperty("file.upload.disable", ConfigConstants.DEFAULT_FILE_UPLOAD_DISABLE));
                     tifPreviewType = properties.getProperty("tif.preview.type", ConfigConstants.DEFAULT_TIF_PREVIEW_TYPE);
+
                     
                     ConfigConstants.setCacheEnabledValueValue(cacheEnabled);
                     ConfigConstants.setSimTextValue(textArray);

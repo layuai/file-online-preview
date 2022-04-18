@@ -63,7 +63,6 @@ public class ConfigConstants {
     public static final String DEFAULT_FILE_UPLOAD_DISABLE = "false";
     public static final String DEFAULT_TIF_PREVIEW_TYPE = "tif";
     
-    public static final String DEFAULT_SERVER_PORT = "8012";//默认端口
 
     public static Boolean isCacheEnabled() {
         return cacheEnabled;
@@ -356,4 +355,5 @@ public class ConfigConstants {
         ConfigConstants.tifPreviewType = tifPreviewType;
     }
 
+    
 }
