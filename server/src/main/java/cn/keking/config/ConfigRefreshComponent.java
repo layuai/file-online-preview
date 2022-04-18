@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @auther: chenjh
  * @time: 2019/4/10 16:16
- * @description 每隔1s读取并更新一次配置文件
+ * @description 每隔60s读取并更新一次配置文件
  */
 @Component
 public class ConfigRefreshComponent {
@@ -80,6 +80,7 @@ public class ConfigRefreshComponent {
                     fileUploadDisable = Boolean.parseBoolean(properties.getProperty("file.upload.disable", ConfigConstants.DEFAULT_FILE_UPLOAD_DISABLE));
                     tifPreviewType = properties.getProperty("tif.preview.type", ConfigConstants.DEFAULT_TIF_PREVIEW_TYPE);
 
+                    
                     ConfigConstants.setCacheEnabledValueValue(cacheEnabled);
                     ConfigConstants.setSimTextValue(textArray);
                     ConfigConstants.setMediaValue(mediaArray);
@@ -100,7 +101,7 @@ public class ConfigRefreshComponent {
                     setWatermarkConfig(properties);
                     bufferedReader.close();
                     fileReader.close();
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.SECONDS.sleep(60);
                 }
             } catch (IOException | InterruptedException e) {
                 LOGGER.error("读取配置文件异常", e);

@@ -62,6 +62,7 @@ public class ConfigConstants {
     public static final String DEFAULT_PDF_BOOKMARK_DISABLE = "true";
     public static final String DEFAULT_FILE_UPLOAD_DISABLE = "false";
     public static final String DEFAULT_TIF_PREVIEW_TYPE = "tif";
+    
 
     public static Boolean isCacheEnabled() {
         return cacheEnabled;
@@ -353,4 +354,6 @@ public class ConfigConstants {
     public static void setTifPreviewTypeValue(String tifPreviewType) {
         ConfigConstants.tifPreviewType = tifPreviewType;
     }
+
+    
 }

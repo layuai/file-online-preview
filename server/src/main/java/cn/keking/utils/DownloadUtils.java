@@ -21,7 +21,7 @@ import static cn.keking.utils.KkFileUtils.isHttpUrl;
 public class DownloadUtils {
 
     private final static Logger logger = LoggerFactory.getLogger(DownloadUtils.class);
-    private static final String fileDir = ConfigConstants.getFileDir();
+    private static final String fileDir = ConfigConstants.getFileDir()+"tempfile/";
     private static final String URL_PARAM_FTP_USERNAME = "ftp.username";
     private static final String URL_PARAM_FTP_PASSWORD = "ftp.password";
     private static final String URL_PARAM_FTP_CONTROL_ENCODING = "ftp.control.encoding";
