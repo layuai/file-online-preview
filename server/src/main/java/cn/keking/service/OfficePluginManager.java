@@ -1,6 +1,7 @@
 package cn.keking.service;
 
 import com.sun.star.document.UpdateDocMode;
+import jodd.util.ThreadUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
@@ -50,19 +51,21 @@ public class OfficePluginManager {
      * 启动Office组件进程
      */
     @PostConstruct
-    public void startOfficeManager(){
+    public void startOfficeManager() {
         File officeHome = OfficeUtils.getDefaultOfficeHome();
         if (officeHome == null) {
             throw new RuntimeException("找不到office组件，请确认'office.home'配置是否有误");
         }
         boolean killOffice = killProcess();
         if (killOffice) {
+            // 杀掉进程后先睡眠一下，否则会出现无法连接的情况，具体需要等待多久没有测试
+            ThreadUtil.sleep(5000);
             logger.warn("检测到有正在运行的office进程，已自动结束该进程");
         }
         try {
             DefaultOfficeManagerConfiguration configuration = new DefaultOfficeManagerConfiguration();
             configuration.setOfficeHome(officeHome);
-            String []portsString = serverPorts.split(",");
+            String[] portsString = serverPorts.split(",");
 
             int[] ports = Arrays.stream(portsString).mapToInt(Integer::parseInt).toArray();
 
@@ -86,8 +89,8 @@ public class OfficePluginManager {
         return converter;
     }
 
-    private Map<String,?> getLoadProperties() {
-        Map<String,Object> loadProperties = new HashMap<>(10);
+    private Map<String, ?> getLoadProperties() {
+        Map<String, Object> loadProperties = new HashMap<>(10);
         loadProperties.put("Hidden", true);
         loadProperties.put("ReadOnly", true);
         loadProperties.put("UpdateDocMode", UpdateDocMode.QUIET_UPDATE);
@@ -113,7 +116,7 @@ public class OfficePluginManager {
                     flag = true;
                 }
             } else {
-                Process p = Runtime.getRuntime().exec(new String[]{"sh","-c","ps -ef | grep " + "soffice.bin"});
+                Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps -ef | grep " + "soffice.bin"});
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 InputStream os = p.getInputStream();
                 byte[] b = new byte[256];
@@ -122,7 +125,7 @@ public class OfficePluginManager {
                 }
                 String s = baos.toString();
                 if (StringUtils.ordinalIndexOf(s, "soffice.bin", 3) > 0) {
-                    String[] cmd ={"sh","-c","kill -15 `ps -ef|grep " + "soffice.bin" + "|awk 'NR==1{print $2}'`"};
+                    String[] cmd = {"sh", "-c", "kill -15 `ps -ef|grep " + "soffice.bin" + "|awk 'NR==1{print $2}'`"};
                     Runtime.getRuntime().exec(cmd);
                     flag = true;
                 }
@@ -134,7 +137,7 @@ public class OfficePluginManager {
     }
 
     @PreDestroy
-    public void destroyOfficeManager(){
+    public void destroyOfficeManager() {
         if (null != officeManager && officeManager.isRunning()) {
             logger.info("Shutting down office process");
             officeManager.stop();
