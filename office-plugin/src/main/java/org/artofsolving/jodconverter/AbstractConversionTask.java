@@ -32,6 +32,7 @@ import com.sun.star.lang.XComponent;
 import com.sun.star.task.ErrorCodeIOException;
 import com.sun.star.util.CloseVetoException;
 import com.sun.star.util.XCloseable;
+import org.w3c.dom.Document;
 
 public abstract class AbstractConversionTask implements OfficeTask {
 
@@ -79,6 +80,7 @@ public abstract class AbstractConversionTask implements OfficeTask {
         }
         XComponentLoader loader = cast(XComponentLoader.class, context.getService(SERVICE_DESKTOP));
         Map<String,?> loadProperties = getLoadProperties(inputFile);
+
         XComponent document = null;
         try {
             document = loader.loadComponentFromURL(toUrl(inputFile), "_blank", 0, toUnoProperties(loadProperties));

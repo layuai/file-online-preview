@@ -7,11 +7,23 @@ import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
 import cn.keking.service.OfficeToPdfService;
+import cn.keking.utils.OfficeUtils;
 import cn.keking.web.filter.BaseUrlFilter;
+import com.lowagie.text.Document;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -42,29 +54,37 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String suffix = fileAttribute.getSuffix();
         String fileName = fileAttribute.getName();
+        String filePassword = fileAttribute.getFilePassword();
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx");
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
         String outFilePath = FILE_DIR + pdfName;
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
-        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-            String filePath;
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
-            if (response.isFailure()) {
-                return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
-            }
-            filePath = response.getContent();
+//        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+        String filePath;
+        ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
+        if (response.isFailure()) {
+            return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
+        }
+        filePath = response.getContent();
+
+        if (OfficeUtils.isEncrypted(filePath) && org.apache.commons.lang3.StringUtils.isBlank(filePassword)) {
+            model.addAttribute("needFilePassword", true);
+            return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
+        } else {
             if (StringUtils.hasText(outFilePath)) {
-                officeToPdfService.openOfficeToPDF(filePath, outFilePath);
+                officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
                 if (isHtml) {
                     // 对转换后的文件进行操作(改变编码方式)
                     fileHandlerService.doActionConvertedFile(outFilePath);
                 }
-                if (ConfigConstants.isCacheEnabled()) {
-                    // 加入缓存
-                    fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
-                }
+//                if (ConfigConstants.isCacheEnabled()) {
+//                    // 加入缓存
+//                    fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+//                }
             }
         }
+//        }
+
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, pdfName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
