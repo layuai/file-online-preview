@@ -47,15 +47,19 @@ public class OfficeFilePreviewImpl implements FilePreview {
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx");
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
         String outFilePath = FILE_DIR + pdfName;
-        // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
-        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-            String filePath;
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
-            if (response.isFailure()) {
-                return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
-            }
-            filePath = response.getContent();
 
+        // 下载远程文件到本地，如果文件在本地已存在不会重复下载
+        ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+        if (response.isFailure()) {
+            return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
+        }
+        String filePath = response.getContent();
+
+        /*
+         * 1. 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
+         * 2. 加密文件暂时不缓存（后续基于用户token实现，基于用户缓存）
+         */
+        if (OfficeUtils.isEncrypted(filePath) || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
             if (OfficeUtils.isEncrypted(filePath) && org.apache.commons.lang3.StringUtils.isBlank(filePassword)) {
                 model.addAttribute("needFilePassword", true);
                 return EXEL_FILE_PREVIEW_PAGE;
