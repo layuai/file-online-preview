@@ -87,6 +87,10 @@ public class DownloadUtils {
         if (!dirFile.exists() && !dirFile.mkdirs()) {
             logger.error("创建目录【{}】失败,可能是权限不够，请检查", fileDir);
         }
+        File realFile = new File(realPath);
+        if (realFile.exists()) {
+            fileAttribute.setSkipDownLoad(true);
+        }
         return realPath;
     }
 
