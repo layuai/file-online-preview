@@ -1,5 +1,4 @@
-
-
+<#setting classic_compatible=true>
 <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
 <script src="js/jquery-3.0.0.min.js" type="text/javascript"></script>
 <script src="js/jquery.form.min.js" type="text/javascript"></script>
@@ -33,7 +32,22 @@
         }
     }
 
+    /**
+     * 需要文件密码
+     */
+    function needFilePassword() {
+        if ('${needFilePassword}' == 'true') {
+            var filePassword = window.prompt("请输入文件密码");
+            if (filePassword != null) {
+                var redirectUrl = window.location.href + '&filePassword=' + filePassword;
+                window.location.replace(redirectUrl);
+            } else {
+                location.reload();
+            }
+        }
+    }
 </script>
+
 <style>
     * {
         margin: 0;
@@ -44,6 +58,4 @@
         height: 100%;
         width: 100%;
     }
-
 </style>
-
