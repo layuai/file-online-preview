@@ -15,6 +15,7 @@ public class FileAttribute {
     private String url;
     private String fileKey;
     private String filePassword;
+    private String userToken;
     private String officePreviewType = ConfigConstants.getOfficePreviewType();
     private String tifPreviewType;
     private Boolean skipDownLoad = false;
@@ -57,6 +58,14 @@ public class FileAttribute {
 
     public void setFilePassword(String filePassword) {
         this.filePassword = filePassword;
+    }
+
+    public String getUserToken() {
+        return userToken;
+    }
+
+    public void setUserToken(String userToken) {
+        this.userToken = userToken;
     }
 
     public String getOfficePreviewType() {

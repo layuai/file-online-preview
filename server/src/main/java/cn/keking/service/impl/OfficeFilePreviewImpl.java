@@ -44,9 +44,11 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String suffix = fileAttribute.getSuffix();
         String fileName = fileAttribute.getName();
         String filePassword = fileAttribute.getFilePassword();
+        String userToken = fileAttribute.getUserToken();
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx");
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
-        String outFilePath = FILE_DIR + pdfName;
+        String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
+        String outFilePath = FILE_DIR + cacheFileName;
 
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
@@ -56,11 +58,32 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String filePath = response.getContent();
 
         /*
-         * 1. 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
-         * 2. 加密文件暂时不缓存（后续基于用户token实现，基于用户缓存）
+         * 1. 缓存判断-如果文件已经进行转换过，就直接返回，否则执行转换
+         * 2. 缓存判断-加密文件基于userToken进行缓存，如果没有就不缓存
          */
-        if (OfficeUtils.isEncrypted(filePath) || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-            if (OfficeUtils.isEncrypted(filePath) && org.apache.commons.lang3.StringUtils.isBlank(filePassword)) {
+        boolean isCached = false;
+        boolean isUseCached = false;
+        boolean isEncryptedOffice = false;
+        if (ConfigConstants.isCacheEnabled()) {
+            // 全局开启缓存
+            isUseCached = true;
+            if (fileHandlerService.listConvertedFiles().containsKey(cacheFileName)) {
+                // 存在缓存
+                isCached = true;
+            }
+            if (OfficeUtils.isEncrypted(filePath)) {
+                isEncryptedOffice = true;
+                if (!StringUtils.hasLength(userToken)) {
+                    // 不缓存没有userToken的加密文件
+                    isUseCached = false;
+                }
+            }
+        }
+
+        if (isCached == false) {
+            // 没有缓存执行转换逻辑
+            if (isEncryptedOffice && !StringUtils.hasLength(filePassword)) {
+                // 加密文件需要密码
                 model.addAttribute("needFilePassword", true);
                 return EXEL_FILE_PREVIEW_PAGE;
             } else {
@@ -70,18 +93,18 @@ public class OfficeFilePreviewImpl implements FilePreview {
                         // 对转换后的文件进行操作(改变编码方式)
                         fileHandlerService.doActionConvertedFile(outFilePath);
                     }
-                    if (ConfigConstants.isCacheEnabled()) {
+                    if (isUseCached) {
                         // 加入缓存
-                        fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+                        fileHandlerService.addConvertedFile(cacheFileName, fileHandlerService.getRelativePath(outFilePath));
                     }
                 }
             }
         }
 
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
-            return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, pdfName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
+            return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-        model.addAttribute("pdfUrl", pdfName);
+        model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
 
