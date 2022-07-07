@@ -3,6 +3,7 @@
 <script src="js/jquery-3.0.0.min.js" type="text/javascript"></script>
 <script src="js/jquery.form.min.js" type="text/javascript"></script>
 <script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="js/bootbox.min.js" type="text/javascript"></script>
 <script src="js/watermark.js" type="text/javascript"></script>
 <script src="js/base64.min.js" type="text/javascript"></script>
 
@@ -32,18 +33,33 @@
         }
     }
 
+    // 中文环境
+    var locale_zh_CN = {
+        OK: '确定',
+        CONFIRM: '确认',
+        CANCEL: '取消'
+    };
+    bootbox.addLocale('locale_zh_CN', locale_zh_CN);
+
     /**
      * 需要文件密码
      */
     function needFilePassword() {
         if ('${needFilePassword}' == 'true') {
-            var filePassword = window.prompt("请输入文件密码");
-            if (filePassword != null) {
-                var redirectUrl = window.location.href + '&filePassword=' + filePassword;
-                window.location.replace(redirectUrl);
-            } else {
-                location.reload();
-            }
+            bootbox.prompt({
+                title: "你正在预览加密文件，请输入文件密码。",
+                inputType: 'password',
+                centerVertical: true,
+                locale: 'locale_zh_CN',
+                callback: function (filePassword) {
+                    if (filePassword != null) {
+                        var redirectUrl = window.location.href + '&filePassword=' + filePassword;
+                        window.location.replace(redirectUrl);
+                    } else {
+                        location.reload();
+                    }
+                }
+            });
         }
     }
 </script>
