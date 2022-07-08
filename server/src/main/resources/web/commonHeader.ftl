@@ -48,7 +48,7 @@
         if ('${needFilePassword}' == 'true') {
             let promptTitle = "你正在预览加密文件，请输入文件密码。";
             if ('${filePasswordError}' == 'true') {
-                promptTitle = "加密文件预览失败，可能原因是文件密码输入错误，请重新尝试输入正确的文件密码，以预览加密文件，或者此文件存在兼容错误，暂时不支持预览。";
+                promptTitle = "加密文件预览失败，请重新输入密码，若密码正确，可能该文件暂不支持预览。";
             }
 
             bootbox.prompt({
