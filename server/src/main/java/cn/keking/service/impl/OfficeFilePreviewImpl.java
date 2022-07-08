@@ -9,6 +9,7 @@ import cn.keking.service.OfficeToPdfService;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.OfficeUtils;
 import cn.keking.web.filter.BaseUrlFilter;
+import org.artofsolving.jodconverter.office.OfficeException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -88,7 +89,19 @@ public class OfficeFilePreviewImpl implements FilePreview {
                 return EXEL_FILE_PREVIEW_PAGE;
             } else {
                 if (StringUtils.hasText(outFilePath)) {
-                    officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
+                    try {
+                        officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
+                    } catch (OfficeException e) {
+                        if (isEncryptedOffice) {
+                            // 加密文件密码错误，提示重新输入
+                            model.addAttribute("needFilePassword", true);
+                            model.addAttribute("filePasswordError", true);
+                            return EXEL_FILE_PREVIEW_PAGE;
+                        }
+
+                        throw e;
+                    }
+
                     if (isHtml) {
                         // 对转换后的文件进行操作(改变编码方式)
                         fileHandlerService.doActionConvertedFile(outFilePath);

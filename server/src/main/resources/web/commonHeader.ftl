@@ -46,14 +46,29 @@
      */
     function needFilePassword() {
         if ('${needFilePassword}' == 'true') {
+            let promptTitle = "你正在预览加密文件，请输入文件密码。";
+            if ('${filePasswordError}' == 'true') {
+                promptTitle = "加密文件预览失败，可能原因是文件密码输入错误，请重新尝试输入正确的文件密码，以预览加密文件，或者此文件存在兼容错误，暂时不支持预览。";
+            }
+
             bootbox.prompt({
-                title: "你正在预览加密文件，请输入文件密码。",
+                title: promptTitle,
                 inputType: 'password',
                 centerVertical: true,
                 locale: 'locale_zh_CN',
                 callback: function (filePassword) {
                     if (filePassword != null) {
-                        var redirectUrl = window.location.href + '&filePassword=' + filePassword;
+                        const locationHref = window.location.href;
+                        const isInclude = locationHref.includes("filePassword=");
+                        let redirectUrl = null;
+                        if (isInclude) {
+                            const url = new URL(locationHref);
+                            url.searchParams.set("filePassword", filePassword);
+                            redirectUrl = url.href;
+                        } else {
+                            redirectUrl = locationHref + '&filePassword=' + filePassword;
+                        }
+
                         window.location.replace(redirectUrl);
                     } else {
                         location.reload();
