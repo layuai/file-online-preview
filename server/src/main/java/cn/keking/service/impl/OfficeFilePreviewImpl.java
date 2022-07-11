@@ -64,7 +64,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
          */
         boolean isCached = false;
         boolean isUseCached = false;
-        boolean isEncryptedOffice = false;
+        boolean isPwdProtectedOffice = false;
         if (ConfigConstants.isCacheEnabled()) {
             // 全局开启缓存
             isUseCached = true;
@@ -72,18 +72,20 @@ public class OfficeFilePreviewImpl implements FilePreview {
                 // 存在缓存
                 isCached = true;
             }
-            if (OfficeUtils.isEncrypted(filePath)) {
-                isEncryptedOffice = true;
+            if (OfficeUtils.isPwdProtected(filePath)) {
+                isPwdProtectedOffice = true;
                 if (!StringUtils.hasLength(userToken)) {
                     // 不缓存没有userToken的加密文件
                     isUseCached = false;
                 }
             }
+        } else {
+            isPwdProtectedOffice = OfficeUtils.isPwdProtected(filePath);
         }
 
         if (isCached == false) {
             // 没有缓存执行转换逻辑
-            if (isEncryptedOffice && !StringUtils.hasLength(filePassword)) {
+            if (isPwdProtectedOffice && !StringUtils.hasLength(filePassword)) {
                 // 加密文件需要密码
                 model.addAttribute("needFilePassword", true);
                 return EXEL_FILE_PREVIEW_PAGE;
@@ -92,7 +94,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
                     try {
                         officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
                     } catch (OfficeException e) {
-                        if (isEncryptedOffice) {
+                        if (isPwdProtectedOffice) {
                             // 加密文件密码错误，提示重新输入
                             model.addAttribute("needFilePassword", true);
                             model.addAttribute("filePasswordError", true);
