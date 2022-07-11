@@ -102,13 +102,21 @@ public class OnlinePreviewController {
      */
     @RequestMapping(value = "/getCorsFile", method = RequestMethod.GET)
     public void getCorsFile(String urlPath, HttpServletResponse response) {
-        logger.info("下载跨域pdf文件url：{}", urlPath);
+        logger.info("下载跨域pdf文件base64编码url：{}", urlPath);
+        String fileUrl;
         try {
-            URL url = WebUtils.normalizedURL(urlPath);
+            fileUrl = new String(Base64.decodeBase64(urlPath));
+        } catch (Exception ex) {
+            logger.error("下载跨域pdf文件base64解码异常，url：{}", urlPath, ex);
+            throw ex;
+        }
+        logger.info("下载跨域pdf文件url：{}", fileUrl);
+        try {
+            URL url = WebUtils.normalizedURL(fileUrl);
             byte[] bytes = NetUtil.downloadBytes(url.toString());
             IOUtils.write(bytes, response.getOutputStream());
         } catch (IOException | GalimatiasParseException e) {
-            logger.error("下载跨域pdf文件异常，url：{}", urlPath, e);
+            logger.error("下载跨域pdf文件异常，url：{}", fileUrl, e);
         }
     }
 
