@@ -43,6 +43,7 @@ public abstract class AbstractConversionTask implements OfficeTask {
 
     protected abstract Map<String,?> getStoreProperties(File outputFile, XComponent document);
 
+    @Override
     public void execute(OfficeContext context) throws OfficeException {
         XComponent document = null;
         try {
