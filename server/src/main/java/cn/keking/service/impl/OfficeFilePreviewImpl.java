@@ -7,6 +7,7 @@ import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
 import cn.keking.service.OfficeToPdfService;
+import cn.keking.utils.KkFileUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -41,9 +42,8 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String officePreviewType = fileAttribute.getOfficePreviewType();
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String suffix = fileAttribute.getSuffix();
-        String fileName = fileAttribute.getName();
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx");
-        String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
+        String pdfName = KkFileUtils.getOutFileName(url, (isHtml ? "html" : "pdf"));
         String outFilePath = FILE_DIR + pdfName;
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
         if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
