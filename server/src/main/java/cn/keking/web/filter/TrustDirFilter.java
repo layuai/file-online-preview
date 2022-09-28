@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 
 import javax.servlet.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -56,13 +57,24 @@ public class TrustDirFilter implements Filter {
 
     private boolean allowPreview(String urlPath) {
         try {
-            URL url = WebUtils.normalizedURL(urlPath);
+            URL url = WebUtils.normalizedFileURL(urlPath);
             if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
+                String urlString = url.toString();
                 String filePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
                 if (PlatformUtils.isWindows()) {
+                    // for file on different drive in windows
+                    // file:[/]?[/]?[/]?[a-zA-Z]  URL.getPath() return  /[a-zA-Z]  [a-zA-Z]
                     filePath = filePath.replaceAll("/", "\\\\");
+                    if (filePath.charAt(0) == '\\') {
+                        filePath = filePath.substring(1);
+                    }
+//                    could check file exist here
+//                    File file = new File(URLDecoder.decode(filePath, StandardCharsets.UTF_8.name()));
+//                    if (!file.exists()) {
+//                        return false;
+//                    }
                 }
-                return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
+                 return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
             }
             return true;
         } catch (IOException | GalimatiasParseException e) {
