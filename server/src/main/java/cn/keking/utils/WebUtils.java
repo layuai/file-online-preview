@@ -34,13 +34,12 @@ public class WebUtils {
         return io.mola.galimatias.URL.parse(urlStr).toJavaURL();
     }
 
-    // 修改windows下file协议路径含有#的问题util
+    // 修改本地windows下file协议路径含有#的问题util
     // 默认file协议格式为: file:[/]?[/]?[/]?
     public static URL normalizedFileURL(String urlStr) throws UnsupportedEncodingException, GalimatiasParseException, MalformedURLException {
         URL url = io.mola.galimatias.URL.parse(urlStr).toJavaURL();
         if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
             String urlString = url.toString();
-            String filePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
             if (PlatformUtils.isWindows()) {
                 // for file path that contains #, incorrect URL file, path, ref
                 // assume file协议 参数中不存在/, 直接使用 urlString.lastIndexOf("/")
@@ -114,7 +113,15 @@ public class WebUtils {
         if (url.toLowerCase().startsWith("file:")) {
             try {
                 URL urlObj = new URL(url);
-                url = urlObj.getPath().substring(1);
+                // when url contains #, fix incorrect file path
+                // assume file:[/]?[/]?[/]?[a-zA-Z] from TrustDirFilter.java allowPreview method
+                // not tested for complicated cases
+                if (url.contains("#")) {
+                    url = url.substring(url.lastIndexOf("/")+1);
+                }
+                else {
+                    url = urlObj.getPath().substring(1);
+                }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
