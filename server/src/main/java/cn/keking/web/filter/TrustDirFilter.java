@@ -74,7 +74,7 @@ public class TrustDirFilter implements Filter {
 //                        return false;
 //                    }
                 }
-                 return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
+                return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
             }
             return true;
         } catch (IOException | GalimatiasParseException e) {
