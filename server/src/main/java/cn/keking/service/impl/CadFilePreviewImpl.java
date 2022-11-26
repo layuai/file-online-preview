@@ -41,7 +41,7 @@ public class CadFilePreviewImpl implements FilePreview {
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
         String outFilePath = FILE_DIR + pdfName;
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
-        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+        if (!fileHandlerService.listConvertedFiles().containsKey(fileAttribute.getUrl()) || !ConfigConstants.isCacheEnabled()) {
             String filePath;
             ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
             if (response.isFailure()) {
@@ -55,7 +55,7 @@ public class CadFilePreviewImpl implements FilePreview {
                 }
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
-                    fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+                    fileHandlerService.addConvertedFile(fileAttribute.getUrl(), fileHandlerService.getRelativePath(outFilePath));
                 }
             }
         }

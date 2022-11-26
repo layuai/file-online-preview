@@ -11,6 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static cn.keking.config.ConfigConstants.getFileDir;
+
 /**
  * Created by kl on 2018/1/17.
  * Content :处理压缩包文件
@@ -18,37 +23,39 @@ import org.springframework.util.StringUtils;
 @Service
 public class CompressFilePreviewImpl implements FilePreview {
 
-    private final FileHandlerService fileHandlerService;
-    private final CompressFileReader compressFileReader;
-    private final OtherFilePreviewImpl otherFilePreview;
+	private final FileHandlerService fileHandlerService;
+	private final CompressFileReader compressFileReader;
+	private final OtherFilePreviewImpl otherFilePreview;
 
-    public CompressFilePreviewImpl(FileHandlerService fileHandlerService, CompressFileReader compressFileReader, OtherFilePreviewImpl otherFilePreview) {
-        this.fileHandlerService = fileHandlerService;
-        this.compressFileReader = compressFileReader;
-        this.otherFilePreview = otherFilePreview;
-    }
+	public CompressFilePreviewImpl(FileHandlerService fileHandlerService, CompressFileReader compressFileReader, OtherFilePreviewImpl otherFilePreview) {
+		this.fileHandlerService = fileHandlerService;
+		this.compressFileReader = compressFileReader;
+		this.otherFilePreview = otherFilePreview;
+	}
 
-    @Override
-    public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
-        String fileName=fileAttribute.getName();
-        String suffix=fileAttribute.getSuffix();
-        String fileTree = null;
-        // 判断文件名是否存在(redis缓存读取)
-        if (!StringUtils.hasText(fileHandlerService.getConvertedFile(fileName))  || !ConfigConstants.isCacheEnabled()) {
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
-            if (response.isFailure()) {
-                return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
-            }
-            String filePath = response.getContent();
-            fileTree = compressFileReader.unRar(filePath, fileName);
-        } else {
-            fileTree = fileHandlerService.getConvertedFile(fileName);
-        }
-        if (fileTree != null && !"null".equals(fileTree)) {
-            model.addAttribute("fileTree", fileTree);
-            return COMPRESS_FILE_PREVIEW_PAGE;
-        } else {
-            return otherFilePreview.notSupportedFile(model, fileAttribute, "压缩文件类型不受支持");
-        }
-    }
+	@Override
+	public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
+		String fileName = fileAttribute.getName();
+		String suffix = fileAttribute.getSuffix();
+		String fileTree = null;
+
+		// 判断文件名是否存在(redis缓存读取)
+		if (!StringUtils.hasText(fileHandlerService.getConvertedFile(fileAttribute.getUrl())) || !ConfigConstants.isCacheEnabled()) {
+			ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+			if (response.isFailure()) {
+				return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
+			}
+			String filePath = response.getContent();
+			String relaivePath = Paths.get(getFileDir()).relativize(Paths.get(filePath)).toString();
+			fileTree = compressFileReader.unRar(filePath, relaivePath, fileAttribute.getUrl());
+		} else {
+			fileTree = fileHandlerService.getConvertedFile(fileAttribute.getUrl());
+		}
+		if (fileTree != null && !"null".equals(fileTree)) {
+			model.addAttribute("fileTree", fileTree);
+			return COMPRESS_FILE_PREVIEW_PAGE;
+		} else {
+			return otherFilePreview.notSupportedFile(model, fileAttribute, "压缩文件类型不受支持");
+		}
+	}
 }
