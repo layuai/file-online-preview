@@ -29,9 +29,10 @@ public class PictureFilePreviewImpl implements FilePreview {
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         List<String> imgUrls = new ArrayList<>();
-        imgUrls.add(url);
+
         String fileKey = fileAttribute.getFileKey();
         List<String> zipImgUrls = fileHandlerService.getImgCache(fileKey);
+        imgUrls.add(url);
         if (!CollectionUtils.isEmpty(zipImgUrls)) {
             imgUrls.addAll(zipImgUrls);
         }

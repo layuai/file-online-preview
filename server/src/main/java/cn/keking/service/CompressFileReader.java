@@ -127,7 +127,7 @@ public class CompressFileReader {
                 String parentName = getLast2FileName(fullName, File.separator, archiveFileName);
                 FileType type = FileType.typeFromUrl(childName);
                 if (type.equals(FileType.PICTURE)) {
-                    imgUrls.add(baseUrl + folder + childName);
+                    imgUrls.add(baseUrl + folder + "/" + childName);
                 }
                 FileNode node =
                         new FileNode(originName, childName, parentName, new ArrayList<>(),
@@ -135,7 +135,7 @@ public class CompressFileReader {
                 addNodes(appender, parentName, node);
                 appender.put(childName, node);
             }
-            fileHandlerService.putImgCache(fileUrl, imgUrls);
+            fileHandlerService.putImgCache(fileKey, imgUrls);
             executors.submit(new RarExtractorWorker(headersToBeExtract, filePath));
             return new ObjectMapper().writeValueAsString(appender.get(""));
         } catch (IOException e) {

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -50,7 +52,6 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
         String cachedFileUrl = userToken == null ? fileAttribute.getUrl() : userToken + "_" + fileAttribute.getUrl();
-        String outFilePath = FILE_DIR + cacheFileName;
 
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
@@ -58,6 +59,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
         }
         String filePath = response.getContent();
+        String outFilePath = Paths.get(filePath).getParent().toString() + File.separator + cacheFileName;
 
         /*
          * 1. 缓存判断-如果文件已经进行转换过，就直接返回，否则执行转换
@@ -120,8 +122,8 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-
-        model.addAttribute("pdfUrl", cacheFileName);
+        String pdfUrl = Paths.get(ConfigConstants.getFileDir()).relativize(Paths.get(outFilePath)).toString();
+        model.addAttribute("pdfUrl", pdfUrl);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
 

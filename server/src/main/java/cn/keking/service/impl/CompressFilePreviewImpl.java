@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -47,6 +48,7 @@ public class CompressFilePreviewImpl implements FilePreview {
 			}
 			String filePath = response.getContent();
 			String relaivePath = Paths.get(getFileDir()).relativize(Paths.get(filePath)).toString();
+			relaivePath = relaivePath.replace(File.separator, "/");
 			fileTree = compressFileReader.unRar(filePath, relaivePath, fileAttribute.getUrl());
 		} else {
 			fileTree = fileHandlerService.getConvertedFile(fileAttribute.getUrl());
