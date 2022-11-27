@@ -28,7 +28,16 @@
 <script type="text/javascript" src="js/jquery.ztree.core.js"></script>
 
 <script type="text/javascript">
-    const data = JSON.parse('${fileTree}');
+    var jsonStr = '${fileTree}';
+    jsonStr = jsonStr.replace(/\r/g, "\\r");
+    jsonStr = jsonStr.replace(/\n/g, "\\n");
+    jsonStr = jsonStr.replace(/\t/g, "\\t");
+    jsonStr = jsonStr.replace(/\\/g, "\\\\");
+    jsonStr = jsonStr.replace(/\'/g, "&#39;");
+    jsonStr = jsonStr.replace(/ /g, "&nbsp;");
+    jsonStr = jsonStr.replace(/</g, "$lt;");
+    jsonStr = jsonStr.replace(/>/g, "$gt;");
+    const data = JSON.parse(jsonStr);
     var baseUrl = "${baseUrl}";
     var setting = {
         view: {
@@ -61,7 +70,8 @@
                     } else {
                         fulls += ",resizable"; // 对于不支持screen属性的浏览器，可以手工进行最大化。 manually
                     }
-                    var previewUrl = baseUrl + treeNode.fileName +"?fileKey="+ treeNode.fileKey;
+                    console.log(treeNode);
+                    var previewUrl = baseUrl + treeNode.rootFolder + "/" + treeNode.fileName +"?fileKey="+ treeNode.fileKey;
                     window.open("onlinePreview?url=" + encodeURIComponent(Base64.encode(previewUrl)), "_blank",fulls);
                 }
             }

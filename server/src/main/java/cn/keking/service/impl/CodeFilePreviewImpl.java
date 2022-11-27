@@ -20,7 +20,7 @@ public class CodeFilePreviewImpl implements FilePreview {
 
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
-         filePreviewHandle.filePreviewHandle(url, model, fileAttribute);
+        filePreviewHandle.filePreviewHandle(url, model, fileAttribute);
         return CODE_FILE_PREVIEW_PAGE;
     }
 }

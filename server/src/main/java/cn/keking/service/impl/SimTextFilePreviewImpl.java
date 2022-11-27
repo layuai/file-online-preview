@@ -30,14 +30,14 @@ public class SimTextFilePreviewImpl implements FilePreview {
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
 
         String fileName = fileAttribute.getName();
-        String baseUrll = FILE_DIR + fileName;
+        String baseUrll = DownloadUtils.getRelFilePath(fileName, fileAttribute);
         //  String suffix = fileAttribute.getSuffix();
         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
         if (response.isFailure()) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
         }
         try {
-            String   fileData = HtmlUtils.htmlEscape(textData(baseUrll));
+            String fileData = HtmlUtils.htmlEscape(textData(baseUrll));
             model.addAttribute("textData", Base64.encodeBase64String(fileData.getBytes()));
         } catch (IOException e) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, e.getLocalizedMessage());

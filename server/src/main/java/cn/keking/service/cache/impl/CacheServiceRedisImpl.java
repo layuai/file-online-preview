@@ -38,6 +38,10 @@ public class CacheServiceRedisImpl implements CacheService {
     public void initMediaConvertCachePool(Integer capacity) {
 
     }
+    @Override
+    public void initFilePathCachePool(Integer capacity) {
+
+    }
 
     @Override
     public void putPDFCache(String key, String value) {
@@ -102,12 +106,37 @@ public class CacheServiceRedisImpl implements CacheService {
         return convertedList.get(key);
     }
 
+
+
+
+    @Override
+    public Map<String, String> putFilePathCache() {
+        RMapCache<String, String> filePathCache = redissonClient.getMapCache(FILE_PATH_KEY);
+        return filePathCache;
+    }
+
+    @Override
+    public void putFilePathCache(String key, String value) {
+        RMapCache<String, String> filePathCache = redissonClient.getMapCache(FILE_PATH_KEY);
+        filePathCache.fastPut(key, value);
+    }
+
+    @Override
+    public String getFilePathCache(String key) {
+        RMapCache<String, String> filePathCache = redissonClient.getMapCache(FILE_PATH_KEY);
+        return filePathCache.get(key);
+    }
+
     @Override
     public void cleanCache() {
         cleanPdfCache();
         cleanImgCache();
         cleanPdfImgCache();
+        cleanFilePathCache();
     }
+
+
+
 
     @Override
     public void addQueueTask(String url) {
@@ -134,5 +163,10 @@ public class CacheServiceRedisImpl implements CacheService {
     private void cleanPdfImgCache() {
         RMapCache<String, Integer> pdfImg = redissonClient.getMapCache(FILE_PREVIEW_PDF_IMGS_KEY);
         pdfImg.clear();
+    }
+
+    private void cleanFilePathCache() {
+        RMapCache<String, Integer> filepath = redissonClient.getMapCache(FILE_PATH_KEY);
+        filepath.clear();
     }
 }

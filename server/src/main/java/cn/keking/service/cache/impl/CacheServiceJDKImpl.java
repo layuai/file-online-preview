@@ -1,6 +1,7 @@
 package cn.keking.service.cache.impl;
 
 import cn.keking.service.cache.CacheService;
+import com.aspose.cad.internal.A.C;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -27,6 +28,9 @@ public class CacheServiceJDKImpl implements CacheService {
     private Map<String, List<String>> imgCache;
     private Map<String, Integer> pdfImagesCache;
     private Map<String, String> mediaConvertCache;
+
+    private Map<String, String> filePathCache;
+
     private static final int QUEUE_SIZE = 500000;
     private final BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
 
@@ -36,6 +40,7 @@ public class CacheServiceJDKImpl implements CacheService {
         initIMGCachePool(CacheService.DEFAULT_IMG_CAPACITY);
         initPdfImagesCachePool(CacheService.DEFAULT_PDFIMG_CAPACITY);
         initMediaConvertCachePool(CacheService.DEFAULT_MEDIACONVERT_CAPACITY);
+        initFilePathCachePool(CacheService.DEFAULT_FILE_PATH_CAPACITY);
     }
 
     @Override
@@ -96,11 +101,42 @@ public class CacheServiceJDKImpl implements CacheService {
         return mediaConvertCache.get(key);
     }
 
+    /**
+     * url对本地磁盘的cache
+     * @return
+     */
+    @Override
+    public Map<String, String> putFilePathCache() {
+        return filePathCache;
+    }
+
+    /**
+     * 缓存文件key对本地磁盘 url的cache
+     * @param key
+     * @param value
+     * @return
+     */
+    @Override
+    public void putFilePathCache(String key, String value) {
+        filePathCache.put(key, value);
+    }
+
+    /**
+     * 获取本地磁盘的cache
+     * @param key
+     * @return
+     */
+    @Override
+    public String getFilePathCache(String key) {
+        return filePathCache.get(key);
+    }
+
     @Override
     public void cleanCache() {
         initPDFCachePool(CacheService.DEFAULT_PDF_CAPACITY);
         initIMGCachePool(CacheService.DEFAULT_IMG_CAPACITY);
         initPdfImagesCachePool(CacheService.DEFAULT_PDFIMG_CAPACITY);
+        initFilePathCachePool(CacheService.DEFAULT_FILE_PATH_CAPACITY);
     }
 
     @Override
@@ -140,5 +176,14 @@ public class CacheServiceJDKImpl implements CacheService {
                 .maximumWeightedCapacity(capacity).weigher(Weighers.singleton())
                 .build();
     }
+
+    @Override
+    public void initFilePathCachePool(Integer capacity) {
+        filePathCache = new ConcurrentLinkedHashMap.Builder<String, String>()
+                .maximumWeightedCapacity(capacity).weigher(Weighers.singleton())
+                .build();
+    }
+
+
 
 }

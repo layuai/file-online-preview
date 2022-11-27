@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.nio.file.Paths;
+
 import static cn.keking.service.impl.OfficeFilePreviewImpl.getPreviewType;
 
 /**
@@ -39,15 +42,15 @@ public class CadFilePreviewImpl implements FilePreview {
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String fileName = fileAttribute.getName();
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
-        String outFilePath = FILE_DIR + pdfName;
+        ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
+        if (response.isFailure()) {
+            return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
+        }
+
+        String filePath = response.getContent();
+        String outFilePath = Paths.get(filePath).getParent().toString() + File.separator + pdfName;
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
-        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-            String filePath;
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
-            if (response.isFailure()) {
-                return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
-            }
-            filePath = response.getContent();
+        if (!fileHandlerService.listConvertedFiles().containsKey(fileAttribute.getUrl()) || !ConfigConstants.isCacheEnabled()) {
             if (StringUtils.hasText(outFilePath)) {
                 boolean convertResult = fileHandlerService.cadToPdf(filePath, outFilePath);
                 if (!convertResult) {
@@ -55,14 +58,16 @@ public class CadFilePreviewImpl implements FilePreview {
                 }
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
-                    fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+                    fileHandlerService.addConvertedFile(fileAttribute.getUrl(), fileHandlerService.getRelativePath(outFilePath));
                 }
             }
         }
         if (baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, pdfName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE,otherFilePreview);
         }
-        model.addAttribute("pdfUrl", pdfName);
+        String pdfUrl = Paths.get(ConfigConstants.getFileDir()).relativize(Paths.get(outFilePath)).toString();
+
+        model.addAttribute("pdfUrl", pdfUrl);
         return PDF_FILE_PREVIEW_PAGE;
     }
 

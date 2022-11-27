@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -49,7 +51,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx");
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
-        String outFilePath = FILE_DIR + cacheFileName;
+        String cachedFileUrl = userToken == null ? fileAttribute.getUrl() : userToken + "_" + fileAttribute.getUrl();
 
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
@@ -57,6 +59,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
         }
         String filePath = response.getContent();
+        String outFilePath = Paths.get(filePath).getParent().toString() + File.separator + cacheFileName;
 
         /*
          * 1. 缓存判断-如果文件已经进行转换过，就直接返回，否则执行转换
@@ -68,7 +71,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (ConfigConstants.isCacheEnabled()) {
             // 全局开启缓存
             isUseCached = true;
-            if (fileHandlerService.listConvertedFiles().containsKey(cacheFileName)) {
+            if (fileHandlerService.listConvertedFiles().containsKey(fileAttribute.getUrl())) {
                 // 存在缓存
                 isCached = true;
             }
@@ -110,7 +113,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
                     }
                     if (isUseCached) {
                         // 加入缓存
-                        fileHandlerService.addConvertedFile(cacheFileName, fileHandlerService.getRelativePath(outFilePath));
+                        fileHandlerService.addConvertedFile(cachedFileUrl, fileHandlerService.getRelativePath(outFilePath));
                     }
                 }
             }
@@ -119,15 +122,17 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-
-        model.addAttribute("pdfUrl", cacheFileName);
+        String pdfUrl = Paths.get(ConfigConstants.getFileDir()).relativize(Paths.get(outFilePath)).toString();
+        model.addAttribute("pdfUrl", pdfUrl);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
 
-    static String getPreviewType(Model model, FileAttribute fileAttribute, String officePreviewType, String baseUrl, String pdfName, String outFilePath, FileHandlerService fileHandlerService, String officePreviewTypeImage, OtherFilePreviewImpl otherFilePreview) {
+    static String getPreviewType(Model model, FileAttribute fileAttribute, String officePreviewType, String baseUrl,
+                                 String pdfName, String outFilePath, FileHandlerService fileHandlerService,
+                                 String officePreviewTypeImage, OtherFilePreviewImpl otherFilePreview) {
         String suffix = fileAttribute.getSuffix();
         boolean isPPT = suffix.equalsIgnoreCase("ppt") || suffix.equalsIgnoreCase("pptx");
-        List<String> imageUrls = fileHandlerService.pdf2jpg(outFilePath, pdfName, baseUrl);
+        List<String> imageUrls = fileHandlerService.pdf2jpg(outFilePath, pdfName, baseUrl, fileAttribute);
         if (imageUrls == null || imageUrls.size() < 1) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
         }

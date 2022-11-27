@@ -2,8 +2,10 @@ package cn.keking.service;
 
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileType;
+import cn.keking.service.cache.CacheService;
 import cn.keking.utils.FileHeaderRar;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.SpringUtil;
 import cn.keking.web.filter.BaseUrlFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
@@ -47,49 +51,49 @@ public class CompressFileReader {
         this.fileHandlerService = fileHandlerService;
     }
 
-    public String readZipFile(String filePath, String fileKey) {
-        String archiveSeparator = "/";
-        Map<String, FileNode> appender = new HashMap<>();
-        List<String> imgUrls = new LinkedList<>();
-        String baseUrl = BaseUrlFilter.getBaseUrl();
-        String archiveFileName = fileHandlerService.getFileNameFromPath(filePath);
-        try {
-            ZipFile zipFile = new ZipFile(filePath, KkFileUtils.getFileEncode(filePath));
-            Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
-            // 排序
-            entries = sortZipEntries(entries);
-            List<Map<String, ZipArchiveEntry>> entriesToBeExtracted = new LinkedList<>();
-            while (entries.hasMoreElements()) {
-                ZipArchiveEntry entry = entries.nextElement();
-                String fullName = entry.getName().replaceAll("//", "").replaceAll("\\\\", "");
-                int level = fullName.split(archiveSeparator).length;
-                // 展示名
-                String originName = getLastFileName(fullName, archiveSeparator);
-                String childName = level + "_" + originName;
-                boolean directory = entry.isDirectory();
-                if (!directory) {
-                    childName = archiveFileName + "_" + originName;
-                    entriesToBeExtracted.add(Collections.singletonMap(childName, entry));
-                }
-                String parentName = getLast2FileName(fullName, archiveSeparator, archiveFileName);
-                parentName = (level - 1) + "_" + parentName;
-                FileType type = FileType.typeFromUrl(childName);
-                if (type.equals(FileType.PICTURE)) {//添加图片文件到图片列表
-                    imgUrls.add(baseUrl + childName);
-                }
-                FileNode node = new FileNode(originName, childName, parentName, new ArrayList<>(), directory, fileKey);
-                addNodes(appender, parentName, node);
-                appender.put(childName, node);
-            }
-            // 开启新的线程处理文件解压
-            executors.submit(new ZipExtractorWorker(entriesToBeExtracted, zipFile, filePath));
-            fileHandlerService.putImgCache(fileKey, imgUrls);
-            return new ObjectMapper().writeValueAsString(appender.get(""));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public String readZipFile(String filePath, String fileKey) {
+//        String archiveSeparator = "/";
+//        Map<String, FileNode> appender = new HashMap<>();
+//        List<String> imgUrls = new LinkedList<>();
+//        String baseUrl = BaseUrlFilter.getBaseUrl();
+//        String archiveFileName = fileHandlerService.getFileNameFromPath(filePath);
+//        try {
+//            ZipFile zipFile = new ZipFile(filePath, KkFileUtils.getFileEncode(filePath));
+//            Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
+//            // 排序
+//            entries = sortZipEntries(entries);
+//            List<Map<String, ZipArchiveEntry>> entriesToBeExtracted = new LinkedList<>();
+//            while (entries.hasMoreElements()) {
+//                ZipArchiveEntry entry = entries.nextElement();
+//                String fullName = entry.getName().replaceAll("//", "").replaceAll("\\\\", "");
+//                int level = fullName.split(archiveSeparator).length;
+//                // 展示名
+//                String originName = getLastFileName(fullName, archiveSeparator);
+//                String childName = level + "_" + originName;
+//                boolean directory = entry.isDirectory();
+//                if (!directory) {
+//                    childName = archiveFileName + "_" + originName;
+//                    entriesToBeExtracted.add(Collections.singletonMap(childName, entry));
+//                }
+//                String parentName = getLast2FileName(fullName, archiveSeparator, archiveFileName);
+//                parentName = (level - 1) + "_" + parentName;
+//                FileType type = FileType.typeFromUrl(childName);
+//                if (type.equals(FileType.PICTURE)) {//添加图片文件到图片列表
+//                    imgUrls.add(baseUrl + childName);
+//                }
+//                FileNode node = new FileNode(originName, childName, parentName, new ArrayList<>(), directory, fileKey);
+//                addNodes(appender, parentName, node);
+//                appender.put(childName, node);
+//            }
+//            // 开启新的线程处理文件解压
+//            executors.submit(new ZipExtractorWorker(entriesToBeExtracted, zipFile, filePath));
+//            fileHandlerService.putImgCache(fileKey, imgUrls);
+//            return new ObjectMapper().writeValueAsString(appender.get(""));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     private Enumeration<ZipArchiveEntry> sortZipEntries(Enumeration<ZipArchiveEntry> entries) {
         List<ZipArchiveEntry> sortedEntries = new LinkedList<>();
@@ -100,10 +104,12 @@ public class CompressFileReader {
         return Collections.enumeration(sortedEntries);
     }
 
-    public String unRar(String filePath, String fileKey) {
+    public String unRar(String filePath, String fileKey, String fileUrl) {
         Map<String, FileNode> appender = new HashMap<>();
         List<String> imgUrls = new ArrayList<>();
         String baseUrl = BaseUrlFilter.getBaseUrl();
+        Path relateveFolderPath = Paths.get(fileDir).relativize(Paths.get(filePath).getParent());
+        String folder = relateveFolderPath.toString();
         try {
             List<FileHeaderRar> items = getRar4Paths(filePath);
             String archiveFileName = fileHandlerService.getFileNameFromPath(filePath);
@@ -111,19 +117,21 @@ public class CompressFileReader {
             for (FileHeaderRar header : items) {
                 String fullName = header.getFileNameW();
                 String originName = getLastFileName(fullName, File.separator);
+                String fullChildFileName = getFullChildFileName(fullName, File.separator);
                 String childName = originName;
                 boolean directory = header.getDirectory();
                 if (!directory) {
-                    childName = archiveFileName + "_" + originName;
+                    childName = archiveFileName + "_" + fullChildFileName.replace(File.separator, "_");
                     headersToBeExtract.add(Collections.singletonMap(childName, header));
                 }
                 String parentName = getLast2FileName(fullName, File.separator, archiveFileName);
                 FileType type = FileType.typeFromUrl(childName);
                 if (type.equals(FileType.PICTURE)) {
-                    imgUrls.add(baseUrl + childName);
+                    imgUrls.add(baseUrl + folder + "/" + childName);
                 }
                 FileNode node =
-                        new FileNode(originName, childName, parentName, new ArrayList<>(), directory, fileKey);
+                        new FileNode(originName, childName, parentName, new ArrayList<>(),
+                                directory, fileKey, folder);
                 addNodes(appender, parentName, node);
                 appender.put(childName, node);
             }
@@ -140,6 +148,7 @@ public class CompressFileReader {
         RandomAccessFile randomAccessFile = null;
         IInArchive inArchive = null;
         List<FileHeaderRar> itemPath = null;
+
         try {
             randomAccessFile = new RandomAccessFile(paths, "r");
             inArchive = SevenZip.openInArchive(null, new RandomAccessFileInStream(randomAccessFile));
@@ -183,49 +192,50 @@ public class CompressFileReader {
         return itemPath;
     }
 
-    public String read7zFile(String filePath, String fileKey) {
-        String archiveSeparator = "/";
-        Map<String, FileNode> appender = new HashMap<>();
-        List<String> imgUrls = new ArrayList<>();
-        String baseUrl = BaseUrlFilter.getBaseUrl();
-        String archiveFileName = fileHandlerService.getFileNameFromPath(filePath);
-        try {
-            SevenZFile zipFile = new SevenZFile(new File(filePath));
-            Iterable<SevenZArchiveEntry> entries = zipFile.getEntries();
-            // 排序
-            Enumeration<SevenZArchiveEntry> newEntries = sortSevenZEntries(entries);
-            List<Map<String, SevenZArchiveEntry>> entriesToBeExtracted = new ArrayList<>();
-            while (newEntries.hasMoreElements()) {
-                SevenZArchiveEntry entry = newEntries.nextElement();
-                String fullName = entry.getName().replaceAll("//", "").replaceAll("\\\\", "");
-                int level = fullName.split(archiveSeparator).length;
-                // 展示名
-                String originName = getLastFileName(fullName, archiveSeparator);
-                String childName = level + "_" + originName;
-                boolean directory = entry.isDirectory();
-                if (!directory) {
-                    childName = archiveFileName + "_" + originName;
-                    entriesToBeExtracted.add(Collections.singletonMap(childName, entry));
-                }
-                String parentName = getLast2FileName(fullName, archiveSeparator, archiveFileName);
-                parentName = (level - 1) + "_" + parentName;
-                FileType type = FileType.typeFromUrl(childName);
-                if (type.equals(FileType.PICTURE)) {//添加图片文件到图片列表
-                    imgUrls.add(baseUrl + childName);
-                }
-                FileNode node = new FileNode(originName, childName, parentName, new ArrayList<>(), directory, fileKey);
-                addNodes(appender, parentName, node);
-                appender.put(childName, node);
-            }
-            // 开启新的线程处理文件解压
-            executors.submit(new SevenZExtractorWorker(entriesToBeExtracted, filePath));
-            fileHandlerService.putImgCache(fileKey, imgUrls);
-            return new ObjectMapper().writeValueAsString(appender.get(""));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public String read7zFile(String filePath, String fileKey) {
+//        String archiveSeparator = "/";
+//        Map<String, FileNode> appender = new HashMap<>();
+//        List<String> imgUrls = new ArrayList<>();
+//        String baseUrl = BaseUrlFilter.getBaseUrl();
+//        String archiveFileName = fileHandlerService.getFileNameFromPath(filePath);
+//        try {
+//            SevenZFile zipFile = new SevenZFile(new File(filePath));
+//            Iterable<SevenZArchiveEntry> entries = zipFile.getEntries();
+//            // 排序
+//            Enumeration<SevenZArchiveEntry> newEntries = sortSevenZEntries(entries);
+//            List<Map<String, SevenZArchiveEntry>> entriesToBeExtracted = new ArrayList<>();
+//            while (newEntries.hasMoreElements()) {
+//                SevenZArchiveEntry entry = newEntries.nextElement();
+//                String fullName = entry.getName().replaceAll("//", "").replaceAll("\\\\", "");
+//                int level = fullName.split(archiveSeparator).length;
+//                // 展示名
+//                String originName = getLastFileName(fullName, archiveSeparator);
+//                String childName = level + "_" + originName;
+//                boolean directory = entry.isDirectory();
+//                if (!directory) {
+//                    childName = archiveFileName + "_" + originName;
+//                    entriesToBeExtracted.add(Collections.singletonMap(childName, entry));
+//                }
+//                String parentName = getLast2FileName(fullName, archiveSeparator, archiveFileName);
+//                parentName = (level - 1) + "_" + parentName;
+//                FileType type = FileType.typeFromUrl(childName);
+//                if (type.equals(FileType.PICTURE)) {//添加图片文件到图片列表
+//                    imgUrls.add(baseUrl + childName);
+//                }
+//                FileNode node = new FileNode(originName, childName,
+//                        parentName, new ArrayList<>(), directory, fileKey);
+//                addNodes(appender, parentName, node);
+//                appender.put(childName, node);
+//            }
+//            // 开启新的线程处理文件解压
+//            executors.submit(new SevenZExtractorWorker(entriesToBeExtracted, filePath));
+//            fileHandlerService.putImgCache(fileKey, imgUrls);
+//            return new ObjectMapper().writeValueAsString(appender.get(""));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
 
     private Enumeration<SevenZArchiveEntry> sortSevenZEntries(Iterable<SevenZArchiveEntry> entries) {
@@ -300,6 +310,15 @@ public class CompressFileReader {
         return newName;
     }
 
+    private static String getFullChildFileName(String fullName, String seperator) {
+        int index = fullName.indexOf(seperator);
+        if (index == -1) {
+            return fullName;
+        }
+        fullName = fullName.substring(index + 1);
+        return fullName;
+    }
+
     public static Comparator<FileNode> sortComparator = new Comparator<FileNode>() {
         final Collator cmp = Collator.getInstance(Locale.US);
 
@@ -333,7 +352,10 @@ public class CompressFileReader {
         private boolean directory;
         //用于图片预览时寻址
         private String fileKey;
+
         private List<FileNode> childList;
+
+        private String rootFolder;
 
         public FileNode(String originName, String fileName, String parentFileName, List<FileNode> childList, boolean directory) {
             this.originName = originName;
@@ -343,13 +365,15 @@ public class CompressFileReader {
             this.directory = directory;
         }
 
-        public FileNode(String originName, String fileName, String parentFileName, List<FileNode> childList, boolean directory, String fileKey) {
+        public FileNode(String originName, String fileName, String parentFileName, List<FileNode> childList,
+                        boolean directory, String fileKey, String rootFolder) {
             this.originName = originName;
             this.fileName = fileName;
             this.parentFileName = parentFileName;
             this.childList = childList;
             this.directory = directory;
             this.fileKey = fileKey;
+            this.rootFolder = rootFolder;
         }
 
         public String getFileKey() {
@@ -408,6 +432,14 @@ public class CompressFileReader {
 
         public void setDirectory(boolean directory) {
             this.directory = directory;
+        }
+
+        public String getRootFolder() {
+            return rootFolder;
+        }
+
+        public void setRootFolder(String rootFolder) {
+            this.rootFolder = rootFolder;
         }
     }
 
@@ -579,7 +611,9 @@ public class CompressFileReader {
         @Override
         public ISequentialOutStream getStream(int index, ExtractAskMode extractAskMode) throws SevenZipException {
             String filePath = inArchive.getStringProperty(index, PropID.PATH);
-            String real = folderName + filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+            String fullChildFileName = getFullChildFileName(filePath, File.separator);
+            fullChildFileName = fullChildFileName.replace(File.separator, "_");
+            String real = folderName + fullChildFileName;
             File f = new File(extractPath + real);
             f.delete();
             return data -> {

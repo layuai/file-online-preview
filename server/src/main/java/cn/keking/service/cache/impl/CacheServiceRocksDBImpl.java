@@ -78,6 +78,46 @@ public class CacheServiceRocksDBImpl implements CacheService {
 
     }
 
+
+    @Override
+    public void initFilePathCachePool(Integer capacity) {
+
+    }
+
+    @Override
+    public Map<String, String> putFilePathCache() {
+        Map<String, String> result = new HashMap<>();
+        try{
+            result = (Map<String, String>) toObject(db.get(FILE_PATH_KEY.getBytes()));
+        } catch (RocksDBException | IOException | ClassNotFoundException e) {
+            LOGGER.error("Get from RocksDB Exception" + e);
+        }
+        return result;
+    }
+
+    @Override
+    public void putFilePathCache(String key, String value) {
+        try {
+            Map<String, String> pdfCacheItem = getPDFCache();
+            pdfCacheItem.put(key, value);
+            db.put(FILE_PATH_KEY.getBytes(), toByteArray(pdfCacheItem));
+        } catch (RocksDBException | IOException e) {
+            LOGGER.error("Put into RocksDB Exception" + e);
+        }
+    }
+
+    @Override
+    public String getFilePathCache(String key) {
+        String result = "";
+        try{
+            Map<String, String> map = (Map<String, String>) toObject(db.get(FILE_PATH_KEY.getBytes()));
+            result = map.get(key);
+        } catch (RocksDBException | IOException | ClassNotFoundException e) {
+            LOGGER.error("Get from RocksDB Exception" + e);
+        }
+        return result;
+    }
+
     @Override
     public void putPDFCache(String key, String value) {
         try {
