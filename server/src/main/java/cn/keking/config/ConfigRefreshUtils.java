@@ -7,7 +7,7 @@ import java.util.Properties;
 /**
  * 配置文件刷新工具类
  *
- * @author zhongjiahua
+ * @author chenjh,zhongjiahua
  * @date 2022-11-29
  */
 public class ConfigRefreshUtils {
