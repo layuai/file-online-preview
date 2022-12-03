@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,8 +52,44 @@ public class OnlinePreviewController {
         this.otherFilePreview = otherFilePreview;
     }
 
-    @GetMapping( "/onlinePreview")
+
+    /**
+     * 转换并下载pdf文件
+     *
+     * @param url
+     * @param model
+     * @param req
+     * @return
+     */
+    @GetMapping("/getPdfFile")
+    public String getPdfFile(String url, Model model, HttpServletRequest req, HttpServletResponse response) throws UnsupportedEncodingException {
+        logger.info("预览文件url:{}", url);
+        String fileUrl;
+        try {
+            fileUrl = WebUtils.decodeUrl(url);
+        } catch (Exception ex) {
+            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
+            return otherFilePreview.notSupportedFile(model, errorMsg);
+        }
+        FileAttribute fileAttribute = fileHandlerService.getFileAttribute(fileUrl, req);
+        model.addAttribute("file", fileAttribute);
+        FilePreview filePreview = previewFactory.get(fileAttribute);
+        logger.info("下载文件url：{}，previewType：{}", fileUrl, fileAttribute.getType());
+        String type = filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
+        String pdfUrl = (String) model.getAttribute("pdfUrl");
+        logger.info("下载pdf文件url：{}，type：{}", pdfUrl, type);
+        response.setContentType("application/pdf");
+        try {
+            response.addHeader("Content-Disposition", "attachment;FileName=" + URLEncoder.encode(pdfUrl, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        return pdfUrl;
+    }
+
+    @GetMapping("/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
+        logger.info("预览文件url:{}", url);
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
@@ -68,7 +104,7 @@ public class OnlinePreviewController {
         return filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
     }
 
-    @GetMapping( "/picturesPreview")
+    @GetMapping("/picturesPreview")
     public String picturesPreview(String urls, Model model, HttpServletRequest req) throws UnsupportedEncodingException {
         String fileUrls;
         try {
@@ -106,11 +142,11 @@ public class OnlinePreviewController {
         try {
             urlPath = WebUtils.decodeUrl(urlPath);
         } catch (Exception ex) {
-            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath),ex);
+            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath), ex);
             return;
         }
         if (urlPath.toLowerCase().startsWith("file:") || urlPath.toLowerCase().startsWith("file%3")
-            || !urlPath.toLowerCase().startsWith("http")) {
+                || !urlPath.toLowerCase().startsWith("http")) {
             logger.info("读取跨域文件异常，可能存在非法访问，urlPath：{}", urlPath);
             return;
         }
