@@ -52,7 +52,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String outFilePath = FILE_DIR + cacheFileName;
 
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
-        ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+        ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
         if (response.isFailure()) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
         }

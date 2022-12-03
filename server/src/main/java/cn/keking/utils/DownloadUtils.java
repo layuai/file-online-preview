@@ -8,9 +8,10 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
 import java.util.UUID;
 
 import static cn.keking.utils.KkFileUtils.isFtpUrl;
@@ -32,8 +33,8 @@ public class DownloadUtils {
      * @param fileName      文件名
      * @return 本地文件绝对路径
      */
-    public static ReturnResponse<String> downLoad(FileAttribute fileAttribute, String fileName) {
-        String urlStr = fileAttribute.getUrl().replaceAll("\\+", "%2B");
+    public static ReturnResponse<String> downLoad(String urlStr, FileAttribute fileAttribute, String fileName) {
+        urlStr = urlStr.replaceAll("\\+", "%2B");
         ReturnResponse<String> response = new ReturnResponse<>(0, "下载成功!!!", "");
         String realPath = DownloadUtils.getRelFilePath(fileName, fileAttribute);
         try {

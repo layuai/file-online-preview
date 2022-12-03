@@ -62,7 +62,7 @@ public class OnlinePreviewController {
      * @return
      */
     @GetMapping( "/getPdfFile")
-    public String getPdfFile(String url, Model model, HttpServletRequest req, HttpServletResponse response) {
+    public String getPdfFile(String url, Model model, HttpServletRequest req, HttpServletResponse response) throws UnsupportedEncodingException {
         logger.info("预览文件url:{}", url);
         String fileUrl;
         try {
