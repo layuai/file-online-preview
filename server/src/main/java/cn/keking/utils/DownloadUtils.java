@@ -33,13 +33,7 @@ public class DownloadUtils {
      * @return 本地文件绝对路径
      */
     public static ReturnResponse<String> downLoad(FileAttribute fileAttribute, String fileName) {
-//        String urlStr = fileAttribute.getUrl().replaceAll("\\+", "%20");
-        String urlStr;
-        try {
-            urlStr = URLEncoder.encode(fileAttribute.getUrl(), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        String urlStr = fileAttribute.getUrl().replaceAll("\\+", "%2B");
         ReturnResponse<String> response = new ReturnResponse<>(0, "下载成功!!!", "");
         String realPath = DownloadUtils.getRelFilePath(fileName, fileAttribute);
         try {
