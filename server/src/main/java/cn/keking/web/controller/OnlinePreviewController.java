@@ -63,6 +63,7 @@ public class OnlinePreviewController {
      */
     @GetMapping( "/getPdfFile")
     public String getPdfFile(String url, Model model, HttpServletRequest req, HttpServletResponse response) {
+        logger.info("预览文件url:{}", url);
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
@@ -88,6 +89,7 @@ public class OnlinePreviewController {
 
     @GetMapping( "/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
+        logger.info("预览文件url:{}", url);
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
