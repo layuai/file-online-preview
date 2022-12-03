@@ -32,7 +32,7 @@ public class SimTextFilePreviewImpl implements FilePreview {
         String fileName = fileAttribute.getName();
         String baseUrll = FILE_DIR + fileName;
         //  String suffix = fileAttribute.getSuffix();
-        ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+        ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
         if (response.isFailure()) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
         }

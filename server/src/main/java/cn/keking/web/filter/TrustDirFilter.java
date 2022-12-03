@@ -3,6 +3,7 @@ package cn.keking.web.filter;
 import cn.keking.config.ConfigConstants;
 import cn.keking.utils.WebUtils;
 import io.mola.galimatias.GalimatiasParseException;
+import jodd.util.URLDecoder;
 import org.artofsolving.jodconverter.util.PlatformUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import org.springframework.util.FileCopyUtils;
 import javax.servlet.*;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
