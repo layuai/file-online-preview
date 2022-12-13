@@ -4856,12 +4856,17 @@
                 methods: {
                 	getQueryVariable :function (variable){
 				       var query = window.location.search.substring(1);
-				       var vars = query.split("&");
-				       for (var i=0;i<vars.length;i++) {
-				               var pair = vars[i].split("=");
-				               if(pair[0] == variable){return pair[1];}
+                       var remoteOfdURL = query.replace(/file=/,"");
+                       if(remoteOfdURL.length==0){
+				    	   return(false);
 				       }
-				       return(false);
+				       return remoteOfdURL;
+				    //    var vars = query.split("&");
+				    //    for (var i=0;i<vars.length;i++) {
+				    //            var pair = vars[i].split("=");
+				    //            if(pair[0] == variable){return pair[1];}
+				    //    }
+				    //    return(false);
 					},
                     scrool: function() {
                         for (var e, t, n = (null === (e = this.$refs.contentDiv.firstElementChild) || void 0 === e || null === (t = e.getBoundingClientRect()) || void 0 === t ? void 0 : t.top) - 60, s = 0, a = 0, r = 0; r < this.$refs.contentDiv.childElementCount; r++) {
