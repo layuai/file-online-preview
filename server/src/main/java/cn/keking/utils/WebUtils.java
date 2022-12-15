@@ -2,9 +2,11 @@ package cn.keking.utils;
 
 import io.mola.galimatias.GalimatiasParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.artofsolving.jodconverter.util.PlatformUtils;
 import org.springframework.util.Base64Utils;
 
 import javax.servlet.ServletRequest;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,6 +15,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -29,6 +32,25 @@ public class WebUtils {
      */
     public static URL normalizedURL(String urlStr) throws GalimatiasParseException, MalformedURLException {
         return io.mola.galimatias.URL.parse(urlStr).toJavaURL();
+    }
+
+    // 修改本地windows下file协议路径含有#的问题util
+    // 默认file协议格式为: file:[/]?[/]?[/]?
+    public static URL normalizedFileURL(String urlStr) throws UnsupportedEncodingException, GalimatiasParseException, MalformedURLException {
+        URL url = io.mola.galimatias.URL.parse(urlStr).toJavaURL();
+        if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
+            String urlString = url.toString();
+            if (PlatformUtils.isWindows()) {
+                // for file path that contains #, incorrect URL file, path, ref
+                // assume file协议 参数中不存在/, 直接使用 urlString.lastIndexOf("/")
+                if (urlString.contains("#")) {
+                    String urlFilePath = urlString.replaceFirst("file:[/]?[/]?[/]?", "");
+                    File file = new File(URLDecoder.decode(urlFilePath, StandardCharsets.UTF_8.name()));
+                    url = file.toURI().toURL();
+                }
+            }
+        }
+        return url;
     }
 
     /**
@@ -91,7 +113,15 @@ public class WebUtils {
         if (url.toLowerCase().startsWith("file:")) {
             try {
                 URL urlObj = new URL(url);
-                url = urlObj.getPath().substring(1);
+                // when url contains #, fix incorrect file path
+                // assume file:[/]?[/]?[/]?[a-zA-Z] from TrustDirFilter.java allowPreview method
+                // not tested for complicated cases
+                if (url.contains("#")) {
+                    url = url.substring(url.lastIndexOf("/")+1);
+                }
+                else {
+                    url = urlObj.getPath().substring(1);
+                }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
