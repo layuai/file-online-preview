@@ -133,6 +133,9 @@ public class WebUtils {
             String noQueryUrl = url.substring(0, url.indexOf("?"));
             String parameterStr = url.substring(url.indexOf("?"));
             parameterStr = parameterStr.replaceFirst(fullFileName, encodedFileName);
+            parameterStr = parameterStr.replace("fullfilename="+fullFileName, "fullfilename="+encodedFileName);
+
+
             return noQueryUrl + parameterStr;
         }
         String noQueryUrl = url.substring(0, url.contains("?") ? url.indexOf("?") : url.length());
@@ -182,14 +185,15 @@ public class WebUtils {
      * aHR0cHM6Ly9maWxlLmtla2luZy5jbi9kZW1vL%2BS4reaWhy5wcHR4 -> https://file.keking.cn/demo/%E4%B8%AD%E6%96%87.pptx -> https://file.keking.cn/demo/中文.pptx
      */
     public static String decodeUrl(String source) {
-        String url = decodeBase64String(source, StandardCharsets.UTF_8);
+        String url;
         try {
-            url = URLDecoder.decode(url, StandardCharsets.UTF_8.name());
+            url = URLDecoder.decode(source, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        return url;
+       return decodeBase64String(url, StandardCharsets.UTF_8);
     }
+
 
     /**
      * 将 Base64 字符串使用指定字符集解码
