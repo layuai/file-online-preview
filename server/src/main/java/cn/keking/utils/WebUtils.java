@@ -132,10 +132,7 @@ public class WebUtils {
             }
             String noQueryUrl = url.substring(0, url.indexOf("?"));
             String parameterStr = url.substring(url.indexOf("?"));
-            parameterStr = parameterStr.replaceFirst(fullFileName, encodedFileName);
             parameterStr = parameterStr.replace("fullfilename="+fullFileName, "fullfilename="+encodedFileName);
-
-
             return noQueryUrl + parameterStr;
         }
         String noQueryUrl = url.substring(0, url.contains("?") ? url.indexOf("?") : url.length());
