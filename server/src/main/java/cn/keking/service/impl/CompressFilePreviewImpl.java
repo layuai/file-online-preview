@@ -40,6 +40,7 @@ public class CompressFilePreviewImpl implements FilePreview {
             }
             String filePath = response.getContent();
             fileTree = compressFileReader.unRar(filePath, fileName);
+            fileHandlerService.addConvertedFile(fileName, fileTree);
         } else {
             fileTree = fileHandlerService.getConvertedFile(fileName);
         }
