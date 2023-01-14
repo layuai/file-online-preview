@@ -41,9 +41,9 @@ public class DownloadUtils {
         } catch (Exception e) {
             logger.error("忽略SSL证书异常:", e);
         }
-        urlStr = urlStr.replaceAll("\\+", "%2B");
         ReturnResponse<String> response = new ReturnResponse<>(0, "下载成功!!!", "");
-        String realPath = DownloadUtils.getRelFilePath(fileName, fileAttribute);
+        String realPath = DownloadUtils.getRelFilePath(KkFileUtils.getOutFileName(urlStr,fileName.substring(fileName.lastIndexOf(".") + 1)) , fileAttribute);
+        urlStr = urlStr.replaceAll("\\+", "%2B");
         if (!StringUtils.hasText(realPath)) {
             response.setCode(1);
             response.setContent(null);

@@ -3,16 +3,19 @@ package cn.keking.service.impl;
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.ReturnResponse;
-import cn.keking.service.FilePreview;
-import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
+import cn.keking.service.FilePreview;
 import cn.keking.service.OfficeToPdfService;
+import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.OfficeUtils;
 import cn.keking.web.filter.BaseUrlFilter;
+import org.jodconverter.core.office.OfficeException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -49,76 +52,76 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String pdfName = KkFileUtils.getOutFileName(url, (isHtml ? "html" : "pdf"));
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
         String outFilePath = FILE_DIR + cacheFileName;
-        if ( !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-        // 下载远程文件到本地，如果文件在本地已存在不会重复下载
-        ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
-        if (response.isFailure()) {
-            return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
-        }
-        String filePath = response.getContent();
-
-        /*
-         * 1. 缓存判断-如果文件已经进行转换过，就直接返回，否则执行转换
-         * 2. 缓存判断-加密文件基于userToken进行缓存，如果没有就不缓存
-         */
-        boolean isCached = false;
-        boolean isUseCached = false;
-        boolean isPwdProtectedOffice = false;
-        if (ConfigConstants.isCacheEnabled()) {
-            // 全局开启缓存
-            isUseCached = true;
-            if (fileHandlerService.listConvertedFiles().containsKey(cacheFileName)) {
-                // 存在缓存
-                isCached = true;
+        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+            // 下载远程文件到本地，如果文件在本地已存在不会重复下载
+            ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
+            if (response.isFailure()) {
+                return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }
-            if (OfficeUtils.isPwdProtected(filePath)) {
-                isPwdProtectedOffice = true;
-                if (!StringUtils.hasLength(userToken)) {
-                    // 不缓存没有userToken的加密文件
-                    isUseCached = false;
+            String filePath = response.getContent();
+
+            /*
+             * 1. 缓存判断-如果文件已经进行转换过，就直接返回，否则执行转换
+             * 2. 缓存判断-加密文件基于userToken进行缓存，如果没有就不缓存
+             */
+            boolean isCached = false;
+            boolean isUseCached = false;
+            boolean isPwdProtectedOffice = false;
+            if (ConfigConstants.isCacheEnabled()) {
+                // 全局开启缓存
+                isUseCached = true;
+                if (fileHandlerService.listConvertedFiles().containsKey(cacheFileName)) {
+                    // 存在缓存
+                    isCached = true;
                 }
-            }
-        } else {
-            isPwdProtectedOffice = OfficeUtils.isPwdProtected(filePath);
-        }
-
-        if (!isCached) {
-            // 没有缓存执行转换逻辑
-            if (isPwdProtectedOffice && !StringUtils.hasLength(filePassword)) {
-                // 加密文件需要密码
-                model.addAttribute("needFilePassword", true);
-                return EXEL_FILE_PREVIEW_PAGE;
+                if (OfficeUtils.isPwdProtected(filePath)) {
+                    isPwdProtectedOffice = true;
+                    if (!StringUtils.hasLength(userToken)) {
+                        // 不缓存没有userToken的加密文件
+                        isUseCached = false;
+                    }
+                }
             } else {
-                if (StringUtils.hasText(outFilePath)) {
-                    try {
-                        officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
-                    } catch (OfficeException e) {
-                        if (isPwdProtectedOffice && !OfficeUtils.isCompatible(filePath, filePassword)) {
-                            // 加密文件密码错误，提示重新输入
-                            model.addAttribute("needFilePassword", true);
-                            model.addAttribute("filePasswordError", true);
-                            return EXEL_FILE_PREVIEW_PAGE;
+                isPwdProtectedOffice = OfficeUtils.isPwdProtected(filePath);
+            }
+
+            if (!isCached) {
+                // 没有缓存执行转换逻辑
+                if (isPwdProtectedOffice && !StringUtils.hasLength(filePassword)) {
+                    // 加密文件需要密码
+                    model.addAttribute("needFilePassword", true);
+                    return EXEL_FILE_PREVIEW_PAGE;
+                } else {
+                    if (StringUtils.hasText(outFilePath)) {
+                        try {
+                            officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
+                        } catch (OfficeException e) {
+                            if (isPwdProtectedOffice && !OfficeUtils.isCompatible(filePath, filePassword)) {
+                                // 加密文件密码错误，提示重新输入
+                                model.addAttribute("needFilePassword", true);
+                                model.addAttribute("filePasswordError", true);
+                                return EXEL_FILE_PREVIEW_PAGE;
+                            }
+
+                            return otherFilePreview.notSupportedFile(model, fileAttribute, "抱歉，该文件版本不兼容，文件版本错误。");
                         }
 
-                        return otherFilePreview.notSupportedFile(model, fileAttribute, "抱歉，该文件版本不兼容，文件版本错误。");
-                    }
-
-                    if (isHtml) {
-                        // 对转换后的文件进行操作(改变编码方式)
-                        fileHandlerService.doActionConvertedFile(outFilePath);
-                    }
-                    if (isUseCached) {
-                        // 加入缓存
-                        fileHandlerService.addConvertedFile(cacheFileName, fileHandlerService.getRelativePath(outFilePath));
+                        if (isHtml) {
+                            // 对转换后的文件进行操作(改变编码方式)
+                            fileHandlerService.doActionConvertedFile(outFilePath);
+                        }
+                        if (isUseCached) {
+                            // 加入缓存
+                            fileHandlerService.addConvertedFile(cacheFileName, fileHandlerService.getRelativePath(outFilePath));
+                        }
                     }
                 }
             }
-        }
         }
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-        cacheFileName =   URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
+        cacheFileName = URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
         model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
