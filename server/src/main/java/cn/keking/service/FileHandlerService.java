@@ -149,9 +149,9 @@ public class FileHandlerService {
                 sb.append(line);
             }
             // 添加sheet控制头
-            sb.append("<script src=\"js/jquery-3.0.0.min.js\" type=\"text/javascript\"></script>");
+            sb.append("<script src=\"js/jquery-3.6.1.min.js\" type=\"text/javascript\"></script>");
             sb.append("<script src=\"js/excel.header.js\" type=\"text/javascript\"></script>");
-            sb.append("<link rel=\"stylesheet\" href=\"bootstrap/css/bootstrap.min.css\">");
+            sb.append("<link rel=\"stylesheet\" href=\"bootstrap/css/xlsx.css\">");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -191,6 +191,9 @@ public class FileHandlerService {
         }
         try {
             File pdfFile = new File(pdfFilePath);
+            if (!pdfFile.exists()) {
+                return null;
+            }
             PDDocument doc = PDDocument.load(pdfFile);
             int pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
@@ -273,10 +276,11 @@ public class FileHandlerService {
         if (url.contains("?fileKey=")) {
             attribute.setSkipDownLoad(true);
         }
+        url = WebUtils.encodeUrlFileName(url);
+        fileName =  KkFileUtils.htmlEscape(fileName);  //文件名处理
         attribute.setType(type);
         attribute.setName(fileName);
         attribute.setSuffix(suffix);
-        url = WebUtils.encodeUrlFileName(url);
         attribute.setUrl(url);
         if (req != null) {
             String officePreviewType = req.getParameter("officePreviewType");

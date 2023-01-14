@@ -9,11 +9,12 @@ import cn.keking.service.OfficeToPdfService;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.OfficeUtils;
 import cn.keking.web.filter.BaseUrlFilter;
-import org.artofsolving.jodconverter.office.OfficeException;
+import org.jodconverter.core.office.OfficeException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -46,11 +47,11 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String fileName = fileAttribute.getName();
         String filePassword = fileAttribute.getFilePassword();
         String userToken = fileAttribute.getUserToken();
-        boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx");
+        boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx") || suffix.equalsIgnoreCase("csv");
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
         String outFilePath = FILE_DIR + cacheFileName;
-
+        if ( !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
         ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
         if (response.isFailure()) {
@@ -83,7 +84,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
             isPwdProtectedOffice = OfficeUtils.isPwdProtected(filePath);
         }
 
-        if (isCached == false) {
+        if (!isCached) {
             // 没有缓存执行转换逻辑
             if (isPwdProtectedOffice && !StringUtils.hasLength(filePassword)) {
                 // 加密文件需要密码
@@ -94,7 +95,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
                     try {
                         officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
                     } catch (OfficeException e) {
-                        if (isPwdProtectedOffice && OfficeUtils.isCompatible(filePath, filePassword) == false) {
+                        if (isPwdProtectedOffice && !OfficeUtils.isCompatible(filePath, filePassword)) {
                             // 加密文件密码错误，提示重新输入
                             model.addAttribute("needFilePassword", true);
                             model.addAttribute("filePasswordError", true);
@@ -115,11 +116,11 @@ public class OfficeFilePreviewImpl implements FilePreview {
                 }
             }
         }
-
+        }
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-
+        cacheFileName =   URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
         model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }

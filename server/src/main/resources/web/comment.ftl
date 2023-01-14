@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css"/>
     <link rel="stylesheet" href="css/theme.css"/>
     <link rel="stylesheet" href="gitalk/gitalk.css"/>
-    <script type="text/javascript" src="js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery-3.6.1.min.js"></script>
     <script type="text/javascript" src="js/jquery.form.min.js"></script>
     <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="gitalk/gitalk.min.js"></script>
@@ -30,12 +30,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="https://kkfileview.keking.cn" target='_blank'>KKFileView</a>
+          <a class="navbar-brand" href="https://kkfileview.keking.cn" target='_blank'>kkFileView</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="./index">首页</a></li>
-            <li><a href="./record">版本记录</a></li>
+            <li><a href="./record">版本发布记录</a></li>
             <li class="active"><a href="./comment">相关交流</a></li>
           </ul>
         </div>
@@ -74,7 +74,7 @@
                 <div class="circle4"></div>
             </div>
         </div>
-    </div> 
+    </div>
 <script>
     $(function () {
         var gitalk = new Gitalk({
