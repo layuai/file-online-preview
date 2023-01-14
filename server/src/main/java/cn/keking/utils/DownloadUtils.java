@@ -42,8 +42,7 @@ public class DownloadUtils {
             logger.error("忽略SSL证书异常:", e);
         }
         ReturnResponse<String> response = new ReturnResponse<>(0, "下载成功!!!", "");
-        String realPath = DownloadUtils.getRelFilePath(KkFileUtils.getOutFileName(urlStr,fileName.substring(fileName.lastIndexOf(".") + 1)) , fileAttribute);
-        urlStr = urlStr.replaceAll("\\+", "%2B");
+        String realPath = DownloadUtils.getRelFilePath(KkFileUtils.getOutFileName(urlStr, fileName.substring(fileName.lastIndexOf(".") + 1)), fileAttribute);
         if (!StringUtils.hasText(realPath)) {
             response.setCode(1);
             response.setContent(null);
