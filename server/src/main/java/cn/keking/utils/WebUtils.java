@@ -1,7 +1,6 @@
 package cn.keking.utils;
 
 import io.mola.galimatias.GalimatiasParseException;
-import jodd.util.URLDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 
@@ -132,10 +131,10 @@ public class WebUtils {
             } catch (UnsupportedEncodingException e) {
                 return null;
             }
-            String  urlStrr = url.toLowerCase();  //转换为小写对比
-            boolean wjl =kuayu("&fullfilename=", urlStrr);  //判断是否启用文件流
-            if(wjl){
-                url =  url.substring(0,url.lastIndexOf("&"));  //删除添加的文件流内容
+            String urlStrr = url.toLowerCase();  //转换为小写对比
+            boolean wjl = kuayu("&fullfilename=", urlStrr);  //判断是否启用文件流
+            if (wjl) {
+                url = url.substring(0, url.lastIndexOf("&"));  //删除添加的文件流内容
             }
             String noQueryUrl = url.substring(0, url.indexOf("?"));
             String parameterStr = url.substring(url.indexOf("?"));
@@ -180,23 +179,26 @@ public class WebUtils {
         }
         return null;
     }
+
     /**
-     *  判断地址是否正确
+     * 判断地址是否正确
      * 高 2022/12/17
      */
-    public static boolean hefaurl (String url) {
+    public static boolean hefaurl(String url) {
         String regStr = "^((https|http|ftp|rtsp|mms|file)://)";//[.?*]表示匹配的就是本身
         Pattern pattern = Pattern.compile(regStr);
         Matcher matcher = pattern.matcher(url);
         return matcher.find();
     }
+
     public static boolean kuayu(String host, String wjl) {  //查询域名是否相同
         if (wjl.contains(host)) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
+
     /**
      * 将 Base64 字符串解码，再解码URL参数, 默认使用 UTF-8
      *
@@ -207,7 +209,11 @@ public class WebUtils {
      */
     public static String decodeUrl(String source) {
         String url = decodeBase64String(source, StandardCharsets.UTF_8);
-        return URLDecoder.decode(url, StandardCharsets.UTF_8.name());
+        if (!StringUtils.isNotBlank(url)) {
+            return null;
+        }
+
+        return url;
     }
 
     /**
@@ -234,6 +240,7 @@ public class WebUtils {
 
     /**
      * 获取 url 的 host
+     *
      * @param urlStr url
      * @return host
      */
