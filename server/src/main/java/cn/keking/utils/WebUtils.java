@@ -1,6 +1,7 @@
 package cn.keking.utils;
 
 import io.mola.galimatias.GalimatiasParseException;
+import jodd.util.URLDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 
@@ -198,23 +199,21 @@ public class WebUtils {
     }
     /**
      * 将 Base64 字符串解码，再解码URL参数, 默认使用 UTF-8
+     *
      * @param source 原始 Base64 字符串
      * @return decoded string
-     *
+     * <p>
      * aHR0cHM6Ly9maWxlLmtla2luZy5jbi9kZW1vL%2BS4reaWhy5wcHR4 -> https://file.keking.cn/demo/%E4%B8%AD%E6%96%87.pptx -> https://file.keking.cn/demo/中文.pptx
      */
     public static String decodeUrl(String source) {
         String url = decodeBase64String(source, StandardCharsets.UTF_8);
-        if (! StringUtils.isNotBlank(url)){
-            return null;
-        }
-
-        return url;
+        return URLDecoder.decode(url, StandardCharsets.UTF_8.name());
     }
 
     /**
      * 将 Base64 字符串使用指定字符集解码
-     * @param source 原始 Base64 字符串
+     *
+     * @param source   原始 Base64 字符串
      * @param charsets 字符集
      * @return decoded string
      */

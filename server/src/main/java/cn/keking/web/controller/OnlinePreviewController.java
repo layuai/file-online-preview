@@ -23,8 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,8 +53,40 @@ public class OnlinePreviewController {
         this.otherFilePreview = otherFilePreview;
     }
 
-    @GetMapping( "/onlinePreview")
+
+    /**
+     * 转换并下载pdf文件
+     *
+     * @param url
+     * @param model
+     * @param req
+     * @return
+     */
+    @GetMapping("/getPdfFile")
+    public String getPdfFile(String url, Model model, HttpServletRequest req, HttpServletResponse response) throws UnsupportedEncodingException {
+        logger.info("预览文件url:{}", url);
+        String fileUrl;
+        try {
+            fileUrl = WebUtils.decodeUrl(url);
+        } catch (Exception ex) {
+            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
+            return otherFilePreview.notSupportedFile(model, errorMsg);
+        }
+        FileAttribute fileAttribute = fileHandlerService.getFileAttribute(fileUrl, req);
+        model.addAttribute("file", fileAttribute);
+        FilePreview filePreview = previewFactory.get(fileAttribute);
+        logger.info("下载文件url：{}，previewType：{}", fileUrl, fileAttribute.getType());
+        String type = filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
+        String pdfUrl = (String) model.getAttribute("pdfUrl");
+        logger.info("下载pdf文件url：{}，type：{}", pdfUrl, type);
+        response.setContentType("application/pdf");
+        response.addHeader("Content-Disposition", "attachment;FileName=" + URLEncoder.encode(pdfUrl, "utf-8"));
+        return pdfUrl;
+    }
+
+    @GetMapping("/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
+        logger.info("预览文件url:{}", url);
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
@@ -67,7 +101,7 @@ public class OnlinePreviewController {
         return filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
     }
 
-    @GetMapping( "/picturesPreview")
+    @GetMapping("/picturesPreview")
     public String picturesPreview(String urls, Model model, HttpServletRequest req) {
         String fileUrls;
         try {
@@ -86,7 +120,7 @@ public class OnlinePreviewController {
         String currentUrl = req.getParameter("currentUrl");
         if (StringUtils.hasText(currentUrl)) {
             String decodedCurrentUrl = new String(Base64.decodeBase64(currentUrl));
-                   decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
+            decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
             model.addAttribute("currentUrl", decodedCurrentUrl);
         } else {
             model.addAttribute("currentUrl", imgUrls.get(0));
@@ -106,7 +140,7 @@ public class OnlinePreviewController {
         try {
             urlPath = WebUtils.decodeUrl(urlPath);
         } catch (Exception ex) {
-            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath),ex);
+            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath), ex);
             return;
         }
         HttpURLConnection urlcon;
@@ -116,46 +150,46 @@ public class OnlinePreviewController {
             return;
         }
         logger.info("下载跨域pdf文件url：{}", urlPath);
-        if (!urlPath.toLowerCase().startsWith("ftp:")){
+        if (!urlPath.toLowerCase().startsWith("ftp:")) {
             try {
                 URL url = WebUtils.normalizedURL(urlPath);
-                urlcon=(HttpURLConnection)url.openConnection();
+                urlcon = (HttpURLConnection) url.openConnection();
                 urlcon.setConnectTimeout(30000);
                 urlcon.setReadTimeout(30000);
                 urlcon.setInstanceFollowRedirects(false);
                 if (urlcon.getResponseCode() == 302 || urlcon.getResponseCode() == 301) {
                     urlcon.disconnect();
-                    url =new URL(urlcon.getHeaderField("Location"));
-                    urlcon=(HttpURLConnection)url.openConnection();
+                    url = new URL(urlcon.getHeaderField("Location"));
+                    urlcon = (HttpURLConnection) url.openConnection();
                 }
-                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500 ) {
+                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500) {
                     logger.error("读取跨域文件异常，url：{}", urlPath);
-                    return ;
+                    return;
                 } else {
-                    if(urlPath.contains( ".svg")) {
+                    if (urlPath.contains(".svg")) {
                         response.setContentType("image/svg+xml");
                     }
-                    inputStream=(url).openStream();
+                    inputStream = (url).openStream();
                     IOUtils.copy(inputStream, response.getOutputStream());
                     urlcon.disconnect();
                 }
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
+                return;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
         } else {
             try {
                 URL url = WebUtils.normalizedURL(urlPath);
-                if(urlPath.contains(".svg")) {
+                if (urlPath.contains(".svg")) {
                     response.setContentType("image/svg+xml");
                 }
                 inputStream = (url).openStream();
                 IOUtils.copy(inputStream, response.getOutputStream());
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
+                return;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
