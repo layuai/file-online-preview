@@ -12,11 +12,16 @@
     <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css"/>
     <link rel="stylesheet" href="bootstrap-table/bootstrap-table.min.css"/>
     <link rel="stylesheet" href="css/theme.css"/>
-    <script type="text/javascript" src="js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery-3.6.1.min.js"></script>
     <script type="text/javascript" src="js/jquery.form.min.js"></script>
     <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="bootstrap-table/bootstrap-table.min.js"></script>
     <script type="text/javascript" src="js/base64.min.js"></script>
+    <style>
+        .alert{
+            width: 50%;
+        }
+    </style>
 </head>
 
 <body>
@@ -31,12 +36,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="https://kkfileview.keking.cn" target='_blank'>KKFileView</a>
+          <a class="navbar-brand" href="https://kkfileview.keking.cn" target='_blank'>kkFileView</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="./index">首页</a></li>
-            <li><a href="./record">版本记录</a></li>
+            <li><a href="./record">版本发布记录</a></li>
             <li><a href="./comment">相关交流</a></li>
           </ul>
         </div>
@@ -75,6 +80,12 @@
                     <label>文件下载地址</label>
                     <input type="url" class="form-control" id="_url" placeholder="请输入下载地址">
                 </div>
+                <div class="alert alert-danger alert-dismissable hide" role="alert" id="previewCheckAlert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <strong>请输入正确的url</strong>
+                </div>
                 <button id="previewByUrl" type="button" class="btn btn-success">预览</button>
             </form>
         </div>
@@ -90,10 +101,16 @@
                     <form enctype="multipart/form-data" id="fileUpload">
                         <div class="form-group">
                             <p id="fileName"></p>
-                            <button type="button" class="btn btn-default" id="fileSelectBtn">
+                            <button type="button" class="btn btn-default" id="fileSelectBtn" style="margin-bottom:8px">
                                 <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> 选择文件
                             </button>
                             <input type="file" name="file" style="display: none" id="fileSelect" onchange="onFileSelected()"/>
+                            <div class="alert alert-danger alert-dismissable hide" role="alert" id="postFileAlert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <strong>请选择需要上传的文件！</strong>
+                            </div>
                          </div>
                          <button id="btnSubmit" type="button" class="btn btn-success">上 传</button>
                     </form>
@@ -203,7 +220,10 @@
         $('#previewByUrl').on('click',function() {
             var _url = $("#_url").val();
             if (!checkUrl(_url)) {
-                alert('请输入正确的url');
+                $("#previewCheckAlert").addClass("show");
+                window.setTimeout(function(){
+                    $("#previewCheckAlert").removeClass("show");
+                },3000);//显示的时间
                 return false;
             }
 
@@ -217,6 +237,21 @@
         });
 
         $("#btnSubmit").click(function () {
+            var _fileName = $("#fileName").text()
+            var index= _fileName.lastIndexOf(".");
+            //获取后缀
+            var ext = _fileName.substr(index+1);
+             if (!ext || ext == "dll"|| ext == "exe"|| ext == "msi" ){
+             window.alert(ext+"不支持上传")
+            return ;
+        }
+            if(!_fileName){
+                $("#postFileAlert").addClass("show");
+                window.setTimeout(function(){
+                    $("#postFileAlert").removeClass("show");
+                },3000);//显示的时间
+                return;
+            }
             showLoadingDiv();
             $("#fileUpload").ajaxSubmit({
                 success: function (data) {
@@ -226,10 +261,12 @@
                     } else {
                         $('#table').bootstrapTable('refresh', {});
                     }
+                    $("#fileName").text("");
                     $(".loading_container").hide();
                 },
                 error: function () {
                     alert('上传失败，请联系管理员');
+                    $("#fileName").text("");
                     $(".loading_container").hide();
                 },
                 url: 'fileUpload', /*设置post提交到的页面*/

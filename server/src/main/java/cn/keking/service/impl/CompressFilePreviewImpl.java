@@ -31,8 +31,7 @@ public class CompressFilePreviewImpl implements FilePreview {
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         String fileName=fileAttribute.getName();
-        String suffix=fileAttribute.getSuffix();
-        String fileTree = null;
+        String fileTree;
         // 判断文件名是否存在(redis缓存读取)
         if (!StringUtils.hasText(fileHandlerService.getConvertedFile(fileName))  || !ConfigConstants.isCacheEnabled()) {
             ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
@@ -41,6 +40,12 @@ public class CompressFilePreviewImpl implements FilePreview {
             }
             String filePath = response.getContent();
             fileTree = compressFileReader.unRar(filePath, fileName);
+            if (fileTree != null && !"null".equals(fileTree)) {
+                if (ConfigConstants.isCacheEnabled()) {
+                    // 加入缓存
+                    fileHandlerService.addConvertedFile(fileName, fileTree);
+                }
+            }
         } else {
             fileTree = fileHandlerService.getConvertedFile(fileName);
         }
