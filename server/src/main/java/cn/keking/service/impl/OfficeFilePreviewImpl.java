@@ -3,18 +3,16 @@ package cn.keking.service.impl;
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.ReturnResponse;
-import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
-import cn.keking.service.OfficeToPdfService;
 import cn.keking.utils.DownloadUtils;
-import cn.keking.utils.OfficeUtils;
+import cn.keking.service.FileHandlerService;
+import cn.keking.service.OfficeToPdfService;
+import cn.keking.utils.KkFileUtils;
 import cn.keking.web.filter.BaseUrlFilter;
-import org.jodconverter.core.office.OfficeException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -48,7 +46,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         String filePassword = fileAttribute.getFilePassword();
         String userToken = fileAttribute.getUserToken();
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx") || suffix.equalsIgnoreCase("csv");
-        String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
+        String pdfName = KkFileUtils.getOutFileName(url, (isHtml ? "html" : "pdf"));
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
         String outFilePath = FILE_DIR + cacheFileName;
         if ( !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
