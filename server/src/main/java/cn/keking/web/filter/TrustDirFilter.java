@@ -4,7 +4,6 @@ import cn.keking.config.ConfigConstants;
 import cn.keking.utils.WebUtils;
 import io.mola.galimatias.GalimatiasParseException;
 import jodd.util.URLDecoder;
-import org.artofsolving.jodconverter.util.PlatformUtils;
 import org.jodconverter.core.util.OSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +56,8 @@ public class TrustDirFilter implements Filter {
     }
 
     private boolean allowPreview(String urlPath) {
-        if(!StringUtils.hasText(urlPath) || !WebUtils.hefaurl(urlPath)){   //判断URL是否合法
-            return false ;
+        if (!StringUtils.hasText(urlPath) || !WebUtils.hefaurl(urlPath)) {   //判断URL是否合法
+            return false;
         }
         try {
             URL url = WebUtils.normalizedURL(urlPath);

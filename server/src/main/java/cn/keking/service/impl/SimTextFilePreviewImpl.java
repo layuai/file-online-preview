@@ -26,17 +26,19 @@ public class SimTextFilePreviewImpl implements FilePreview {
     private final FileHandlerService fileHandlerService;
     private final OtherFilePreviewImpl otherFilePreview;
 
-    public SimTextFilePreviewImpl(FileHandlerService fileHandlerService,OtherFilePreviewImpl otherFilePreview) {
+    public SimTextFilePreviewImpl(FileHandlerService fileHandlerService, OtherFilePreviewImpl otherFilePreview) {
         this.fileHandlerService = fileHandlerService;
         this.otherFilePreview = otherFilePreview;
     }
+
     private static final String FILE_DIR = ConfigConstants.getFileDir();
+
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         String fileName = fileAttribute.getName();
         String filePath = FILE_DIR + fileName;
         if (!fileHandlerService.listConvertedFiles().containsKey(fileName) || !ConfigConstants.isCacheEnabled()) {
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+            ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }
@@ -45,16 +47,16 @@ public class SimTextFilePreviewImpl implements FilePreview {
                 fileHandlerService.addConvertedFile(fileName, filePath);  //加入缓存
             }
             try {
-                String  fileData = HtmlUtils.htmlEscape(textData(filePath,fileName));
+                String fileData = HtmlUtils.htmlEscape(textData(filePath, fileName));
                 model.addAttribute("textData", Base64.encodeBase64String(fileData.getBytes()));
             } catch (IOException e) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, e.getLocalizedMessage());
             }
             return TXT_FILE_PREVIEW_PAGE;
         }
-        String  fileData = null;
+        String fileData = null;
         try {
-            fileData = HtmlUtils.htmlEscape(textData(filePath,fileName));
+            fileData = HtmlUtils.htmlEscape(textData(filePath, fileName));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,7 +64,7 @@ public class SimTextFilePreviewImpl implements FilePreview {
         return TXT_FILE_PREVIEW_PAGE;
     }
 
-    private String textData(String filePath,String fileName) throws IOException {
+    private String textData(String filePath, String fileName) throws IOException {
         File file = new File(filePath);
         if (KkFileUtils.isIllegalFileName(fileName)) {
             return null;
