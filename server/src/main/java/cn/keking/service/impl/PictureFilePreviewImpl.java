@@ -30,6 +30,7 @@ public class PictureFilePreviewImpl implements FilePreview {
 
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
+        String originalUrl = url;
         url= KkFileUtils.htmlEscape(url);
         List<String> imgUrls = new ArrayList<>();
         imgUrls.add(url);
@@ -52,7 +53,7 @@ public class PictureFilePreviewImpl implements FilePreview {
             }
         } else {
             model.addAttribute("imgUrls", imgUrls);
-            model.addAttribute("currentUrl", url);
+            model.addAttribute("currentUrl", originalUrl);
         }
         return PICTURE_FILE_PREVIEW_PAGE;
     }
