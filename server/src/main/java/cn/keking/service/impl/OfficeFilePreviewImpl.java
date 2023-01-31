@@ -26,7 +26,6 @@ public class OfficeFilePreviewImpl implements FilePreview {
 
     public static final String OFFICE_PREVIEW_TYPE_IMAGE = "image";
     public static final String OFFICE_PREVIEW_TYPE_ALL_IMAGES = "allImages";
-    private static final String FILE_DIR = ConfigConstants.getFileDir();
 
     private final FileHandlerService fileHandlerService;
     private final OfficeToPdfService officeToPdfService;
@@ -50,7 +49,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx") || suffix.equalsIgnoreCase("csv");
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
-        String outFilePath = FILE_DIR + cacheFileName;
+        String outFilePath = ConfigConstants.getFileDir() + cacheFileName;
         if ( !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
