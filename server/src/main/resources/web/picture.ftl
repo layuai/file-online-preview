@@ -19,12 +19,16 @@
 
 <ul id="image">
     <#list imgUrls as img>
-        <#if img?contains("http://") || img?contains("https://")>
-            <#assign img="${img}">
+<#--        <#if img?contains("http://") || img?contains("https://")>-->
+        <#if img.url?contains("http://") || img.url?contains("https://")>
+<#--            <#assign img="${img}">-->
+            <#assign url="${img.url}">
         <#else>
-            <#assign img="${baseUrl}${img}">
+<#--            <#assign img="${baseUrl}${img}">-->
+            <#assign url="${baseUrl}${img.url}">
         </#if>
-        <li><img id="${img}"  url="${img}" src="${img}" style="display: none"></li>
+        <li><img id="${img.id}"  url="${url}" src="${url}" style="display: none"></li>
+<#--        <li><img id="${img}"  url="${img}" src="${img}" style="display: none"></li>-->
     </#list>
 </ul>
 
