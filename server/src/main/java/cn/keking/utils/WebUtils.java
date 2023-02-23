@@ -127,8 +127,8 @@ public class WebUtils {
         String fullFileName = WebUtils.getUrlParameterReg(url, "fullfilename");
         if (fullFileName != null && fullFileName.length() > 0) {
             try {
-                encodedFileName = URLEncoder.encode(fullFileName, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+                encodedFileName = URLUtils.encode(fullFileName, "UTF-8");
+            } catch (Exception e) {
                 return null;
             }
             String  urlStrr = url.toLowerCase();  //转换为小写对比
@@ -145,8 +145,8 @@ public class WebUtils {
         int fileNameStartIndex = noQueryUrl.lastIndexOf('/') + 1;
         int fileNameEndIndex = noQueryUrl.lastIndexOf('.');
         try {
-            encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+            encodedFileName = URLUtils.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
+        } catch (Exception e) {
             return null;
         }
         return url.substring(0, fileNameStartIndex) + encodedFileName + url.substring(fileNameEndIndex);

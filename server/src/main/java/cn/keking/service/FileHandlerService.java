@@ -5,6 +5,7 @@ import cn.keking.model.FileAttribute;
 import cn.keking.model.FileType;
 import cn.keking.service.cache.CacheService;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.URLUtils;
 import cn.keking.utils.WebUtils;
 import com.aspose.cad.CodePages;
 import com.aspose.cad.Color;
@@ -181,8 +182,8 @@ public class FileHandlerService {
         String pdfFolder = pdfName.substring(0, pdfName.length() - 4);
         String urlPrefix;
         try {
-            urlPrefix = baseUrl + URLEncoder.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
-        } catch (UnsupportedEncodingException e) {
+            urlPrefix = baseUrl + URLUtils.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
+        } catch (Exception e) {
             logger.error("UnsupportedEncodingException", e);
             urlPrefix = baseUrl + pdfFolder;
         }

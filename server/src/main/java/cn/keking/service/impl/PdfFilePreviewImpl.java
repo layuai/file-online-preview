@@ -6,11 +6,13 @@ import cn.keking.model.ReturnResponse;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
+import cn.keking.utils.URLUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -74,7 +76,7 @@ public class PdfFilePreviewImpl implements FilePreview {
                         fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
                     }
                 } else {
-                    pdfName =   URLEncoder.encode(pdfName).replaceAll("\\+", "%20");
+                    pdfName =   URLUtils.encode(pdfName, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
                     model.addAttribute("pdfUrl", pdfName);
                 }
             } else {

@@ -8,6 +8,7 @@ import cn.keking.service.FilePreview;
 import cn.keking.service.OfficeToPdfService;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.OfficeUtils;
+import cn.keking.utils.URLUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.jodconverter.core.office.OfficeException;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -120,7 +122,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-        cacheFileName =   URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
+        cacheFileName =   URLUtils.encode(cacheFileName, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
         model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
