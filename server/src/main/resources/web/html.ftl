@@ -8,8 +8,14 @@
     <#include "*/commonHeader.ftl">
     <#include "*/needFilePasswordHeader.ftl">
 </head>
+<#if pdfUrl?contains("http://") || pdfUrl?contains("https://")>
+    <#assign finalUrl="${pdfUrl}">
+<#else>
+    <#assign finalUrl="${baseUrl}${pdfUrl}">
+</#if>
 <body>
-<iframe src="${pdfUrl}" width="100%" frameborder="0"></iframe>
+<iframe src="${finalUrl}" width="100%" frameborder="0"></iframe>
+<#--<iframe src="${pdfUrl}" width="100%" frameborder="0"></iframe>-->
 </body>
 
 <script type="text/javascript">
