@@ -35,6 +35,11 @@ public class URLUtils {
         return s;
     }
 
+//    public static void main(String[] args) {
+//        String ss = "https://devminio.haoweiyun.com.cn/authorized-access/cwc/saas/test/merge/15891c25-9cb7-4e9f-97ec-37074f7e5a61_bz11.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=hI6SjDDA8OFQmbK7%2F20230224%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20230224T060031Z&amp;X-Amz-Expires=300&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=930b2ddef4cb535b90be36ffad8248688e14d340053941f4bac6498c798bde61";
+//        System.out.println(decode(ss, "utf-8"));
+//    }
+
     public static String decode(String s, String enc) {
         try {
             String decodedStr = null;

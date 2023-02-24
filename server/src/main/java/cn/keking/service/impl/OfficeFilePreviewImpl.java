@@ -156,7 +156,8 @@ public class OfficeFilePreviewImpl implements FilePreview {
                 imgUrls.add(tUrlMap);
             }
             model.addAttribute("imgurls", imgUrls);
-            model.addAttribute("currentUrl", curId);
+            model.addAttribute("currentUrl", imageUrls.get(0));
+            model.addAttribute("curId", curId);
             return PICTURE_FILE_PREVIEW_PAGE;
         }
     }

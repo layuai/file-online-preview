@@ -8,17 +8,19 @@
     <script type="text/javascript" src="plyr/plyr.js"></script>
     <style>
         body {
+            height:auto;
             background-color: #404040;
         }
 
         .m {
             width: 1024px;
+            height:auto;
             margin: 0 auto;
         }
     </style>
 </head>
 <body>
-<div class="m">
+<div id="mediaBox" class="m">
     <video>
         <source src="${mediaUrl}"/>
     </video>
@@ -26,6 +28,10 @@
 <script>
     plyr.setup();
     window.onload = function () {
+        let height = window.innerHeight;
+        let mb = document.getElementById("mediaBox");
+        let margin_top = (height - mb.offsetHeight) / 2;
+        mb.style.marginTop = margin_top + "px";
         initWaterMark();
     }
 </script>

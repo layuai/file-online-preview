@@ -62,6 +62,7 @@ public class PdfFilePreviewImpl implements FilePreview {
 //            model.addAttribute("currentUrl", imageUrls.get(0));
             if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType)) {
                 model.addAttribute("imgurls", imageUrls);
+                model.addAttribute("currentUrl", imageUrls.get(0));
                 return OFFICE_PICTURE_FILE_PREVIEW_PAGE;
             } else {
                 List<Map<String, String>> imgUrls = new ArrayList<>();
@@ -76,7 +77,8 @@ public class PdfFilePreviewImpl implements FilePreview {
                     imgUrls.add(tUrlMap);
                 }
                 model.addAttribute("imgurls", imgUrls);
-                model.addAttribute("currentUrl", curId);
+                model.addAttribute("currentUrl", imageUrls.get(0));
+                model.addAttribute("curId", curId);
                 return PICTURE_FILE_PREVIEW_PAGE;
             }
         } else {

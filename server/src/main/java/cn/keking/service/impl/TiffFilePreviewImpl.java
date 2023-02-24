@@ -119,7 +119,8 @@ public class TiffFilePreviewImpl implements FilePreview {
                     imgUrls.add(tUrlMap);
                 }
                 model.addAttribute("imgurls", imgUrls);
-                model.addAttribute("currentUrl", curId);
+                model.addAttribute("currentUrl", listImageUrls.get(0));
+                model.addAttribute("curId", curId);
             }
 
             // 转换后的tif没用了，可以删掉了

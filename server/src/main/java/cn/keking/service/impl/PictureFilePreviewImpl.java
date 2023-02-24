@@ -68,11 +68,13 @@ public class PictureFilePreviewImpl implements FilePreview {
                 imgUrls.add(tUrlMap);
 //                imgUrls.add(file);
                 model.addAttribute("imgUrls", imgUrls);
-                model.addAttribute("currentUrl", id);
+                model.addAttribute("currentUrl", file);
+                model.addAttribute("curId", id);
             }
         } else {
             model.addAttribute("imgUrls", imgUrls);
-            model.addAttribute("currentUrl", curId);
+            model.addAttribute("currentUrl", url);
+            model.addAttribute("curId", curId);
         }
         return PICTURE_FILE_PREVIEW_PAGE;
     }

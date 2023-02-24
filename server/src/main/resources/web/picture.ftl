@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>图片预览</title>
     <#include "*/commonHeader.ftl">
     <link rel="stylesheet" href="css/viewer.min.css">
@@ -10,8 +10,21 @@
         body {
             background-color: #404040;
         }
-        #image { width: 800px; margin: 0 auto; font-size: 0;}
-        #image li {  display: inline-block;width: 50px;height: 50px; margin-left: 1%; padding-top: 1%;}
+
+        #image {
+            width: 800px;
+            margin: 0 auto;
+            font-size: 0;
+        }
+
+        #image li {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            margin-left: 1%;
+            padding-top: 1%;
+        }
+
         /*#dowebok li img { width: 200%;}*/
     </style>
 </head>
@@ -19,16 +32,16 @@
 
 <ul id="image">
     <#list imgUrls as img>
-<#--        <#if img?contains("http://") || img?contains("https://")>-->
+    <#--        <#if img?contains("http://") || img?contains("https://")>-->
         <#if img.url?contains("http://") || img.url?contains("https://")>
-<#--            <#assign img="${img}">-->
+        <#--            <#assign img="${img}">-->
             <#assign url="${img.url}">
         <#else>
-<#--            <#assign img="${baseUrl}${img}">-->
+        <#--            <#assign img="${baseUrl}${img}">-->
             <#assign url="${baseUrl}${img.url}">
         </#if>
-        <li><img id="${img.id}"  url="${url}" src="${url}" style="display: none"></li>
-<#--        <li><img id="${img}"  url="${img}" src="${img}" style="display: none"></li>-->
+        <li><img id="${img.id}" url="${url}" src="${url}" style="display: none"></li>
+    <#--        <li><img id="${img}"  url="${img}" src="${img}" style="display: none"></li>-->
     </#list>
 </ul>
 
@@ -38,12 +51,12 @@
         navbar: false,
         button: false,
         backdrop: false,
-        loop : true
+        loop: true
     });
-    document.getElementById("${currentUrl}").click();
-
+    <#--document.getElementById("${currentUrl}").click();-->
+    document.getElementById("${curId}").click();
     /*初始化水印*/
-    window.onload = function() {
+    window.onload = function () {
         initWaterMark();
     }
 </script>
