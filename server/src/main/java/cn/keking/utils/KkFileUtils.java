@@ -32,29 +32,33 @@ public class KkFileUtils {
 
     /**
      * 检查文件名是否合规
+     *
      * @param fileName 文件名
-     * @return 合规结果,true:不合规，false:合规
+     * @return 合规结果, true:不合规，false:合规
      */
-    public static boolean isIllegalFileName(String fileName){
-        for (String str: illegalFileStrList){
-            if(fileName.contains(str)){
+    public static boolean isIllegalFileName(String fileName) {
+        for (String str : illegalFileStrList) {
+            if (fileName.contains(str)) {
                 return true;
             }
         }
         return false;
     }
+
     /**
      * 检查是否是数字
+     *
      * @param str 文件名
-     * @return 合规结果,true:不合规，false:合规
+     * @return 合规结果, true:不合规，false:合规
      */
     public static boolean isInteger(String str) {
-        if(StringUtils.hasText(str)){
+        if (StringUtils.hasText(str)) {
             boolean strResult = str.matches("-?[0-9]+.?[0-9]*");
-            return strResult ;
+            return strResult;
         }
         return false;
     }
+
     /**
      * 判断url是否是http资源
      *
@@ -100,7 +104,7 @@ public class KkFileUtils {
 
 
     public static String htmlEscape(String input) {
-        if(StringUtils.hasText(input)){
+        if (StringUtils.hasText(input)) {
             //input = input.replaceAll("\\{", "%7B").replaceAll("}", "%7D").replaceAll("\\\\", "%5C");
             return HtmlUtils.htmlEscape(input, "UTF-8");
         }
@@ -172,6 +176,14 @@ public class KkFileUtils {
             return false;
         }
         return true;
+    }
+
+
+    public static String fileNameUrlDecode(String input) {
+        if (StringUtils.hasText(input)) {
+            return URLUtils.decode(input, "UTF-8");
+        }
+        return input;
     }
 
 }

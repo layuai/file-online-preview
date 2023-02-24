@@ -35,4 +35,19 @@ public class URLUtils {
         return s;
     }
 
+    public static String decode(String s, String enc) {
+        try {
+            String decodedStr = null;
+            try {
+                decodedStr = URLDecoder.decode(s, enc);
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage(), e);
+            }
+            return isEncoded(decodedStr, enc) ? decode(decodedStr, enc) : decodedStr;
+        } catch (Exception e) {
+            logger.error("URLUtils中encode异常", e);
+        }
+        return s;
+    }
+
 }
