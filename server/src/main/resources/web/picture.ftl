@@ -54,9 +54,10 @@
         loop: true
     });
     <#--document.getElementById("${currentUrl}").click();-->
-    document.getElementById("${curId}").click();
     /*初始化水印*/
     window.onload = function () {
+        document.getElementById("${curId}").click();
+
         initWaterMark();
     }
 </script>
