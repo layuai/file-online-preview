@@ -287,6 +287,8 @@ public class FileHandlerService {
         }
         url = WebUtils.encodeUrlFileName(url);
         fileName = KkFileUtils.htmlEscape(fileName);  //文件名处理
+        // 解决由于url加密导致文件名过长，无法保存文件的问题
+        fileName = KkFileUtils.fileNameUrlDecode(fileName);
         attribute.setType(type);
         attribute.setName(fileName);
         attribute.setSuffix(suffix);
