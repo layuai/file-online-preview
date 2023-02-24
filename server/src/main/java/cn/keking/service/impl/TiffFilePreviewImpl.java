@@ -6,6 +6,7 @@ import cn.keking.model.ReturnResponse;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.ConvertPicUtil;
 import cn.keking.utils.DownloadUtils;
+import cn.keking.utils.MD5Utils;
 import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.slf4j.Logger;
@@ -16,7 +17,9 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * tiff 图片文件处理
@@ -102,8 +105,22 @@ public class TiffFilePreviewImpl implements FilePreview {
                     listImageUrls.add(baseUrl + strJpg);
                 }
 
-                model.addAttribute("imgUrls", listImageUrls);
+//                model.addAttribute("imgUrls", listImageUrls);
+//                model.addAttribute("currentUrl", listImageUrls.get(0));
+                List<Map<String, String>> imgUrls = new ArrayList<>();
+                String curId = null;
+                for (String turl : listImageUrls) {
+                    if (curId == null) {
+                        curId = MD5Utils.md5(turl);
+                    }
+                    Map<String, String> tUrlMap = new HashMap<>();
+                    tUrlMap.put("url", turl);
+                    tUrlMap.put("id", MD5Utils.md5(turl));
+                    imgUrls.add(tUrlMap);
+                }
+                model.addAttribute("imgurls", imgUrls);
                 model.addAttribute("currentUrl", listImageUrls.get(0));
+                model.addAttribute("curId", curId);
             }
 
             // 转换后的tif没用了，可以删掉了

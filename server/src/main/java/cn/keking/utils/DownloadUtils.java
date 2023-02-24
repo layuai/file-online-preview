@@ -3,16 +3,15 @@ package cn.keking.utils;
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.ReturnResponse;
-import cn.keking.service.FileHandlerService;
 import io.mola.galimatias.GalimatiasParseException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.HtmlUtils;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
 import java.util.UUID;
 
 import static cn.keking.utils.KkFileUtils.isFtpUrl;
@@ -43,18 +42,32 @@ public class DownloadUtils {
         }
         String urlStr = fileAttribute.getUrl().replaceAll("\\+", "%20");
         ReturnResponse<String> response = new ReturnResponse<>(0, "下载成功!!!", "");
-        String realPath = DownloadUtils.getRelFilePath(fileName, fileAttribute);
-        if(!StringUtils.hasText(realPath)){
+//        String realPath = DownloadUtils.getRelFilePath(fileName, fileAttribute);
+        String[] realPaths = DownloadUtils.getRelFilePath(fileName, fileAttribute);
+//        if (!StringUtils.hasText(realPath)) {
+//            response.setCode(1);
+//            response.setContent(null);
+//            response.setMsg("下载失败:文件名不合法!" + urlStr);
+//            return response;
+//        }
+        if (realPaths == null) {
             response.setCode(1);
             response.setContent(null);
             response.setMsg("下载失败:文件名不合法!" + urlStr);
             return response;
         }
-        if(realPath.equals("cunzhai")){
-            response.setContent(fileDir + fileName);
+        if ("1".equals(realPaths[0])) {
+            response.setContent(realPaths[1]);
             response.setMsg(fileName);
             return response;
         }
+        String realPath = realPaths[1];
+//        if (realPath.equals("cunzhai")) {
+//            response.setContent(realPath);
+////            response.setContent(fileDir + fileName);
+//            response.setMsg(fileName);
+//            return response;
+//        }
         try {
             URL url = WebUtils.normalizedURL(urlStr);
             if (!fileAttribute.getSkipDownLoad()) {
@@ -94,7 +107,7 @@ public class DownloadUtils {
      * @param fileName 文件名
      * @return 文件路径
      */
-    private static String getRelFilePath(String fileName, FileAttribute fileAttribute) {
+    private static String[] getRelFilePath(String fileName, FileAttribute fileAttribute) {
         String type = fileAttribute.getSuffix();
         if (null == fileName) {
             UUID uuid = UUID.randomUUID();
@@ -102,6 +115,8 @@ public class DownloadUtils {
         } else { // 文件后缀不一致时，以type为准(针对simText【将类txt文件转为txt】)
             fileName = fileName.replace(fileName.substring(fileName.lastIndexOf(".") + 1), type);
         }
+        // 解决由于url加密导致文件名过长，无法保存文件的问题
+        fileName = KkFileUtils.fileNameUrlDecode(fileName);
         // 判断是否非法地址
         if (KkFileUtils.isIllegalFileName(fileName)) {
             return null;
@@ -115,9 +130,10 @@ public class DownloadUtils {
         File realFile = new File(realPath);
         if (realFile.exists()) {
             fileAttribute.setSkipDownLoad(true);
-            return "cunzhai";
+//            return "cunzhai";
+            return new String[]{"1", realPath};
         }
-        return realPath;
+        return new String[]{"0", realPath};
     }
 
 }

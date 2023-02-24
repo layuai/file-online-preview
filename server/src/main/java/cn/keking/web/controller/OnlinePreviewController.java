@@ -6,18 +6,14 @@ import cn.keking.service.FilePreview;
 import cn.keking.service.FilePreviewFactory;
 import cn.keking.service.cache.CacheService;
 import cn.keking.service.impl.OtherFilePreviewImpl;
-import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.WebUtils;
 import fr.opensagres.xdocreport.core.io.IOUtils;
 import io.mola.galimatias.GalimatiasParseException;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,10 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-
-import static cn.keking.service.FilePreview.PICTURE_FILE_PREVIEW_PAGE;
 
 /**
  * @author yudian-it
@@ -51,11 +43,13 @@ public class OnlinePreviewController {
         this.otherFilePreview = otherFilePreview;
     }
 
-    @GetMapping( "/onlinePreview")
+    @GetMapping("/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
+            // 防止XSS攻击
+//            fileUrl = KkFileUtils.htmlEscape(fileUrl);
         } catch (Exception ex) {
             String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
             return otherFilePreview.notSupportedFile(model, errorMsg);
@@ -66,33 +60,50 @@ public class OnlinePreviewController {
         logger.info("预览文件url：{}，previewType：{}", fileUrl, fileAttribute.getType());
         return filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
     }
-
-    @GetMapping( "/picturesPreview")
-    public String picturesPreview(String urls, Model model, HttpServletRequest req) {
-        String fileUrls;
-        try {
-            fileUrls = WebUtils.decodeUrl(urls);
-            // 防止XSS攻击
-            fileUrls = KkFileUtils.htmlEscape(fileUrls);
-        } catch (Exception ex) {
-            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "urls");
-            return otherFilePreview.notSupportedFile(model, errorMsg);
-        }
-        logger.info("预览文件url：{}，urls：{}", fileUrls, urls);
-        // 抽取文件并返回文件列表
-        String[] images = fileUrls.split("\\|");
-        List<String> imgUrls = Arrays.asList(images);
-        model.addAttribute("imgUrls", imgUrls);
-        String currentUrl = req.getParameter("currentUrl");
-        if (StringUtils.hasText(currentUrl)) {
-            String decodedCurrentUrl = new String(Base64.decodeBase64(currentUrl));
-                   decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
-            model.addAttribute("currentUrl", decodedCurrentUrl);
-        } else {
-            model.addAttribute("currentUrl", imgUrls.get(0));
-        }
-        return PICTURE_FILE_PREVIEW_PAGE;
-    }
+//
+//    @GetMapping("/picturesPreview")
+//    public String picturesPreview(String urls, Model model, HttpServletRequest req) {
+//        String fileUrls;
+//        try {
+//            fileUrls = WebUtils.decodeUrl(urls);
+//            // 防止XSS攻击
+//            fileUrls = KkFileUtils.htmlEscape(fileUrls);
+//        } catch (Exception ex) {
+//            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "urls");
+//            return otherFilePreview.notSupportedFile(model, errorMsg);
+//        }
+//        logger.info("预览文件url：{}，urls：{}", fileUrls, urls);
+//        // 抽取文件并返回文件列表
+//        String[] images = fileUrls.split("\\|");
+//        List<String> imgUrls = Arrays.asList(images);
+//
+//        List<Map<String, String>> imgUrlMap = new ArrayList<>();
+//        String curId = null;
+//        for (String turl : imgUrls) {
+//            if (curId == null) {
+//                curId = MD5Utils.md5(turl);
+//            }
+//            Map<String, String> tUrlMap = new HashMap<>();
+//            tUrlMap.put("url", turl);
+//            tUrlMap.put("id", MD5Utils.md5(turl));
+//            imgUrlMap.add(tUrlMap);
+//        }
+//        model.addAttribute("imgUrls", imgUrlMap);
+//        model.addAttribute("currentUrl", curId); // 默认第一个
+//
+////        model.addAttribute("imgUrls", imgUrls);
+////        String currentUrl = req.getParameter("currentUrl");
+////        if (StringUtils.hasText(currentUrl)) {
+////            String decodedCurrentUrl = new String(Base64.decodeBase64(currentUrl));
+////            decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
+////            model.addAttribute("currentUrl", decodedCurrentUrl);
+////        } else {
+////            model.addAttribute("currentUrl", imgUrls.get(0));
+////        }
+//
+//        return PICTURE_FILE_PREVIEW_PAGE;
+//    }
+//
 
     /**
      * 根据url获取文件内容
@@ -106,7 +117,7 @@ public class OnlinePreviewController {
         try {
             urlPath = WebUtils.decodeUrl(urlPath);
         } catch (Exception ex) {
-            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath),ex);
+            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath), ex);
             return;
         }
         HttpURLConnection urlcon;
@@ -116,62 +127,62 @@ public class OnlinePreviewController {
             return;
         }
         logger.info("下载跨域pdf文件url：{}", urlPath);
-        if (!urlPath.toLowerCase().startsWith("ftp:")){
+        if (!urlPath.toLowerCase().startsWith("ftp:")) {
             try {
                 URL url = WebUtils.normalizedURL(urlPath);
-                urlcon=(HttpURLConnection)url.openConnection();
+                urlcon = (HttpURLConnection) url.openConnection();
                 urlcon.setConnectTimeout(30000);
                 urlcon.setReadTimeout(30000);
                 urlcon.setInstanceFollowRedirects(false);
                 if (urlcon.getResponseCode() == 302 || urlcon.getResponseCode() == 301) {
                     urlcon.disconnect();
-                    url =new URL(urlcon.getHeaderField("Location"));
-                    urlcon=(HttpURLConnection)url.openConnection();
+                    url = new URL(urlcon.getHeaderField("Location"));
+                    urlcon = (HttpURLConnection) url.openConnection();
                 }
-                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500 ) {
-                    logger.error("读取跨域文件异常，url：{}", urlPath);
-                    return ;
+                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500) {
+                    logger.error("读取跨域文件异常(403/404/500)，host：{}，path：{}，query：{}", url.getHost(), url.getPath(), url.getQuery());
+                    return;
                 } else {
-                    if(urlPath.contains( ".svg")) {
+                    if (urlPath.contains(".svg")) {
                         response.setContentType("image/svg+xml");
                     }
-                    inputStream=(url).openStream();
+                    inputStream = (url).openStream();
                     IOUtils.copy(inputStream, response.getOutputStream());
                     urlcon.disconnect();
                 }
             } catch (IOException | GalimatiasParseException e) {
-                logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
+                logger.error("读取跨域文件异常，url：{}", urlPath, e);
+                return;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
         } else {
             try {
                 URL url = WebUtils.normalizedURL(urlPath);
-                if(urlPath.contains(".svg")) {
+                if (urlPath.contains(".svg")) {
                     response.setContentType("image/svg+xml");
                 }
                 inputStream = (url).openStream();
                 IOUtils.copy(inputStream, response.getOutputStream());
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
+                return;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
         }
     }
-
-    /**
-     * 通过api接口入队
-     *
-     * @param url 请编码后在入队
-     */
-    @GetMapping("/addTask")
-    @ResponseBody
-    public String addQueueTask(String url) {
-        logger.info("添加转码队列url：{}", url);
-        cacheService.addQueueTask(url);
-        return "success";
-    }
+//
+//    /**
+//     * 通过api接口入队
+//     *
+//     * @param url 请编码后在入队
+//     */
+//    @GetMapping("/addTask")
+//    @ResponseBody
+//    public String addQueueTask(String url) {
+//        logger.info("添加转码队列url：{}", url);
+//        cacheService.addQueueTask(url);
+//        return "success";
+//    }
 }

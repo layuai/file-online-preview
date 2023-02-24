@@ -5,12 +5,12 @@ import cn.keking.model.FileAttribute;
 import cn.keking.model.FileType;
 import cn.keking.service.cache.CacheService;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.URLUtils;
 import cn.keking.utils.WebUtils;
 import com.aspose.cad.CodePages;
 import com.aspose.cad.Color;
 import com.aspose.cad.Image;
 import com.aspose.cad.LoadOptions;
-import com.aspose.cad.fileformats.cad.CadDrawTypeMode;
 import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.PdfOptions;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,10 +167,11 @@ public class FileHandlerService {
     }
 
     /**
-     *  pdf文件转换成jpg图片集
+     * pdf文件转换成jpg图片集
+     *
      * @param pdfFilePath pdf文件路径
-     * @param pdfName pdf文件名称
-     * @param baseUrl 基础访问地址
+     * @param pdfName     pdf文件名称
+     * @param baseUrl     基础访问地址
      * @return 图片访问集合
      */
     public List<String> pdf2jpg(String pdfFilePath, String pdfName, String baseUrl) {
@@ -181,8 +181,8 @@ public class FileHandlerService {
         String pdfFolder = pdfName.substring(0, pdfName.length() - 4);
         String urlPrefix;
         try {
-            urlPrefix = baseUrl + URLEncoder.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
-        } catch (UnsupportedEncodingException e) {
+            urlPrefix = baseUrl + URLUtils.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
+        } catch (Exception e) {
             logger.error("UnsupportedEncodingException", e);
             urlPrefix = baseUrl + pdfFolder;
         }
@@ -225,11 +225,12 @@ public class FileHandlerService {
 
     /**
      * cad文件转pdf
-     * @param inputFilePath cad文件路径
+     *
+     * @param inputFilePath  cad文件路径
      * @param outputFilePath pdf输出文件路径
      * @return 转换是否成功
      */
-    public boolean cadToPdf(String inputFilePath, String outputFilePath)  {
+    public boolean cadToPdf(String inputFilePath, String outputFilePath) {
         File outputFile = new File(outputFilePath);
         LoadOptions opts = new LoadOptions();
         opts.setSpecifiedEncoding(CodePages.SimpChinese);
@@ -239,7 +240,7 @@ public class FileHandlerService {
         cadRasterizationOptions.setPageWidth(1400);
         cadRasterizationOptions.setPageHeight(650);
         cadRasterizationOptions.setAutomaticLayoutsScaling(true);
-        cadRasterizationOptions.setNoScaling (false);
+        cadRasterizationOptions.setNoScaling(false);
         cadRasterizationOptions.setDrawType(1);
         PdfOptions pdfOptions = new PdfOptions();
         pdfOptions.setVectorRasterizationOptions(cadRasterizationOptions);
@@ -252,8 +253,8 @@ public class FileHandlerService {
             return true;
         } catch (IOException e) {
             logger.error("PDFFileNotFoundException，inputFilePath：{}", inputFilePath, e);
-        }finally{
-            if(cadImage != null){   //关闭
+        } finally {
+            if (cadImage != null) {   //关闭
                 cadImage.close();
             }
         }
@@ -285,14 +286,16 @@ public class FileHandlerService {
             attribute.setSkipDownLoad(true);
         }
         url = WebUtils.encodeUrlFileName(url);
-       fileName =  KkFileUtils.htmlEscape(fileName);  //文件名处理
+        fileName = KkFileUtils.htmlEscape(fileName);  //文件名处理
+        // 解决由于url加密导致文件名过长，无法保存文件的问题
+        fileName = KkFileUtils.fileNameUrlDecode(fileName);
         attribute.setType(type);
         attribute.setName(fileName);
         attribute.setSuffix(suffix);
         attribute.setUrl(url);
         if (req != null) {
             String officePreviewType = req.getParameter("officePreviewType");
-            String fileKey = WebUtils.getUrlParameterReg(url,"fileKey");
+            String fileKey = WebUtils.getUrlParameterReg(url, "fileKey");
             if (StringUtils.hasText(officePreviewType)) {
                 attribute.setOfficePreviewType(officePreviewType);
             }
@@ -328,6 +331,7 @@ public class FileHandlerService {
 
     /**
      * 添加转换后的视频文件缓存
+     *
      * @param fileName
      * @param value
      */
