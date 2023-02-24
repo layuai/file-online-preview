@@ -56,6 +56,8 @@ public class OnlinePreviewController {
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
+            // 防止XSS攻击
+            fileUrl = KkFileUtils.htmlEscape(fileUrl);
         } catch (Exception ex) {
             String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
             return otherFilePreview.notSupportedFile(model, errorMsg);
@@ -66,128 +68,128 @@ public class OnlinePreviewController {
         logger.info("预览文件url：{}，previewType：{}", fileUrl, fileAttribute.getType());
         return filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
     }
-
-    @GetMapping("/picturesPreview")
-    public String picturesPreview(String urls, Model model, HttpServletRequest req) {
-        String fileUrls;
-        try {
-            fileUrls = WebUtils.decodeUrl(urls);
-            // 防止XSS攻击
-            fileUrls = KkFileUtils.htmlEscape(fileUrls);
-        } catch (Exception ex) {
-            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "urls");
-            return otherFilePreview.notSupportedFile(model, errorMsg);
-        }
-        logger.info("预览文件url：{}，urls：{}", fileUrls, urls);
-        // 抽取文件并返回文件列表
-        String[] images = fileUrls.split("\\|");
-        List<String> imgUrls = Arrays.asList(images);
-
-        List<Map<String, String>> imgUrlMap = new ArrayList<>();
-        String curId = null;
-        for (String turl : imgUrls) {
-            if (curId == null) {
-                curId = MD5Utils.md5(turl);
-            }
-            Map<String, String> tUrlMap = new HashMap<>();
-            tUrlMap.put("url", turl);
-            tUrlMap.put("id", MD5Utils.md5(turl));
-            imgUrlMap.add(tUrlMap);
-        }
-        model.addAttribute("imgUrls", imgUrlMap);
-        model.addAttribute("currentUrl", curId); // 默认第一个
-
-//        model.addAttribute("imgUrls", imgUrls);
-//        String currentUrl = req.getParameter("currentUrl");
-//        if (StringUtils.hasText(currentUrl)) {
-//            String decodedCurrentUrl = new String(Base64.decodeBase64(currentUrl));
-//            decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
-//            model.addAttribute("currentUrl", decodedCurrentUrl);
-//        } else {
-//            model.addAttribute("currentUrl", imgUrls.get(0));
+//
+//    @GetMapping("/picturesPreview")
+//    public String picturesPreview(String urls, Model model, HttpServletRequest req) {
+//        String fileUrls;
+//        try {
+//            fileUrls = WebUtils.decodeUrl(urls);
+//            // 防止XSS攻击
+//            fileUrls = KkFileUtils.htmlEscape(fileUrls);
+//        } catch (Exception ex) {
+//            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "urls");
+//            return otherFilePreview.notSupportedFile(model, errorMsg);
 //        }
-
-        return PICTURE_FILE_PREVIEW_PAGE;
-    }
-
-    /**
-     * 根据url获取文件内容
-     * 当pdfjs读取存在跨域问题的文件时将通过此接口读取
-     *
-     * @param urlPath  url
-     * @param response response
-     */
-    @GetMapping("/getCorsFile")
-    public void getCorsFile(String urlPath, HttpServletResponse response) throws IOException {
-        try {
-            urlPath = WebUtils.decodeUrl(urlPath);
-        } catch (Exception ex) {
-            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath), ex);
-            return;
-        }
-        HttpURLConnection urlcon;
-        InputStream inputStream = null;
-        if (urlPath.toLowerCase().startsWith("file:") || urlPath.toLowerCase().startsWith("file%3")) {
-            logger.info("读取跨域文件异常，可能存在非法访问，urlPath：{}", urlPath);
-            return;
-        }
-        logger.info("下载跨域pdf文件url：{}", urlPath);
-        if (!urlPath.toLowerCase().startsWith("ftp:")) {
-            try {
-                URL url = WebUtils.normalizedURL(urlPath);
-                urlcon = (HttpURLConnection) url.openConnection();
-                urlcon.setConnectTimeout(30000);
-                urlcon.setReadTimeout(30000);
-                urlcon.setInstanceFollowRedirects(false);
-                if (urlcon.getResponseCode() == 302 || urlcon.getResponseCode() == 301) {
-                    urlcon.disconnect();
-                    url = new URL(urlcon.getHeaderField("Location"));
-                    urlcon = (HttpURLConnection) url.openConnection();
-                }
-                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500) {
-                    logger.error("读取跨域文件异常，url：{}", urlPath);
-                    return;
-                } else {
-                    if (urlPath.contains(".svg")) {
-                        response.setContentType("image/svg+xml");
-                    }
-                    inputStream = (url).openStream();
-                    IOUtils.copy(inputStream, response.getOutputStream());
-                    urlcon.disconnect();
-                }
-            } catch (IOException | GalimatiasParseException e) {
-                logger.error("读取跨域文件异常，url：{}", urlPath);
-                return;
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-        } else {
-            try {
-                URL url = WebUtils.normalizedURL(urlPath);
-                if (urlPath.contains(".svg")) {
-                    response.setContentType("image/svg+xml");
-                }
-                inputStream = (url).openStream();
-                IOUtils.copy(inputStream, response.getOutputStream());
-            } catch (IOException | GalimatiasParseException e) {
-                logger.error("读取跨域文件异常，url：{}", urlPath);
-                return;
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-        }
-    }
-
-    /**
-     * 通过api接口入队
-     *
-     * @param url 请编码后在入队
-     */
-    @GetMapping("/addTask")
-    @ResponseBody
-    public String addQueueTask(String url) {
-        logger.info("添加转码队列url：{}", url);
-        cacheService.addQueueTask(url);
-        return "success";
-    }
+//        logger.info("预览文件url：{}，urls：{}", fileUrls, urls);
+//        // 抽取文件并返回文件列表
+//        String[] images = fileUrls.split("\\|");
+//        List<String> imgUrls = Arrays.asList(images);
+//
+//        List<Map<String, String>> imgUrlMap = new ArrayList<>();
+//        String curId = null;
+//        for (String turl : imgUrls) {
+//            if (curId == null) {
+//                curId = MD5Utils.md5(turl);
+//            }
+//            Map<String, String> tUrlMap = new HashMap<>();
+//            tUrlMap.put("url", turl);
+//            tUrlMap.put("id", MD5Utils.md5(turl));
+//            imgUrlMap.add(tUrlMap);
+//        }
+//        model.addAttribute("imgUrls", imgUrlMap);
+//        model.addAttribute("currentUrl", curId); // 默认第一个
+//
+////        model.addAttribute("imgUrls", imgUrls);
+////        String currentUrl = req.getParameter("currentUrl");
+////        if (StringUtils.hasText(currentUrl)) {
+////            String decodedCurrentUrl = new String(Base64.decodeBase64(currentUrl));
+////            decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
+////            model.addAttribute("currentUrl", decodedCurrentUrl);
+////        } else {
+////            model.addAttribute("currentUrl", imgUrls.get(0));
+////        }
+//
+//        return PICTURE_FILE_PREVIEW_PAGE;
+//    }
+//
+//    /**
+//     * 根据url获取文件内容
+//     * 当pdfjs读取存在跨域问题的文件时将通过此接口读取
+//     *
+//     * @param urlPath  url
+//     * @param response response
+//     */
+//    @GetMapping("/getCorsFile")
+//    public void getCorsFile(String urlPath, HttpServletResponse response) throws IOException {
+//        try {
+//            urlPath = WebUtils.decodeUrl(urlPath);
+//        } catch (Exception ex) {
+//            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath), ex);
+//            return;
+//        }
+//        HttpURLConnection urlcon;
+//        InputStream inputStream = null;
+//        if (urlPath.toLowerCase().startsWith("file:") || urlPath.toLowerCase().startsWith("file%3")) {
+//            logger.info("读取跨域文件异常，可能存在非法访问，urlPath：{}", urlPath);
+//            return;
+//        }
+//        logger.info("下载跨域pdf文件url：{}", urlPath);
+//        if (!urlPath.toLowerCase().startsWith("ftp:")) {
+//            try {
+//                URL url = WebUtils.normalizedURL(urlPath);
+//                urlcon = (HttpURLConnection) url.openConnection();
+//                urlcon.setConnectTimeout(30000);
+//                urlcon.setReadTimeout(30000);
+//                urlcon.setInstanceFollowRedirects(false);
+//                if (urlcon.getResponseCode() == 302 || urlcon.getResponseCode() == 301) {
+//                    urlcon.disconnect();
+//                    url = new URL(urlcon.getHeaderField("Location"));
+//                    urlcon = (HttpURLConnection) url.openConnection();
+//                }
+//                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500) {
+//                    logger.error("读取跨域文件异常，url：{}", urlPath);
+//                    return;
+//                } else {
+//                    if (urlPath.contains(".svg")) {
+//                        response.setContentType("image/svg+xml");
+//                    }
+//                    inputStream = (url).openStream();
+//                    IOUtils.copy(inputStream, response.getOutputStream());
+//                    urlcon.disconnect();
+//                }
+//            } catch (IOException | GalimatiasParseException e) {
+//                logger.error("读取跨域文件异常，url：{}", urlPath);
+//                return;
+//            } finally {
+//                IOUtils.closeQuietly(inputStream);
+//            }
+//        } else {
+//            try {
+//                URL url = WebUtils.normalizedURL(urlPath);
+//                if (urlPath.contains(".svg")) {
+//                    response.setContentType("image/svg+xml");
+//                }
+//                inputStream = (url).openStream();
+//                IOUtils.copy(inputStream, response.getOutputStream());
+//            } catch (IOException | GalimatiasParseException e) {
+//                logger.error("读取跨域文件异常，url：{}", urlPath);
+//                return;
+//            } finally {
+//                IOUtils.closeQuietly(inputStream);
+//            }
+//        }
+//    }
+//
+//    /**
+//     * 通过api接口入队
+//     *
+//     * @param url 请编码后在入队
+//     */
+//    @GetMapping("/addTask")
+//    @ResponseBody
+//    public String addQueueTask(String url) {
+//        logger.info("添加转码队列url：{}", url);
+//        cacheService.addQueueTask(url);
+//        return "success";
+//    }
 }
