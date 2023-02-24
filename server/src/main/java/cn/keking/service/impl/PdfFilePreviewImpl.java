@@ -3,17 +3,20 @@ package cn.keking.service.impl;
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.ReturnResponse;
+import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
-import cn.keking.service.FileHandlerService;
+import cn.keking.utils.MD5Utils;
 import cn.keking.utils.URLUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by kl on 2018/1/17.
@@ -55,11 +58,25 @@ public class PdfFilePreviewImpl implements FilePreview {
             if (imageUrls == null || imageUrls.size() < 1) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
             }
-            model.addAttribute("imgurls", imageUrls);
-            model.addAttribute("currentUrl", imageUrls.get(0));
+//            model.addAttribute("imgurls", imageUrls);
+//            model.addAttribute("currentUrl", imageUrls.get(0));
             if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType)) {
+                model.addAttribute("imgurls", imageUrls);
                 return OFFICE_PICTURE_FILE_PREVIEW_PAGE;
             } else {
+                List<Map<String, String>> imgUrls = new ArrayList<>();
+                String curId = null;
+                for (String turl : imageUrls) {
+                    if (curId == null) {
+                        curId = MD5Utils.md5(turl);
+                    }
+                    Map<String, String> tUrlMap = new HashMap<>();
+                    tUrlMap.put("url", turl);
+                    tUrlMap.put("id", MD5Utils.md5(turl));
+                    imgUrls.add(tUrlMap);
+                }
+                model.addAttribute("imgurls", imgUrls);
+                model.addAttribute("currentUrl", curId);
                 return PICTURE_FILE_PREVIEW_PAGE;
             }
         } else {
@@ -76,7 +93,7 @@ public class PdfFilePreviewImpl implements FilePreview {
                         fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
                     }
                 } else {
-                    pdfName =   URLUtils.encode(pdfName, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+                    pdfName = URLUtils.encode(pdfName, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
                     model.addAttribute("pdfUrl", pdfName);
                 }
             } else {
