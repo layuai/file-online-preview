@@ -39,7 +39,7 @@ public class PictureFilePreviewImpl implements FilePreview {
             imgUrls.addAll(zipImgUrls);
         }
         // 不是http开头，浏览器不能直接访问，需下载到本地
-        if (url != null && !url.toLowerCase().startsWith("http")) {
+        if (url != null && !url.toLowerCase().startsWith("http://")) {
             ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
