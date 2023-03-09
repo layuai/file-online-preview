@@ -91,27 +91,24 @@
     });
 
     function downloadFile() {
-        btnDownload.innerText = "下载中...";
-        btnDownload.disabled = true;
-        btnDownload.style.backgroundColor = "#999";
-        // 用fetch发送请求 对请求回来的二进制文件流进行处理
-        fetch("${file.url}").then((res) => {
-            res.blob().then((blob) => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                const filename = "${file.name}";
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = filename;
-                a.click();
-                window.URL.revokeObjectURL(blobUrl);
-            });
-        }).finally(() => {
+        if (!btnDownload.disabled) {
+            btnDownload.innerText = "下载中...";
+            btnDownload.disabled = true;
+            btnDownload.style.backgroundColor = "#999";
+
+            let a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = "${file.url}";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
             setTimeout(() => {
                 btnDownload.innerText = "下载文件";
                 btnDownload.disabled = false;
                 btnDownload.style.backgroundColor = "#22b255";
-            }, 1200)
-        });
+            }, 1000)
+        }
     }
 
 </script>
