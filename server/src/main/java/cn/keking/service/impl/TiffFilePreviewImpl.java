@@ -67,7 +67,7 @@ public class TiffFilePreviewImpl implements FilePreview {
             File fileTiff = new File(strLocalTif);
             // 如果本地不存在这个tif文件，则下载
             if (!fileTiff.exists()) {
-                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, inputFileName);
+                ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, inputFileName);
                 if (response.isFailure()) {
                     return NOT_SUPPORTED_FILE_PAGE;
                 }

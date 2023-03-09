@@ -34,7 +34,7 @@ public class CompressFilePreviewImpl implements FilePreview {
         String fileTree;
         // 判断文件名是否存在(redis缓存读取)
         if (!StringUtils.hasText(fileHandlerService.getConvertedFile(fileName))  || !ConfigConstants.isCacheEnabled()) {
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+            ReturnResponse<String> response = DownloadUtils.downLoad(url, fileAttribute, fileName);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }

@@ -3,6 +3,7 @@ package cn.keking.web.filter;
 import cn.keking.config.ConfigConstants;
 import cn.keking.utils.WebUtils;
 import io.mola.galimatias.GalimatiasParseException;
+import jodd.util.URLDecoder;
 import org.jodconverter.core.util.OSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,6 @@ import org.springframework.util.StringUtils;
 import javax.servlet.*;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -56,8 +56,8 @@ public class TrustDirFilter implements Filter {
     }
 
     private boolean allowPreview(String urlPath) {
-        if(!StringUtils.hasText(urlPath) || !WebUtils.hefaurl(urlPath)){   //判断URL是否合法
-            return false ;
+        if (!StringUtils.hasText(urlPath) || !WebUtils.hefaurl(urlPath)) {   //判断URL是否合法
+            return false;
         }
         try {
             URL url = WebUtils.normalizedURL(urlPath);

@@ -131,10 +131,10 @@ public class WebUtils {
             } catch (UnsupportedEncodingException e) {
                 return null;
             }
-            String  urlStrr = url.toLowerCase();  //转换为小写对比
-            boolean wjl =kuayu("&fullfilename=", urlStrr);  //判断是否启用文件流
-            if(wjl){
-                url =  url.substring(0,url.lastIndexOf("&"));  //删除添加的文件流内容
+            String urlStrr = url.toLowerCase();  //转换为小写对比
+            boolean wjl = kuayu("&fullfilename=", urlStrr);  //判断是否启用文件流
+            if (wjl) {
+                url = url.substring(0, url.lastIndexOf("&"));  //删除添加的文件流内容
             }
             String noQueryUrl = url.substring(0, url.indexOf("?"));
             String parameterStr = url.substring(url.indexOf("?"));
@@ -179,33 +179,37 @@ public class WebUtils {
         }
         return null;
     }
+
     /**
-     *  判断地址是否正确
+     * 判断地址是否正确
      * 高 2022/12/17
      */
-    public static boolean hefaurl (String url) {
+    public static boolean hefaurl(String url) {
         String regStr = "^((https|http|ftp|rtsp|mms|file)://)";//[.?*]表示匹配的就是本身
         Pattern pattern = Pattern.compile(regStr);
         Matcher matcher = pattern.matcher(url);
         return matcher.find();
     }
+
     public static boolean kuayu(String host, String wjl) {  //查询域名是否相同
         if (wjl.contains(host)) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
+
     /**
      * 将 Base64 字符串解码，再解码URL参数, 默认使用 UTF-8
+     *
      * @param source 原始 Base64 字符串
      * @return decoded string
-     *
+     * <p>
      * aHR0cHM6Ly9maWxlLmtla2luZy5jbi9kZW1vL%2BS4reaWhy5wcHR4 -> https://file.keking.cn/demo/%E4%B8%AD%E6%96%87.pptx -> https://file.keking.cn/demo/中文.pptx
      */
     public static String decodeUrl(String source) {
         String url = decodeBase64String(source, StandardCharsets.UTF_8);
-        if (! StringUtils.isNotBlank(url)){
+        if (!StringUtils.isNotBlank(url)) {
             return null;
         }
 
@@ -214,7 +218,8 @@ public class WebUtils {
 
     /**
      * 将 Base64 字符串使用指定字符集解码
-     * @param source 原始 Base64 字符串
+     *
+     * @param source   原始 Base64 字符串
      * @param charsets 字符集
      * @return decoded string
      */
@@ -235,6 +240,7 @@ public class WebUtils {
 
     /**
      * 获取 url 的 host
+     *
      * @param urlStr url
      * @return host
      */
