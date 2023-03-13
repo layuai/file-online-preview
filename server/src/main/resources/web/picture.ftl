@@ -51,7 +51,20 @@
         navbar: false,
         button: false,
         backdrop: false,
-        loop: true
+        loop: true,
+        toolbar: {
+            zoomIn: 1,
+            zoomOut: 1,
+            oneToOne: 1,
+            reset: 0,
+            prev: 0,
+            play: 0,
+            next: 0,
+            rotateLeft: 1,
+            rotateRight: 1,
+            flipHorizontal: 1,
+            flipVertical: 1,
+        }
     });
     <#--document.getElementById("${currentUrl}").click();-->
     /*初始化水印*/
