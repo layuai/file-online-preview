@@ -2,22 +2,22 @@ package cn.keking.web.controller;
 
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.ReturnResponse;
+import cn.keking.service.TaskDesignService;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -119,9 +119,7 @@ public class FileController {
         List<Map<String, String>> list = new ArrayList<>();
         File file = new File(fileDir + demoPath);
         if (file.exists()) {
-            File[] files = Objects.requireNonNull(file.listFiles());
-            Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
-            Arrays.stream(files).forEach(file1 -> {
+            Arrays.stream(Objects.requireNonNull(file.listFiles())).forEach(file1 -> {
                 Map<String, String> fileName = new HashMap<>();
                 fileName.put("fileName", demoDir + "/" + file1.getName());
                 list.add(fileName);
@@ -130,6 +128,23 @@ public class FileController {
         return list;
     }
 
+    @GetMapping("/directory")
+    public Object directory(String urls) {
+        if (urls == null || urls.length() == 0) {
+            return ReturnResponse.failure("内容为空！");
+        }
+        String fileUrl;
+        try {
+            fileUrl = WebUtils.decodeUrl(urls);
+            if (fileUrl.toLowerCase().startsWith("file:") || fileUrl.toLowerCase().startsWith("file%3")) {
+                return ReturnResponse.failure("地址不合法！");
+            }
+        } catch (Exception ex) {
+            String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
+            return errorMsg;
+        }
+        return TaskDesignService.getTree(fileUrl);
+    }
     private boolean existsFile(String fileName) {
         File file = new File(fileDir + demoPath + fileName);
         return file.exists();
