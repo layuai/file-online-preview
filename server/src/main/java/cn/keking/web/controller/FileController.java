@@ -114,7 +114,7 @@ public class FileController {
         return ReturnResponse.success();
     }
 
-    @GetMapping("/listFiles")
+   @GetMapping("/listFiles")
     public List<Map<String, String>> getFiles() {
         List<Map<String, String>> list = new ArrayList<>();
         File file = new File(fileDir + demoPath);
