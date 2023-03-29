@@ -12,18 +12,27 @@
         body {
             background-color: #404040;
         }
-        h1, h2, h3, h4, h5, h6 {color: #2f332a;font-weight: bold;font-family: Helvetica, Arial, sans-serif;padding-bottom: 5px;}
         h1 {font-size: 24px;line-height: 34px;text-align: center;}
-        h2 {font-size: 14px;line-height: 24px;padding-top: 5px;}
-        h6 {font-weight: normal;font-size: 12px;letter-spacing: 1px;line-height: 24px;text-align: center;}
         a {color:#3C6E31;text-decoration: underline;}
         a:hover {background-color:#3C6E31;color:white;}
         code {color: #2f332a;}
-        div.zTreeDemoBackground {width:600px;text-align:center;margin: 0 auto;background-color: #ffffff;}
+       div.zTreeDemoBackground {
+           max-width: 880px;
+           text-align:center;
+            margin:0 auto;
+            border-radius:3px;
+            box-shadow:rgba(0,0,0,0.15) 0 0 8px;
+            background:#FBFBFB;
+            border:1px solid #ddd;
+            margin:1px auto;
+            padding:5px;
+       }
+       
     </style>
 </head>
 <body>
 <div class="zTreeDemoBackground left">
+<h1>kkFileView</h1>
     <ul id="treeDemo" class="ztree"></ul>
 </div>
 <script>
@@ -44,7 +53,6 @@
     function chooseNode(event, treeId, treeNode) {
         var path = '${baseUrl}' + treeNode.id;
         location.href = "${baseUrl}onlinePreview?url=" + encodeURIComponent(Base64.encode(path));
-
     }
 
     $(document).ready(function () {
