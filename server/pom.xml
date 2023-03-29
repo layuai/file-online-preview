@@ -29,7 +29,11 @@
             <artifactId>jodconverter-local</artifactId>
             <version>${jodconverter.version}</version>
         </dependency>
-
+ <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
         <!-- web start -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

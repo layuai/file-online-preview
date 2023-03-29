@@ -25115,33 +25115,7 @@ PERFORMANCE OF THIS SOFTWARE.
                 Object(p.isFullScreen)() ? this.exitFullscreen() : this.requestFullscreen()
             }
             openEmbedCodeDialog() {
-                const e = this.state.value.firstSheetContentBounds.height / this.state.value.firstSheetContentBounds.width
-                  , t = Math.min(750, this.state.value.firstSheetContentBounds.width)
-                  , n = Math.min(Math.max(422, t * e), 1e3)
-                  , r = (location.pathname.match(/^\/(m|embed)\/(([0-9A-Za-z])+)/) || [])[2]
-                  , o = document.createElement("textarea");
-                o.readOnly = !0,
-                o.classList.add("share-embed-code-textarea"),
-                o.innerText = `<iframe src='https://www.xmind.app/embed/${r}/' width='${t.toFixed(0)}' height='${n.toFixed(0)}' frameborder='0' scrolling='no' allowfullscreen="true"></iframe>`;
-                const a = new window.utils.Dialog({
-                    title: "Embed Code",
-                    contents: [o, '<span class="form-text text-muted">Copy the code to embed this map into your article. The embed map can even be zoomed in / out.</span>'],
-                    confirmText: "COPY TO CLIPBOARD",
-                    confirmAction: ()=>Object(i.a)(this, void 0, void 0, (function*() {
-                        o.select(),
-                        o.setSelectionRange(0, o.value.length),
-                        document.execCommand("copy")
-                    }
-                    )),
-                    closeAction(e) {
-                        return Object(i.a)(this, void 0, void 0, (function*() {
-                            e.hide()
-                        }
-                        ))
-                    }
-                });
-                a.$cancel.hide(),
-                a.show()
+             
             }
         }
         class v extends f {

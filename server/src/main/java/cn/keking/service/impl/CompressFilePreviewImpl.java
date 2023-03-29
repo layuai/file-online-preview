@@ -21,7 +21,6 @@ public class CompressFilePreviewImpl implements FilePreview {
     private final FileHandlerService fileHandlerService;
     private final CompressFileReader compressFileReader;
     private final OtherFilePreviewImpl otherFilePreview;
-
     public CompressFilePreviewImpl(FileHandlerService fileHandlerService, CompressFileReader compressFileReader, OtherFilePreviewImpl otherFilePreview) {
         this.fileHandlerService = fileHandlerService;
         this.compressFileReader = compressFileReader;
@@ -31,6 +30,7 @@ public class CompressFilePreviewImpl implements FilePreview {
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         String fileName=fileAttribute.getName();
+        String filePassword = fileAttribute.getFilePassword();
         String fileTree;
         // 判断文件名是否存在(redis缓存读取)
         if (!StringUtils.hasText(fileHandlerService.getConvertedFile(fileName))  || !ConfigConstants.isCacheEnabled()) {
@@ -39,7 +39,11 @@ public class CompressFilePreviewImpl implements FilePreview {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }
             String filePath = response.getContent();
-            fileTree = compressFileReader.unRar(filePath, fileName);
+            fileTree = compressFileReader.unRar(filePath, filePassword);
+            if ("Password".equals(fileTree)) {
+                model.addAttribute("needFilePassword", true);
+                return EXEL_FILE_PREVIEW_PAGE;
+            }
             if (fileTree != null && !"null".equals(fileTree)) {
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
