@@ -3,22 +3,27 @@
 <head>
     <meta charset="utf-8"/>
     <title>压缩包预览</title>
-   <script type="text/javascript" src="ztree/js/jquery-1.4.4.min.js"></script>
+   <script src="js/jquery-3.6.1.min.js"></script>
      <#include "*/commonHeader.ftl">
-      <script src="js/base64.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="ztree/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css"/>
-
-    <!--
-    其他两种css风格样式
-    <link rel="stylesheet" href="ztree/css/metroStyle/metroStyle.css" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="ztree/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="ztree/css/awesomeStyle/awesome.css" rel="stylesheet" type="text/css" />
-    -->
-    <script type="text/javascript" src="ztree/js/jquery.ztree.all.min.js"></script>
+   <script src="js/base64.min.js" type="text/javascript"></script>
+   <link href="css/zTreeStyle.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="js/jquery.ztree.core.js"></script>
+        <style type="text/css">
+        body {
+            background-color: #404040;
+        }
+        h1, h2, h3, h4, h5, h6 {color: #2f332a;font-weight: bold;font-family: Helvetica, Arial, sans-serif;padding-bottom: 5px;}
+        h1 {font-size: 24px;line-height: 34px;text-align: center;}
+        h2 {font-size: 14px;line-height: 24px;padding-top: 5px;}
+        h6 {font-weight: normal;font-size: 12px;letter-spacing: 1px;line-height: 24px;text-align: center;}
+        a {color:#3C6E31;text-decoration: underline;}
+        a:hover {background-color:#3C6E31;color:white;}
+        code {color: #2f332a;}
+        div.zTreeDemoBackground {width:600px;text-align:center;margin: 0 auto;background-color: #ffffff;}
+    </style>
 </head>
 <body>
-<div>
-    <h1>kkFileView</h1>
+<div class="zTreeDemoBackground left">
     <ul id="treeDemo" class="ztree"></ul>
 </div>
 <script>
