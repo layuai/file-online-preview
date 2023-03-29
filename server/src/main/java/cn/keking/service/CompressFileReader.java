@@ -1,4 +1,5 @@
 package cn.keking.service;
+import cn.keking.config.ConfigConstants;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
 import net.sf.sevenzipjbinding.IInArchive;
 import net.sf.sevenzipjbinding.SevenZip;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +27,7 @@ public class CompressFileReader {
     public CompressFileReader(FileHandlerService fileHandlerService) {
         this.fileHandlerService = fileHandlerService;
     }
-
+    private static final String fileDir = ConfigConstants.getFileDir();
     public static byte[] getUTF8BytesFromGBKString(String gbkStr) {
         int n = gbkStr.length();
         byte[] utfBytes = new byte[3 * n];
@@ -169,5 +172,35 @@ public class CompressFileReader {
                 }
             }
         }
+    }
+    /**
+     * 读取文件目录树
+     */
+    public static List<ZtreeNodeVo> getTree(String rootPath) {
+        List<ZtreeNodeVo> nodes = new ArrayList<>();
+        File file = new File(fileDir+rootPath);
+        ZtreeNodeVo node = traverse(file);
+        nodes.add(node);
+        return nodes;
+    }
+
+    private static ZtreeNodeVo traverse(File file) {
+        ZtreeNodeVo pathNodeVo = new ZtreeNodeVo();
+        pathNodeVo.setId(file.getAbsolutePath().replace(fileDir, "").replace("\\", "/"));
+        pathNodeVo.setName(file.getName());
+        pathNodeVo.setPid(file.getParent().replace(fileDir, "").replace("\\", "/"));
+        if (file.isDirectory()) {
+            List<ZtreeNodeVo> subNodeVos = new ArrayList<>();
+            File[] subFiles = file.listFiles();
+            if (subFiles == null) {
+                return pathNodeVo;
+            }
+            for (File subFile : subFiles) {
+                ZtreeNodeVo subNodeVo = traverse(subFile);
+                subNodeVos.add(subNodeVo);
+            }
+            pathNodeVo.setChildren(subNodeVos);
+        }
+        return pathNodeVo;
     }
 }
