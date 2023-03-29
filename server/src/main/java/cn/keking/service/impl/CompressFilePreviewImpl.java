@@ -45,7 +45,7 @@ public class CompressFilePreviewImpl implements FilePreview {
                 model.addAttribute("needFilePassword", true);
                 return EXEL_FILE_PREVIEW_PAGE;
             }
-            if (ObjectUtils.isEmpty(fileTree)) {
+            if (!ObjectUtils.isEmpty(fileTree)) {
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
                     fileHandlerService.addConvertedFile(fileName, fileTree);
@@ -54,7 +54,7 @@ public class CompressFilePreviewImpl implements FilePreview {
         } else {
             fileTree = fileHandlerService.getConvertedFile(fileName);
         }
-        if (ObjectUtils.isEmpty(fileTree)) {
+        if (!ObjectUtils.isEmpty(fileTree)) {
             model.addAttribute("fileTree", fileTree);
             return COMPRESS_FILE_PREVIEW_PAGE;
         } else {
