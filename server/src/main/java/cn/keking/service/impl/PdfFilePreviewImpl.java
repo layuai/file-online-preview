@@ -74,7 +74,7 @@ public class PdfFilePreviewImpl implements FilePreview {
 
                 return OFFICE_PICTURE_FILE_PREVIEW_PAGE;
             } else {
-                System.out.println(999);
+            
                 return PICTURE_FILE_PREVIEW_PAGE;
             }
         } else {
