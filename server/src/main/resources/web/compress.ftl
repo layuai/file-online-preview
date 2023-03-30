@@ -51,7 +51,7 @@
     };
 
     function chooseNode(event, treeId, treeNode) {
-        var path = '${baseUrl}' + treeNode.id;
+        var path = '${baseUrl}' + treeNode.id +"?fileKey="+'${fileName}';
         location.href = "${baseUrl}onlinePreview?url=" + encodeURIComponent(Base64.encode(path));
     }
 
