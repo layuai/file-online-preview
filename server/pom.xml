@@ -29,7 +29,6 @@
             <artifactId>jodconverter-local</artifactId>
             <version>${jodconverter.version}</version>
         </dependency>
-
         <!-- web start -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
