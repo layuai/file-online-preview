@@ -1,5 +1,7 @@
 package cn.keking.service;
 import cn.keking.config.ConfigConstants;
+import cn.keking.model.FileType;
+import cn.keking.web.filter.BaseUrlFilter;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
 import net.sf.sevenzipjbinding.IInArchive;
 import net.sf.sevenzipjbinding.SevenZip;
@@ -9,6 +11,7 @@ import net.sf.sevenzipjbinding.simple.ISimpleInArchive;
 import net.sf.sevenzipjbinding.simple.ISimpleInArchiveItem;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -108,7 +111,9 @@ public class CompressFileReader {
         //表示不是乱码 返回false
         return false;
     }
-    public String unRar(String paths, String passWord) {
+    public String unRar(String paths, String passWord, String fileName) {
+        List<String> imgUrls = new ArrayList<>();
+        String baseUrl = BaseUrlFilter.getBaseUrl();
         String archiveFileName = fileHandlerService.getFileNameFromPath(paths);
         RandomAccessFile randomAccessFile = null;
         IInArchive inArchive = null;
@@ -118,22 +123,23 @@ public class CompressFileReader {
             String folderName = paths.substring(paths.lastIndexOf(File.separator) + 1);
             String extractPath = paths.substring(0, paths.lastIndexOf(folderName));
             ISimpleInArchive   simpleInArchive = inArchive.getSimpleInterface();
+            final String[] str = {null};
             for (final ISimpleInArchiveItem item : simpleInArchive.getArchiveItems()) {
                 if (!item.isFolder()) {
                     ExtractOperationResult result;
                     result = item.extractSlow(data -> {
                         try {
-                            String str = getUtf8String(item.getPath());
-                            if (isMessyCode(str)){
-                                str = new String(item.getPath().getBytes(StandardCharsets.ISO_8859_1), "gbk");
+                             str[0] = getUtf8String(item.getPath());
+                            if (isMessyCode(str[0])){
+                                str[0] = new String(item.getPath().getBytes(StandardCharsets.ISO_8859_1), "gbk");
                             }
-                            str = str.replace("\\",  File.separator); //Linux 下路径错误
-                            String  str1 = str.substring(0, str.lastIndexOf(File.separator)+ 1);
+                            str[0] = str[0].replace("\\",  File.separator); //Linux 下路径错误
+                            String  str1 = str[0].substring(0, str[0].lastIndexOf(File.separator)+ 1);
                             File file = new File(extractPath, folderName + "_" + File.separator + str1);
                             if (!file.exists()) {
                                 file.mkdirs();
                             }
-                            OutputStream out = new FileOutputStream( extractPath+ folderName + "_" + File.separator + str, true);
+                            OutputStream out = new FileOutputStream( extractPath+ folderName + "_" + File.separator + str[0], true);
                             IOUtils.write(data, out);
                             out.close();
                         } catch (Exception e) {
@@ -142,15 +148,19 @@ public class CompressFileReader {
                         return data.length;
                     }, passWord);
                     if (result == ExtractOperationResult.OK) {
+                        FileType type = FileType.typeFromUrl(str[0]);
+                        if (type.equals(FileType.PICTURE)) {
+                          //  System.out.println( baseUrl +folderName + "_" + str[0]);
+                            imgUrls.add(baseUrl +folderName + "_/" + str[0].replace("\\", "/"));
+                        }
+                        fileHandlerService.putImgCache(fileName, imgUrls);
                     } else {
-                     System.out.println("解压失败：密码错误或者其他错误...." + result);
-                        return null;
+                        return "error";
                     }
                 }
             }
             return archiveFileName + "_";
         } catch (Exception e) {
-           // System.err.println("Error occurs: " + e);
             String Str1 = String.valueOf(e);
             if (Str1.contains("Password")) {
                 return "Password";
@@ -183,7 +193,6 @@ public class CompressFileReader {
         nodes.add(node);
         return nodes;
     }
-
     private static ZtreeNodeVo traverse(File file) {
         ZtreeNodeVo pathNodeVo = new ZtreeNodeVo();
         pathNodeVo.setId(file.getAbsolutePath().replace(fileDir, "").replace("\\", "/"));
