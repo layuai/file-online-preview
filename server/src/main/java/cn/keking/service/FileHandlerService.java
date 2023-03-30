@@ -201,10 +201,9 @@ public class FileHandlerService {
             doc.setResourceCache(new NotResourceCache());
             int pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
-
-            int index = pdfFilePath.lastIndexOf(".");
-            String folder = pdfFilePath.substring(0, index);
-
+            int index = pdfName.lastIndexOf(".");
+            String folder = pdfName.substring(0, index);
+                   folder = fileDir+ folder;
             File path = new File(folder);
             if (!path.exists() && !path.mkdirs()) {
                 logger.error("创建转换文件【{}】目录失败，请检查目录权限！", folder);
