@@ -6,10 +6,13 @@ import cn.keking.model.ReturnResponse;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
+import cn.keking.utils.SslUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -49,6 +52,18 @@ public class PdfFilePreviewImpl implements FilePreview {
                     fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
                 }
             }
+            String urlStrr = null;
+            URL urll;
+            try {
+                SslUtils.ignoreSsl();
+                urll = new URL(url);
+                urlStrr = URLDecoder.decode(urll.getPath(), "UTF-8");
+            } catch (Exception e) {
+
+            }
+            if (url.contains("?fileKey=")) {
+                outFilePath=FILE_DIR+urlStrr;
+            };
             List<String> imageUrls = fileHandlerService.pdf2jpg(outFilePath, pdfName, baseUrl);
             if (imageUrls == null || imageUrls.size() < 1) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
@@ -56,8 +71,10 @@ public class PdfFilePreviewImpl implements FilePreview {
             model.addAttribute("imgurls", imageUrls);
             model.addAttribute("currentUrl", imageUrls.get(0));
             if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType)) {
+
                 return OFFICE_PICTURE_FILE_PREVIEW_PAGE;
             } else {
+                System.out.println(999);
                 return PICTURE_FILE_PREVIEW_PAGE;
             }
         } else {
