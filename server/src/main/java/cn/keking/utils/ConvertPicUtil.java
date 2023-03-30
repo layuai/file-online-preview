@@ -18,6 +18,8 @@ import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class ConvertPicUtil {
      * @param strOutputFile 输出文件的路径和文件名
      * @return boolean 是否转换成功
      */
-    public static List<String> convertTif2Jpg(String strInputFile, String strOutputFile) {
+    public static List<String> convertTif2Jpg(String strInputFile, String strOutputFile, String url) {
         List<String> listImageFiles = new ArrayList<>();
 
         if (strInputFile == null || "".equals(strInputFile.trim())) {
@@ -42,7 +44,14 @@ public class ConvertPicUtil {
             logger.info("找不到文件【" + strInputFile + "】");
             return null;
         }
-
+        String urlStrr = null;
+        URL urll;
+        try {
+            urll = new URL(url);
+            urlStrr = URLDecoder.decode(urll.getPath(), "UTF-8");
+        } catch (Exception e) {
+            logger.error("地址错误:", e);
+        }
         strInputFile = strInputFile.replaceAll("\\\\", "/");
         strOutputFile = strOutputFile.replaceAll("\\\\", "/");
 
@@ -53,9 +62,14 @@ public class ConvertPicUtil {
             TIFFEncodeParam tiffEncodeParam = new TIFFEncodeParam();
             tiffEncodeParam.setCompression(TIFFEncodeParam.COMPRESSION_GROUP4);
             tiffEncodeParam.setLittleEndian(false);
-
             String strFilePrefix = strInputFile.substring(strInputFile.lastIndexOf("/") + 1, strInputFile.lastIndexOf("."));
-
+            String strFilePrefixx;
+            if (url.contains("?fileKey=")) {
+                int dot = urlStrr.lastIndexOf('.');
+                strFilePrefixx= urlStrr.substring(0, dot);
+            }else {
+                strFilePrefixx= strFilePrefix;
+            }
             fileSeekStream = new FileSeekableStream(strInputFile);
             ImageDecoder imageDecoder = ImageCodec.createImageDecoder("TIFF", fileSeekStream, null);
             int intTifCount = imageDecoder.getNumPages();
@@ -70,22 +84,21 @@ public class ConvertPicUtil {
                 // 如果是多页tif文件，则在目标文件夹下，按照文件名再创建子目录，将转换后的文件放入此新建的子目录中
                 strJpgPath = strOutputFile.substring(0, strOutputFile.lastIndexOf("."));
             }
-
+          //  System.out.println(strOutputFile);
             // 处理目标文件夹，如果不存在则自动创建
             File fileJpgPath = new File(strJpgPath);
             if (!fileJpgPath.exists() && !fileJpgPath.mkdirs()) {
                 logger.error("{} 创建失败", strJpgPath);
             }
-
             // 循环，处理每页tif文件，转换为jpg
             for (int i = 0; i < intTifCount; i++) {
                 String strJpg;
                 if (intTifCount == 1) {
                     strJpg = strJpgPath + "/" + strFilePrefix + ".jpg";
-                    strJpgUrl = strFilePrefix + ".jpg";
+                    strJpgUrl = strFilePrefixx + ".jpg";
                 } else {
                     strJpg = strJpgPath + "/" + i + ".jpg";
-                    strJpgUrl = strFilePrefix + "/" + i + ".jpg";
+                    strJpgUrl = strFilePrefixx + "/" + i + ".jpg";
                 }
 
                 File fileJpg = new File(strJpg);
@@ -106,10 +119,8 @@ public class ConvertPicUtil {
                 } else {
                     logger.info("JPG文件已存在： " + fileJpg.getCanonicalPath());
                 }
-
                 listImageFiles.add(strJpgUrl);
             }
-
             return listImageFiles;
         } catch (IOException e) {
             e.printStackTrace();
@@ -178,7 +189,7 @@ public class ConvertPicUtil {
      * @param strPdfFile 输出的pdf的路径和文件名
      * @return File
      */
-    public static File convertTif2Pdf(String strTifFile, String strPdfFile) {
+    public static File convertTif2Pdf(String strTifFile, String strPdfFile, String url) {
         try {
             RandomAccessFileOrArray rafa = new RandomAccessFileOrArray(strTifFile);
 
@@ -195,7 +206,7 @@ public class ConvertPicUtil {
             if (intPages == 1) {
                 String strJpg = strTifFile.substring(0, strTifFile.lastIndexOf(".")) + ".jpg";
                 File fileJpg = new File(strJpg);
-                List<String> listPic2Jpg = convertTif2Jpg(strTifFile, strJpg);
+                List<String> listPic2Jpg = convertTif2Jpg(strTifFile, strJpg, url);
 
                 if (listPic2Jpg != null && fileJpg.exists()) {
                     convertJpg2Pdf(strJpg, strPdfFile);
