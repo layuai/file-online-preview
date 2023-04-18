@@ -31,9 +31,10 @@ public class CommonPreviewImpl implements FilePreview {
 
     @Override
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
+        String fileName = fileAttribute.getName();
         // 不是http开头，浏览器不能直接访问，需下载到本地
         if (url != null && !url.toLowerCase().startsWith("http")) {
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
+            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             } else {
