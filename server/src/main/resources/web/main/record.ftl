@@ -46,13 +46,25 @@
     <div class="page-header">
         <h1>版本发布记录</h1>
     </div>
+        <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">2023年04月19日，v4.3.0-SNAPSHOT版本</h3>
+            
+        </div>
+        <div class="panel-body">
+            <div>
+                1.新增 dcm 等医疗数位影像预览<br>
+                2.新增 drawio 绘图预览<br>
+            </div>
+        </div>
+    </div>
     <div class="panel panel-success">
         <div class="panel-heading">
             <h3 class="panel-title">2023年04月18日，v4.2.1 版本</h3>
         </div>
         <div class="panel-body">
             <div>
-                1. 修复 dwg 等 CAD 类型文件报空指针的 bug<br>
+                1. 修复4.20 dwg 等 CAD 类型文件报空指针的 bug<br>
             </div>
         </div>
     </div>
