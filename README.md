@@ -24,6 +24,8 @@ Document online preview project solution, built using the popular Spring Boot fr
 16. Supports image format files such as `tga`.
 17. Supports vector image format files such as `svg`.
 18. Supports many audio and video format files such as `avi`, `mov`, `wmv`, `mkv`, `3gp`, and `rm`.
+20. Supports for `dcm` .
+19. Supports for `drawio` .
 
 ### Features
 - Build with the popular frame spring boot
