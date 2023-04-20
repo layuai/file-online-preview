@@ -25,8 +25,6 @@ Document online preview project solution, built using the popular Spring Boot fr
 19. Supports vector image format files such as `svg`.
 20. Supports `mp3`,`wav`,`mp4`,`flv` .
 21. Supports many audio and video format files such as `avi`, `mov`, `wmv`, `mkv`, `3gp`, and `rm`.
-22. Supports for `dcm` .
-23. Supports for `drawio` .
 
 ### Features
 - Build with the popular frame spring boot
