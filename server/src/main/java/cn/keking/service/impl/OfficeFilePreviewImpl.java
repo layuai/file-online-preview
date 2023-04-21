@@ -50,7 +50,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         boolean force_updated_cache=fileAttribute.force_updated_cache();
         String userToken = fileAttribute.getUserToken();
          boolean isHtml = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx") || suffix.equalsIgnoreCase("csv") || suffix.equalsIgnoreCase("xlsm") || suffix.equalsIgnoreCase("xlt") || suffix.equalsIgnoreCase("xltm") || suffix.equalsIgnoreCase("et") || suffix.equalsIgnoreCase("ett") || suffix.equalsIgnoreCase("xlam");
-        String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + (isHtml ? "html" : "pdf");
+        String pdfName = fileName.substring(0, fileName.lastIndexOf(".") ) + suffix +"." +(isHtml ? "html" : "pdf"); //生成文件添加类型后缀 防止同名文件
         String cacheFileName = userToken == null ? pdfName : userToken + "_" + pdfName;
         String outFilePath = FILE_DIR + cacheFileName;
         if (force_updated_cache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
