@@ -91,6 +91,16 @@
                 window.open('http://127.0.0.1:8012/onlinePreview?url='+encodeURIComponent(Base64.encode(previewUrl)));
             </p>
         </div>
+        
+           <div style="font-size: 16px;">
+            【同名文件强制更新方法】 &force_updated_cache = true
+           <p style="background-color: #2f332a;color: #cccccc;font-size: 14px;padding:10px;margin-top:10px;">
+                var originUrl = 'http://127.0.0.1:8080/filedownload?fileId=1'; //要预览文件的访问地址<br>
+                var previewUrl = originUrl + '&fullfilename=test.txt'<br>
+                var force_updated_cache = '&force_updated_cache = true' //这里URL是需要拼接的 不需要base64加密<br> 
+                window.open('http://127.0.0.1:8012/onlinePreview?url='+encodeURIComponent(Base64.encode(previewUrl)) + force_updated_cache);
+            </p>
+        </div>
     </div>
 </div>
 
