@@ -7,6 +7,7 @@ import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
 import cn.keking.service.CompressFileReader;
+import cn.keking.utils.KkFileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.springframework.stereotype.Service;
@@ -37,9 +38,10 @@ public class CompressFilePreviewImpl implements FilePreview {
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         String fileName=fileAttribute.getName();
         String filePassword = fileAttribute.getFilePassword();
+        boolean force_updated_cache=fileAttribute.force_updated_cache();
         String fileTree = null;
         // 判断文件名是否存在(redis缓存读取)
-        if (!StringUtils.hasText(fileHandlerService.getConvertedFile(fileName))  || !ConfigConstants.isCacheEnabled()) {
+        if (force_updated_cache || !StringUtils.hasText(fileHandlerService.getConvertedFile(fileName))  || !ConfigConstants.isCacheEnabled()) {
             ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
@@ -59,6 +61,9 @@ public class CompressFilePreviewImpl implements FilePreview {
                 }
             }
             if (!ObjectUtils.isEmpty(fileTree)) {
+                if( ConfigConstants.getdeletesourcefile()){  //是否保留压缩包源文件
+                    KkFileUtils.deleteFileByPath(filePath);
+                }
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
                     fileHandlerService.addConvertedFile(fileName, fileTree);

@@ -7,6 +7,7 @@ import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.ConvertPicUtil;
 import cn.keking.utils.DownloadUtils;
+import cn.keking.utils.KkFileUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -38,6 +39,8 @@ public class TiffFilePreviewImpl implements FilePreview {
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String tifPreviewType = ConfigConstants.getTifPreviewType();
         String tifOnLinePreviewType = fileAttribute.getTifPreviewType();
+        String suffix = fileAttribute.getSuffix();
+        boolean force_updated_cache=fileAttribute.force_updated_cache();
         if (StringUtils.hasText(tifOnLinePreviewType)) {
             tifPreviewType = tifOnLinePreviewType;
         }
@@ -45,32 +48,36 @@ public class TiffFilePreviewImpl implements FilePreview {
             model.addAttribute("currentUrl", url);
             return TIFF_FILE_PREVIEW_PAGE;
         } else if ("jpg".equalsIgnoreCase(tifPreviewType) || "pdf".equalsIgnoreCase(tifPreviewType)) {
-            String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
+            String pdfName = fileName.substring(0, fileName.lastIndexOf(".")) + suffix +"." + "pdf" ; //生成文件添加类型后缀 防止同名文件
             String jpgName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "jpg";
             String strLocalTif = fileDir + fileName;
             String outFilePath = fileDir + pdfName;
             if ("pdf".equalsIgnoreCase(tifPreviewType)) {
                     //当文件不存在时，就去下载
-                    if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+                    if (force_updated_cache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
                         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
                         if (response.isFailure()) {
                             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                         }
                         String filePath = response.getContent();
-                        if (ConfigConstants.isCacheEnabled()) {
-                            // 加入缓存
-                            fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
-                        }
                         if(ConvertPicUtil.convertJpg2Pdf(filePath, outFilePath)){
+                            if(ConfigConstants.getdeletesourcefile()){  //是否保留TIFF源文件
+                                KkFileUtils.deleteFileByPath(filePath);
+                            }
+                            if (ConfigConstants.isCacheEnabled()) {
+                                // 加入缓存
+                                fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+                            }
                             model.addAttribute("pdfUrl", pdfName);
                             return PDF_FILE_PREVIEW_PAGE;
+                        }else {
+                            return NOT_SUPPORTED_FILE_PAGE;
                         }
                     }
                  else {
                     model.addAttribute("pdfUrl", pdfName);
                     return PDF_FILE_PREVIEW_PAGE;
                 }
-
             } else {
                 File fileTiff = new File(strLocalTif);
                 // 如果本地不存在这个tif文件，则下载
