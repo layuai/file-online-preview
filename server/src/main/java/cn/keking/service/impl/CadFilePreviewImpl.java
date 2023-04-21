@@ -39,8 +39,9 @@ public class CadFilePreviewImpl implements FilePreview {
         String officePreviewType = fileAttribute.getOfficePreviewType() == null ? ConfigConstants.getOfficePreviewType() : fileAttribute.getOfficePreviewType();
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String fileName = fileAttribute.getName();
+        String suffix = fileAttribute.getSuffix();
         boolean force_updated_cache=fileAttribute.force_updated_cache();
-        String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
+        String pdfName = fileName.substring(0, fileName.lastIndexOf(".")) + suffix +"." + "pdf" ; //生成文件添加类型后缀 防止同名文件
         String outFilePath = FILE_DIR + pdfName;
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
         if (force_updated_cache ||!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
