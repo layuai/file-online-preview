@@ -38,11 +38,13 @@ public class CadFilePreviewImpl implements FilePreview {
         // 预览Type，参数传了就取参数的，没传取系统默认
         String officePreviewType = fileAttribute.getOfficePreviewType() == null ? ConfigConstants.getOfficePreviewType() : fileAttribute.getOfficePreviewType();
         String baseUrl = BaseUrlFilter.getBaseUrl();
+        boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
         String fileName = fileAttribute.getName();
-        String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
+        String suffix = fileAttribute.getSuffix();
+        String pdfName = fileName.substring(0, fileName.lastIndexOf(".")) + suffix +"." + "pdf" ; //生成文件添加类型后缀 防止同名文件
         String outFilePath = FILE_DIR + pdfName;
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
-        if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+        if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
             String filePath;
             ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
             if (response.isFailure()) {

@@ -39,6 +39,8 @@ public class TiffFilePreviewImpl implements FilePreview {
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String tifPreviewType = ConfigConstants.getTifPreviewType();
         String tifOnLinePreviewType = fileAttribute.getTifPreviewType();
+        String suffix = fileAttribute.getSuffix();
+        boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
         if (StringUtils.hasText(tifOnLinePreviewType)) {
             tifPreviewType = tifOnLinePreviewType;
         }
@@ -46,13 +48,13 @@ public class TiffFilePreviewImpl implements FilePreview {
             model.addAttribute("currentUrl", url);
             return TIFF_FILE_PREVIEW_PAGE;
         } else if ("jpg".equalsIgnoreCase(tifPreviewType) || "pdf".equalsIgnoreCase(tifPreviewType)) {
-            String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
+            String pdfName = fileName.substring(0, fileName.lastIndexOf(".")) + suffix +"." + "pdf" ; //生成文件添加类型后缀 防止同名文件
             String jpgName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "jpg";
             String strLocalTif = fileDir + fileName;
             String outFilePath = fileDir + pdfName;
             if ("pdf".equalsIgnoreCase(tifPreviewType)) {
                     //当文件不存在时，就去下载
-                    if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+                    if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
                         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
                         if (response.isFailure()) {
                             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
