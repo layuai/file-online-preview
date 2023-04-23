@@ -18,7 +18,6 @@ public class FileAttribute {
     private String officePreviewType = ConfigConstants.getOfficePreviewType();
     private String tifPreviewType;
     private Boolean skipDownLoad = false;
-    private Boolean force_updated_cache = false;
 
     public FileAttribute() {
     }
@@ -116,13 +115,6 @@ public class FileAttribute {
 
     public void setTifPreviewType(String previewType) {
         this.tifPreviewType = previewType;
-    }
-
-    public Boolean force_updated_cache() {
-        return force_updated_cache;
-    }
-    public  void setforce_updated_cache(Boolean force_updated_cache) {
-        this.force_updated_cache = force_updated_cache;
     }
 
 }
