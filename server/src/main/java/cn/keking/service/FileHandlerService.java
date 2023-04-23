@@ -180,7 +180,7 @@ public class FileHandlerService {
         List<String> imageUrls = new ArrayList<>();
         Integer imageCount = this.getConvertedPdfImage(pdfFilePath);
         String imageFileSuffix = ".jpg";
-        String pdfFolder = pdfName.substring(0, pdfName.length() - 4);
+        String pdfFolder = pdfName.substring(0, pdfName.length() - 4).trim();
         String urlPrefix;
         try {
             urlPrefix = baseUrl + URLEncoder.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
@@ -205,7 +205,7 @@ public class FileHandlerService {
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
 
             int index = pdfFilePath.lastIndexOf(".");
-            String folder = pdfFilePath.substring(0, index);
+            String folder = pdfFilePath.substring(0, index).trim();
 
             File path = new File(folder);
             if (!path.exists() && !path.mkdirs()) {
