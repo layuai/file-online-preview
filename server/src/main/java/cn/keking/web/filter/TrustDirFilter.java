@@ -59,19 +59,14 @@ public class TrustDirFilter implements Filter {
         if(!StringUtils.hasText(urlPath) || !WebUtils.hefaurl(urlPath)){   //判断URL是否合法
             return false ;
         }
-        try {
-            URL url = WebUtils.normalizedURL(urlPath);
-            if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
-                String filePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
-                if (OSUtils.IS_OS_WINDOWS) {
-                    filePath = filePath.replaceAll("/", "\\\\");
-                }
-                return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
+        File directory = new File(urlPath);
+        if ("file".equals(urlPath.toLowerCase(Locale.ROOT))) {
+            String filePath = directory.getAbsolutePath();
+            if (OSUtils.IS_OS_WINDOWS) {
+                filePath = filePath.replaceAll("/", "\\\\");
             }
-            return true;
-        } catch (IOException | GalimatiasParseException e) {
-            logger.error("解析URL异常，url：{}", urlPath, e);
-            return false;
+            return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
         }
+        return true;
     }
 }
