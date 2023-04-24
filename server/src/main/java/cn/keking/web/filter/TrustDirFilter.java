@@ -55,7 +55,7 @@ public class TrustDirFilter implements Filter {
 
     }
 
-    private boolean allowPreview(String urlPath) {
+   private boolean allowPreview(String urlPath) {
         if(!StringUtils.hasText(urlPath) || !WebUtils.hefaurl(urlPath)){   //判断URL是否合法
             return false ;
         }
@@ -64,7 +64,8 @@ public class TrustDirFilter implements Filter {
             if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
                 String filePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
                 if (OSUtils.IS_OS_WINDOWS) {
-                    filePath = filePath.replaceAll("/", "\\\\");
+                    File directory = new File(urlPath);//设定为当前文件夹
+                    filePath = directory.getAbsolutePath();
                 }
                 return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
             }
