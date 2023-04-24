@@ -11,9 +11,9 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -62,9 +62,10 @@ public class TrustDirFilter implements Filter {
         try {
             URL url = WebUtils.normalizedURL(urlPath);
             if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
-                String filePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
+                File directory = new File(urlPath); //获取路径
+                String filePath = directory.getAbsolutePath(); //获取绝对路径
                 if (OSUtils.IS_OS_WINDOWS) {
-                    filePath = filePath.replaceAll("/", "\\\\");
+                    filePath = filePath.replaceAll("/", "\\\\");  //windows下统一斜杠
                 }
                 return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
             }
