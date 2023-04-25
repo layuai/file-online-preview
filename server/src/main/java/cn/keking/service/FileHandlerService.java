@@ -8,6 +8,7 @@ import cn.keking.service.cache.NotResourceCache;
 import cn.keking.utils.EncodingDetects;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.WebUtils;
+import cn.keking.web.filter.BaseUrlFilter;
 import com.aspose.cad.CodePages;
 import com.aspose.cad.Color;
 import com.aspose.cad.Image;
@@ -180,10 +181,9 @@ public class FileHandlerService {
      * @return 图片访问地址
      */
     private String getPdf2jpgUrl(String pdfName, int index) {
-        String baseUrl = ConfigConstants.getBaseUrl();
+        String baseUrl = BaseUrlFilter.getBaseUrl();
         String pdfFolder = pdfName.substring(0, pdfName.length() - 4);
         String urlPrefix;
-
         try {
             urlPrefix = baseUrl + URLEncoder.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
         } catch (UnsupportedEncodingException e) {
@@ -237,10 +237,8 @@ public class FileHandlerService {
             doc.setResourceCache(new NotResourceCache());
             int pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
-
             int index = pdfFilePath.lastIndexOf(".");
             String folder = pdfFilePath.substring(0, index);
-
             File path = new File(folder);
             if (!path.exists() && !path.mkdirs()) {
                 logger.error("创建转换文件【{}】目录失败，请检查目录权限！", folder);
@@ -248,8 +246,8 @@ public class FileHandlerService {
             String imageFilePath;
             for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
                 imageFilePath = folder + File.separator + pageIndex + pdf2jpg_image_format;
-                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, 105, ImageType.RGB);
-                ImageIOUtil.writeImage(image, imageFilePath, 105);
+                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, ConfigConstants.getpdf2jpgDpiSize(), ImageType.RGB);
+                ImageIOUtil.writeImage(image, imageFilePath, ConfigConstants.getpdf2jpgDpiSize());
                 String imageUrl = this.getPdf2jpgUrl(pdfName, pageIndex);
                 imageUrls.add(imageUrl);
             }
