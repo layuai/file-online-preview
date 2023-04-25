@@ -62,11 +62,13 @@ public class TrustDirFilter implements Filter {
         try {
             URL url = WebUtils.normalizedURL(urlPath);
             if ("file".equals(url.getProtocol().toLowerCase(Locale.ROOT))) {
-                String filePath = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
+                String filePath;
+                     filePath = URLDecoder.decode(urlPath.replace("file:///",""), StandardCharsets.UTF_8.name());
+                     filePath = URLDecoder.decode(filePath.replace("file://",""), StandardCharsets.UTF_8.name());
                 if (OSUtils.IS_OS_WINDOWS) {
                     filePath = filePath.replaceAll("/", "\\\\");
                 }
-                return filePath.startsWith(ConfigConstants.getFileDir()) || filePath.startsWith(ConfigConstants.getLocalPreviewDir());
+                return  filePath.startsWith(ConfigConstants.getLocalPreviewDir());
             }
             return true;
         } catch (IOException | GalimatiasParseException e) {
