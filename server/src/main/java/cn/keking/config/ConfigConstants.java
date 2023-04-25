@@ -46,6 +46,7 @@ public class ConfigConstants {
     private static String[] prohibit= {};
     private static String size;
     private static String password;
+    private static int Pdf2JpgDpiSize;
     private static Boolean deletesourcefile;
 
     public static final String DEFAULT_CACHE_ENABLED = "true";
@@ -71,6 +72,7 @@ public class ConfigConstants {
     public static final String DEFAULT_size_DISABLE = "500MB";
     public static final String DEFAULT_prohibit_DISABLE = "exe,dll";
     public static final String DEFAULT_password_DISABLE = "123456";
+    public static final String DEFAULT_Pdf2JpgDpiSize_DISABLE = "105";
     public static final String DEFAULT_Delete_Source_File_PREVIEW_TYPE = "true";
 
     public static Boolean isCacheEnabled() {
@@ -407,6 +409,19 @@ public class ConfigConstants {
     public static void setpasswordValue(String password) {
         ConfigConstants.password = password;
     }
+
+
+    public static int getPdf2JpgDpiSize() {
+        return Pdf2JpgDpiSize;
+    }
+    @Value("${pdf.picture.size:105}")
+    public void Pdf2JpgDpiSize(int Pdf2JpgDpiSize) {
+        setPdf2JpgDpiSizeValue(Pdf2JpgDpiSize);
+    }
+    public static void setPdf2JpgDpiSizeValue(int Pdf2JpgDpiSize) {
+        ConfigConstants.Pdf2JpgDpiSize = Pdf2JpgDpiSize;
+    }
+
 
     public static Boolean getdeletesourcefile() {
         return deletesourcefile;
