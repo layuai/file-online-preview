@@ -8,12 +8,15 @@ import cn.keking.service.cache.NotResourceCache;
 import cn.keking.utils.EncodingDetects;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.WebUtils;
+import cn.keking.web.filter.BaseUrlFilter;
 import com.aspose.cad.CodePages;
 import com.aspose.cad.Color;
 import com.aspose.cad.Image;
 import com.aspose.cad.LoadOptions;
 import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.PdfOptions;
+import com.itextpdf.text.exceptions.BadPasswordException;
+import com.itextpdf.text.pdf.PdfReader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -219,8 +222,21 @@ public class FileHandlerService {
      * @param pdfName     pdf文件名称
      * @return 图片访问集合
      */
-    public List<String> pdf2jpg(String pdfFilePath, String pdfName, FileAttribute fileAttribute) {
+    public List<String> pdf2jpg(String pdfFilePath, String pdfName, FileAttribute fileAttribute) throws Exception {
         boolean forceUpdatedCache = fileAttribute.forceUpdatedCache();
+        PDDocument doc = null;
+        PdfReader pdfReader = null;
+        try {
+            pdfReader =  new PdfReader(pdfFilePath);   //判断pdf文件是否加密 加密文件强制执行转换
+        } catch (BadPasswordException e) {
+            forceUpdatedCache = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (pdfReader != null) {   //关闭
+                pdfReader.close();
+            }
+        }
         if (!forceUpdatedCache) {
             List<String> cacheResult = this.loadPdf2jpgCache(pdfFilePath, pdfName);
             if (!CollectionUtils.isEmpty(cacheResult)) {
@@ -233,7 +249,7 @@ public class FileHandlerService {
             if (!pdfFile.exists()) {
                 return null;
             }
-            PDDocument doc = PDDocument.load(pdfFile);
+            doc = PDDocument.load(pdfFile);
             doc.setResourceCache(new NotResourceCache());
             int pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
@@ -248,15 +264,18 @@ public class FileHandlerService {
             String imageFilePath;
             for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
                 imageFilePath = folder + File.separator + pageIndex + pdf2jpg_image_format;
-                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, 105, ImageType.RGB);
-                ImageIOUtil.writeImage(image, imageFilePath, 105);
+                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex,  ConfigConstants.getpdf2JpgDpi(), ImageType.RGB);
+                ImageIOUtil.writeImage(image, imageFilePath, ConfigConstants.getpdf2JpgDpi());
                 String imageUrl = this.getPdf2jpgUrl(pdfName, pageIndex);
                 imageUrls.add(imageUrl);
             }
-            doc.close();
             this.addPdf2jpgCache(pdfFilePath, pageCount);
         } catch (IOException e) {
             logger.error("Convert pdf to jpg exception, pdfFilePath：{}", pdfFilePath, e);
+        }finally {
+            if (doc != null) {   //关闭
+                doc.close();
+            }
         }
         return imageUrls;
     }
