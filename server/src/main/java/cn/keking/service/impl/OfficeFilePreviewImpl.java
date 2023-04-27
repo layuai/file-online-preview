@@ -10,11 +10,14 @@ import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.OfficeUtils;
 import cn.keking.web.filter.BaseUrlFilter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.EncryptedDocumentException;
 import org.jodconverter.core.office.OfficeException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -28,6 +31,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
     public static final String OFFICE_PREVIEW_TYPE_IMAGE = "image";
     public static final String OFFICE_PREVIEW_TYPE_ALL_IMAGES = "allImages";
     private static final String FILE_DIR = ConfigConstants.getFileDir();
+    private static final String OFFICE_PASSWORD_MSG = "password";
 
     private final FileHandlerService fileHandlerService;
     private final OfficeToPdfService officeToPdfService;
@@ -133,9 +137,20 @@ public class OfficeFilePreviewImpl implements FilePreview {
     static String getPreviewType(Model model, FileAttribute fileAttribute, String officePreviewType, String baseUrl, String pdfName, String outFilePath, FileHandlerService fileHandlerService, String officePreviewTypeImage, OtherFilePreviewImpl otherFilePreview) {
         String suffix = fileAttribute.getSuffix();
         boolean isPPT = suffix.equalsIgnoreCase("ppt") || suffix.equalsIgnoreCase("pptx");
-        List<String> imageUrls = fileHandlerService.pdf2jpg(outFilePath, pdfName, fileAttribute);
-        if (imageUrls == null || imageUrls.size() < 1) {
-            return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
+        List<String> imageUrls;
+        try {
+            imageUrls =  fileHandlerService.pdf2jpg(outFilePath, pdfName, fileAttribute);
+        } catch (Exception e) {
+            Throwable[] throwableArray = ExceptionUtils.getThrowables(e);
+            for (Throwable throwable : throwableArray) {
+                if (throwable instanceof IOException || throwable instanceof EncryptedDocumentException) {
+                    if (e.getMessage().toLowerCase().contains(OFFICE_PASSWORD_MSG)) {
+                        model.addAttribute("needFilePassword", true);
+                        return EXEL_FILE_PREVIEW_PAGE;
+                    }
+                }
+            }
+            return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
         }
         model.addAttribute("imgurls", imageUrls);
         model.addAttribute("currentUrl", imageUrls.get(0));

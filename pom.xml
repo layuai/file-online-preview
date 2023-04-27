@@ -11,7 +11,7 @@
     <properties>
         <java.version>1.8</java.version>
 
-   <jodconverter.version>4.4.6</jodconverter.version>
+        <jodconverter.version>4.4.6</jodconverter.version>
         <spring.boot.version>2.4.2</spring.boot.version>
         <poi.version>5.2.2</poi.version>
         <xdocreport.version>1.0.6</xdocreport.version>
@@ -32,8 +32,9 @@
         <openblas.version>0.3.6-1.5.1</openblas.version>
         <ffmpeg.version>4.2.1-1.5.2</ffmpeg.version>
         <itextpdf.version>5.5.13.3</itextpdf.version>
+        <aspose-cad.version>23.1</aspose-cad.version>
+        <bcprov.version>1.70</bcprov.version>
         <httpclient.version>3.1</httpclient.version>
-
         <commons-cli.version>1.2</commons-cli.version>
         <commons-net.version>3.6</commons-net.version>
         <commons-lang3.version>3.7</commons-lang3.version>
