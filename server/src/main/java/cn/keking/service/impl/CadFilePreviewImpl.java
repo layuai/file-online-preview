@@ -52,8 +52,10 @@ public class CadFilePreviewImpl implements FilePreview {
             }
             filePath = response.getContent();
             if (StringUtils.hasText(outFilePath)) {
-                boolean convertResult = fileHandlerService.cadToPdf(filePath, outFilePath);
-                if (!convertResult) {
+                try {
+                    fileHandlerService.cadToPdf(filePath, outFilePath);
+                } catch (Exception e) {
+                    e.printStackTrace();
                     return otherFilePreview.notSupportedFile(model, fileAttribute, "cad文件转换异常，请联系管理员");
                 }
                 //是否保留CAD源文件
