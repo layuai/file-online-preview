@@ -1,8 +1,11 @@
 package cn.keking.service;
 
+import cn.keking.exception.CallBackException;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.FileType;
 import cn.keking.service.cache.CacheService;
+import cn.keking.utils.HttpUtils;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -58,6 +61,11 @@ public class FileConvertQueueTask {
                 try {
                     url = cacheService.takeQueueTask();
                     if (url != null) {
+                        String callbackUrl = null;
+                        if (url.contains("callbackUrl")) {
+                            callbackUrl = url.split("callbackUrl")[1];
+                            url = url.split("callbackUrl")[0];
+                        }
                         FileAttribute fileAttribute = fileHandlerService.getFileAttribute(url, null);
                         FileType fileType = fileAttribute.getType();
                         logger.info("正在处理预览转换任务，url：{}，预览类型：{}", url, fileType);
@@ -67,6 +75,8 @@ public class FileConvertQueueTask {
                         } else {
                             logger.info("预览类型无需处理，url：{}，预览类型：{}", url, fileType);
                         }
+                        String finalCallbackUrl = callbackUrl;
+                        new Thread(() -> callback(finalCallbackUrl)).start();
                     }
                 } catch (Exception e) {
                     try {
@@ -80,9 +90,34 @@ public class FileConvertQueueTask {
             }
         }
 
-        public boolean isNeedConvert(FileType fileType) {
-            return fileType.equals(FileType.COMPRESS) || fileType.equals(FileType.OFFICE) || fileType.equals(FileType.CAD);
+        private void callback(String callbackUrl) {
+            if (null != callbackUrl && !callbackUrl.equals("")) {
+                //http回调通知
+                try {
+                    JSONObject jsonObject = HttpUtils.sendGet(callbackUrl);
+                    if (null != jsonObject && jsonObject.getInteger("code") == 200) {
+                        logger.info("成功回调通知地址：" + callbackUrl);
+                    } else {
+                        logger.error("失败回调通知地址：" + callbackUrl);
+                    }
+                } catch (CallBackException e) {
+                    try {
+                        Thread.sleep(1000 * 10);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    JSONObject jsonObject1 = HttpUtils.sendGet(callbackUrl);
+                    if (null != jsonObject1 && jsonObject1.getInteger("code") == 200) {
+                        logger.info("成功回调通知地址：" + callbackUrl);
+                    } else {
+                        logger.error("失败回调通知地址：" + callbackUrl);
+                    }
+                }
+            }
+        }
 
+        public boolean isNeedConvert(FileType fileType) {
+            return fileType.equals(FileType.COMPRESS) || fileType.equals(FileType.PDF) || fileType.equals(FileType.OFFICE) || fileType.equals(FileType.CAD);
         }
     }
 

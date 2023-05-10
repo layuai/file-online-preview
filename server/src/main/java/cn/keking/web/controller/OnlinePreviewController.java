@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +52,7 @@ public class OnlinePreviewController {
         this.otherFilePreview = otherFilePreview;
     }
 
-    @GetMapping( "/onlinePreview")
+    @GetMapping("/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
         String fileUrl;
         try {
@@ -67,7 +68,7 @@ public class OnlinePreviewController {
         return filePreview.filePreviewHandle(fileUrl, model, fileAttribute);
     }
 
-    @GetMapping( "/picturesPreview")
+    @GetMapping("/picturesPreview")
     public String picturesPreview(String urls, Model model, HttpServletRequest req) {
         String fileUrls;
         try {
@@ -86,7 +87,7 @@ public class OnlinePreviewController {
         String currentUrl = req.getParameter("currentUrl");
         if (StringUtils.hasText(currentUrl)) {
             String decodedCurrentUrl = new String(Base64.decodeBase64(currentUrl));
-                   decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
+            decodedCurrentUrl = KkFileUtils.htmlEscape(decodedCurrentUrl);   // 防止XSS攻击
             model.addAttribute("currentUrl", decodedCurrentUrl);
         } else {
             model.addAttribute("currentUrl", imgUrls.get(0));
@@ -106,7 +107,7 @@ public class OnlinePreviewController {
         try {
             urlPath = WebUtils.decodeUrl(urlPath);
         } catch (Exception ex) {
-            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath),ex);
+            logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath), ex);
             return;
         }
         HttpURLConnection urlcon;
@@ -116,46 +117,46 @@ public class OnlinePreviewController {
             return;
         }
         logger.info("下载跨域pdf文件url：{}", urlPath);
-        if (!urlPath.toLowerCase().startsWith("ftp:")){
+        if (!urlPath.toLowerCase().startsWith("ftp:")) {
             try {
                 URL url = WebUtils.normalizedURL(urlPath);
-                urlcon=(HttpURLConnection)url.openConnection();
+                urlcon = (HttpURLConnection) url.openConnection();
                 urlcon.setConnectTimeout(30000);
                 urlcon.setReadTimeout(30000);
                 urlcon.setInstanceFollowRedirects(false);
                 if (urlcon.getResponseCode() == 302 || urlcon.getResponseCode() == 301) {
                     urlcon.disconnect();
-                    url =new URL(urlcon.getHeaderField("Location"));
-                    urlcon=(HttpURLConnection)url.openConnection();
+                    url = new URL(urlcon.getHeaderField("Location"));
+                    urlcon = (HttpURLConnection) url.openConnection();
                 }
-                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500 ) {
+                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500) {
                     logger.error("读取跨域文件异常，url：{}", urlPath);
-                    return ;
+                    return;
                 } else {
-                    if(urlPath.contains( ".svg")) {
+                    if (urlPath.contains(".svg")) {
                         response.setContentType("image/svg+xml");
                     }
-                    inputStream=(url).openStream();
+                    inputStream = (url).openStream();
                     IOUtils.copy(inputStream, response.getOutputStream());
                     urlcon.disconnect();
                 }
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
+                return;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
         } else {
             try {
                 URL url = WebUtils.normalizedURL(urlPath);
-                if(urlPath.contains(".svg")) {
+                if (urlPath.contains(".svg")) {
                     response.setContentType("image/svg+xml");
                 }
                 inputStream = (url).openStream();
                 IOUtils.copy(inputStream, response.getOutputStream());
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
+                return;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
@@ -169,9 +170,14 @@ public class OnlinePreviewController {
      */
     @GetMapping("/addTask")
     @ResponseBody
-    public String addQueueTask(String url) {
+    public String addQueueTask(@RequestParam("url") String url, @RequestParam(value = "callbackUrl", required = false) String callbackUrl) {
         logger.info("添加转码队列url：{}", url);
-        cacheService.addQueueTask(url);
+        logger.info("回调通知url：{}", callbackUrl);
+        if (null != callbackUrl&&!callbackUrl.equals("")) {
+            cacheService.addQueueTask(url + "callbackUrl" + callbackUrl);
+        } else {
+            cacheService.addQueueTask(url);
+        }
         return "success";
     }
 }
