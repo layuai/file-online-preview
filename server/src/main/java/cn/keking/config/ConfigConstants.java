@@ -32,6 +32,8 @@ public class ConfigConstants {
     private static String ftpPassword;
     private static String ftpControlEncoding;
     private static String baseUrl;
+    private static String baseUrlOffice;
+    private static String baseUrlOut;
     private static String fileDir = ConfigUtils.getHomePath() + File.separator + "file" + File.separator;
     private static String localPreviewDir;
     private static CopyOnWriteArraySet<String> trustHostSet;
@@ -139,6 +141,7 @@ public class ConfigConstants {
     public void setMediaConvertDisable(String mediaConvertDisable) {
         setMediaConvertDisableValue(mediaConvertDisable);
     }
+
     public static void setMediaConvertDisableValue(String mediaConvertDisable) {
         ConfigConstants.mediaConvertDisable = mediaConvertDisable;
     }
@@ -208,6 +211,31 @@ public class ConfigConstants {
         ConfigConstants.baseUrl = baseUrl;
     }
 
+    public static String getBaseUrlOffice() {
+        return baseUrlOffice;
+    }
+
+    @Value("${base.url.office:default}")
+    public void setBaseUrlOffice(String baseUrlOffice) {
+        setBaseUrlOfficeValue(baseUrlOffice);
+    }
+
+    public static void setBaseUrlOfficeValue(String baseUrlOffice) {
+        ConfigConstants.baseUrlOffice = baseUrlOffice;
+    }
+
+    public static String getBaseUrlOut() {
+        return baseUrlOut;
+    }
+
+    @Value("${base.url.out:default}")
+    public void setBaseUrlOut(String baseUrlOut) {
+        setBaseUrlOutValue(baseUrlOut);
+    }
+
+    public static void setBaseUrlOutValue(String baseUrlOut) {
+        ConfigConstants.baseUrlOut = baseUrlOut;
+    }
     public static String getFileDir() {
         return fileDir;
     }
@@ -290,6 +318,7 @@ public class ConfigConstants {
     public void setPdfOpenFileDisable(String pdfOpenFileDisable) {
         setPdfOpenFileDisableValue(pdfOpenFileDisable);
     }
+
     public static void setPdfOpenFileDisableValue(String pdfOpenFileDisable) {
         ConfigConstants.pdfOpenFileDisable = pdfOpenFileDisable;
     }
@@ -297,10 +326,12 @@ public class ConfigConstants {
     public static String getPdfPrintDisable() {
         return pdfPrintDisable;
     }
+
     @Value("${pdf.print.disable:true}")
     public void setPdfPrintDisable(String pdfPrintDisable) {
         setPdfPrintDisableValue(pdfPrintDisable);
     }
+
     public static void setPdfPrintDisableValue(String pdfPrintDisable) {
         ConfigConstants.pdfPrintDisable = pdfPrintDisable;
     }
@@ -313,6 +344,7 @@ public class ConfigConstants {
     public void setPdfDownloadDisable(String pdfDownloadDisable) {
         setPdfDownloadDisableValue(pdfDownloadDisable);
     }
+
     public static void setPdfDownloadDisableValue(String pdfDownloadDisable) {
         ConfigConstants.pdfDownloadDisable = pdfDownloadDisable;
     }
@@ -320,10 +352,12 @@ public class ConfigConstants {
     public static String getPdfBookmarkDisable() {
         return pdfBookmarkDisable;
     }
+
     @Value("${pdf.bookmark.disable:true}")
     public void setPdfBookmarkDisable(String pdfBookmarkDisable) {
         setPdfBookmarkDisableValue(pdfBookmarkDisable);
     }
+
     public static void setPdfBookmarkDisableValue(String pdfBookmarkDisable) {
         ConfigConstants.pdfBookmarkDisable = pdfBookmarkDisable;
     }
@@ -331,10 +365,12 @@ public class ConfigConstants {
     public static String getOfficePreviewSwitchDisabled() {
         return officePreviewSwitchDisabled;
     }
+
     @Value("${office.preview.switch.disabled:true}")
     public void setOfficePreviewSwitchDisabled(String officePreviewSwitchDisabled) {
         ConfigConstants.officePreviewSwitchDisabled = officePreviewSwitchDisabled;
     }
+
     public static void setOfficePreviewSwitchDisabledValue(String officePreviewSwitchDisabled) {
         ConfigConstants.officePreviewSwitchDisabled = officePreviewSwitchDisabled;
     }
@@ -369,16 +405,20 @@ public class ConfigConstants {
     public static String getBeiAn() {
         return beiAn;
     }
+
     @Value("${beiAn:无}")
     public void setBeiAn(String beiAn) {
         setBeiAnValue(beiAn);
     }
+
     public static void setBeiAnValue(String beiAn) {
         ConfigConstants.beiAn = beiAn;
     }
+
     public static String[] getProhibit() {
         return prohibit;
     }
+
     @Value("${prohibit:exe,dll}")
     public void setProhibit(String prohibit) {
         String[] prohibitArr = prohibit.split(",");
@@ -388,13 +428,16 @@ public class ConfigConstants {
     public static void setProhibitValue(String[] prohibit) {
         ConfigConstants.prohibit = prohibit;
     }
+
     public static String maxSize() {
         return size;
     }
+
     @Value("${spring.servlet.multipart.max-file-size:500MB}")
     public void setSize(String size) {
         setSizeValue(size);
     }
+
     public static void setSizeValue(String size) {
         ConfigConstants.size = size;
     }
@@ -402,10 +445,12 @@ public class ConfigConstants {
     public static String getPassword() {
         return password;
     }
+
     @Value("${sc.password:123456}")
     public void setPassword(String password) {
         setPasswordValue(password);
     }
+
     public static void setPasswordValue(String password) {
         ConfigConstants.password = password;
     }
@@ -414,10 +459,12 @@ public class ConfigConstants {
     public static int getPdf2JpgDpi() {
         return pdf2JpgDpi;
     }
+
     @Value("${pdf.picture.size:105}")
     public void pdf2JpgDpi(int pdf2JpgDpi) {
         setPdf2JpgDpiValue(pdf2JpgDpi);
     }
+
     public static void setPdf2JpgDpiValue(int pdf2JpgDpi) {
         ConfigConstants.pdf2JpgDpi = pdf2JpgDpi;
     }

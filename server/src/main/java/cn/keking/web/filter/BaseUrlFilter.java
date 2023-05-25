@@ -39,6 +39,14 @@ public class BaseUrlFilter implements Filter {
         String configBaseUrl = ConfigConstants.getBaseUrl();
 
         final HttpServletRequest servletRequest = (HttpServletRequest) request;
+        // 判断环境
+        String huanjing = servletRequest.getParameter("Huanjing");
+        if (null != huanjing && huanjing.equals("office")) {
+            configBaseUrl = ConfigConstants.getBaseUrlOffice();
+        }
+        if (null != huanjing && huanjing.equals("out")) {
+            configBaseUrl = ConfigConstants.getBaseUrlOut();
+        }
         //1、支持通过 http header 中 X-Base-Url 来动态设置 baseUrl 以支持多个域名/项目的共享使用
         final String urlInHeader = servletRequest.getHeader("X-Base-Url");
         if (StringUtils.isNotEmpty(urlInHeader)) {
