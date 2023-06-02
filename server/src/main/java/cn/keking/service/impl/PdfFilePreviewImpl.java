@@ -9,10 +9,13 @@ import cn.keking.service.FileHandlerService;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -22,7 +25,7 @@ import java.util.List;
  */
 @Service
 public class PdfFilePreviewImpl implements FilePreview {
-
+    private final Logger logger = LoggerFactory.getLogger(PdfFilePreviewImpl.class);
     private final FileHandlerService fileHandlerService;
     private final OtherFilePreviewImpl otherFilePreview;
     private static final String FILE_DIR = ConfigConstants.getFileDir();
@@ -93,7 +96,11 @@ public class PdfFilePreviewImpl implements FilePreview {
                         fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
                     }
                 } else {
-                    pdfName =   URLEncoder.encode(pdfName).replaceAll("\\+", "%20");
+                    try {
+                        pdfName = URLEncoder.encode(pdfName, "UTF-8").replaceAll("\\+", "%20");
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("UnsupportedEncodingException", e);
+                    }
                     model.addAttribute("pdfUrl", pdfName);
                 }
             } else {

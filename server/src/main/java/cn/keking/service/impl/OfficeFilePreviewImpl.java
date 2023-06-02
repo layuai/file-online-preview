@@ -13,11 +13,14 @@ import cn.keking.web.filter.BaseUrlFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.jodconverter.core.office.OfficeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -27,7 +30,7 @@ import java.util.List;
  */
 @Service
 public class OfficeFilePreviewImpl implements FilePreview {
-
+    private final Logger logger = LoggerFactory.getLogger(OfficeFilePreviewImpl.class);
     public static final String OFFICE_PREVIEW_TYPE_IMAGE = "image";
     public static final String OFFICE_PREVIEW_TYPE_ALL_IMAGES = "allImages";
     private static final String FILE_DIR = ConfigConstants.getFileDir();
@@ -129,7 +132,11 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-        cacheFileName =   URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
+        try {
+            cacheFileName = URLEncoder.encode(cacheFileName, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            logger.error("UnsupportedEncodingException", e);
+        }
         model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
