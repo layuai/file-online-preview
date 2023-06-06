@@ -3,10 +3,13 @@ package cn.keking.web.filter;
 import cn.keking.config.ConfigConstants;
 import cn.keking.config.WatermarkConfigConstants;
 import cn.keking.utils.KkFileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author chenjh
@@ -37,6 +40,7 @@ public class AttributeSetFilter implements Filter {
         request.setAttribute("pdfPrintDisable", ConfigConstants.getPdfPrintDisable());
         request.setAttribute("pdfDownloadDisable", ConfigConstants.getPdfDownloadDisable());
         request.setAttribute("pdfBookmarkDisable", ConfigConstants.getPdfBookmarkDisable());
+        request.setAttribute("pdfWatermarkDisable", ConfigConstants.getPdfWatermarkDisable());
         request.setAttribute("fileKey", httpRequest.getParameter("fileKey"));
         request.setAttribute("switchDisabled", ConfigConstants.getOfficePreviewSwitchDisabled());
         request.setAttribute("fileUploadDisable", ConfigConstants.getFileUploadDisable());
@@ -51,7 +55,17 @@ public class AttributeSetFilter implements Filter {
 
     private void setWatermarkAttribute(ServletRequest request) {
         String watermarkTxt= KkFileUtils.htmlEscape(request.getParameter("watermarkTxt"));
-        request.setAttribute("watermarkTxt", watermarkTxt != null ? watermarkTxt : WatermarkConfigConstants.getWatermarkTxt());
+        String defaultWatermarkTxt = WatermarkConfigConstants.getWatermarkTxt();
+
+        if(StringUtils.isNotBlank(defaultWatermarkTxt)) {
+            // 动态添加时间 yyyy-MM-dd HH:mm:ss
+            String txtDate = "#date";
+            if(defaultWatermarkTxt.contains(txtDate)) {
+                String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                defaultWatermarkTxt = defaultWatermarkTxt.replaceAll(txtDate, currentDate);
+            }
+        }
+        request.setAttribute("watermarkTxt", watermarkTxt != null ? watermarkTxt : defaultWatermarkTxt);
         String watermarkXSpace =  KkFileUtils.htmlEscape(request.getParameter("watermarkXSpace"));
         if (!KkFileUtils.isInteger(watermarkXSpace)){
             watermarkXSpace =null;

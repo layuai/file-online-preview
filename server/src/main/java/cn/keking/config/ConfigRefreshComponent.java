@@ -51,6 +51,7 @@ public class ConfigRefreshComponent {
                 String pdfPrintDisable;
                 String pdfDownloadDisable;
                 String pdfBookmarkDisable;
+                String pdfWatermarkDisable;
                 boolean fileUploadDisable;
                 String tifPreviewType;
                 String prohibit;
@@ -83,6 +84,7 @@ public class ConfigRefreshComponent {
                     pdfPrintDisable = properties.getProperty("pdf.print.disable", ConfigConstants.DEFAULT_PDF_PRINT_DISABLE);
                     pdfDownloadDisable = properties.getProperty("pdf.download.disable", ConfigConstants.DEFAULT_PDF_DOWNLOAD_DISABLE);
                     pdfBookmarkDisable = properties.getProperty("pdf.bookmark.disable", ConfigConstants.DEFAULT_PDF_BOOKMARK_DISABLE);
+                    pdfWatermarkDisable = properties.getProperty("pdf.watermark.disable", ConfigConstants.DEFAULT_PDF_WATERMARK_DISABLE);
                     fileUploadDisable = Boolean.parseBoolean(properties.getProperty("file.upload.disable", ConfigConstants.DEFAULT_FILE_UPLOAD_DISABLE));
                     tifPreviewType = properties.getProperty("tif.preview.type", ConfigConstants.DEFAULT_TIF_PREVIEW_TYPE);
                     size = properties.getProperty("spring.servlet.multipart.max-file-size", ConfigConstants.DEFAULT_SIZE);
@@ -109,6 +111,7 @@ public class ConfigRefreshComponent {
                     ConfigConstants.setPdfPrintDisableValue(pdfPrintDisable);
                     ConfigConstants.setPdfDownloadDisableValue(pdfDownloadDisable);
                     ConfigConstants.setPdfBookmarkDisableValue(pdfBookmarkDisable);
+                    ConfigConstants.setPdfWatermarkDisableValue(pdfWatermarkDisable);
                     ConfigConstants.setFileUploadDisableValue(fileUploadDisable);
                     ConfigConstants.setTifPreviewTypeValue(tifPreviewType);
                     ConfigConstants.setBeiAnValue(beiAn);
