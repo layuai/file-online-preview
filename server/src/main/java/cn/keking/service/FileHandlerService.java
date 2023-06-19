@@ -368,7 +368,7 @@ public class FileHandlerService {
             attribute.setSkipDownLoad(true);
         }
         url = WebUtils.encodeUrlFileName(url);
-        fileName = KkFileUtils.htmlEscape(fileName);  //文件名处理
+        fileName = KkFileUtils.htmlEscape(fileName).replaceAll("#", "%23");  //文件名处理
         attribute.setType(type);
         attribute.setName(fileName);
         attribute.setSuffix(suffix);
