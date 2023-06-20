@@ -7,12 +7,10 @@ import cn.keking.service.cache.CacheService;
 import cn.keking.service.cache.NotResourceCache;
 import cn.keking.utils.EncodingDetects;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.UrlEncoderUtils;
 import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
-import com.aspose.cad.CodePages;
-import com.aspose.cad.Color;
-import com.aspose.cad.Image;
-import com.aspose.cad.LoadOptions;
+import com.aspose.cad.*;
 import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.PdfOptions;
 import com.itextpdf.text.pdf.PdfReader;
@@ -32,12 +30,14 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 /**
@@ -289,7 +289,10 @@ public class FileHandlerService {
         }
         return imageUrls;
     }
-
+    /**
+    定义线程池，推荐手动创建线程池
+     */
+    private static final ExecutorService pool = Executors.newFixedThreadPool(1);
     /**
      * cad文件转pdf
      *
@@ -298,33 +301,58 @@ public class FileHandlerService {
      * @return 转换是否成功
      */
     public String cadToPdf(String inputFilePath, String outputFilePath)  throws Exception  {
-        File outputFile = new File(outputFilePath);
-        LoadOptions opts = new LoadOptions();
-        opts.setSpecifiedEncoding(CodePages.SimpChinese);
-        com.aspose.cad.Image cadImage = Image.load(inputFilePath, opts);
-        CadRasterizationOptions cadRasterizationOptions = new CadRasterizationOptions();
-        cadRasterizationOptions.setBackgroundColor(Color.getWhite());
-        cadRasterizationOptions.setPageWidth(1400);
-        cadRasterizationOptions.setPageHeight(650);
-        cadRasterizationOptions.setAutomaticLayoutsScaling(true);
-        cadRasterizationOptions.setNoScaling(false);
-        cadRasterizationOptions.setDrawType(1);
-        PdfOptions pdfOptions = new PdfOptions();
-        pdfOptions.setVectorRasterizationOptions(cadRasterizationOptions);
-        OutputStream stream = null;
+        final InterruptionTokenSource source = new com.aspose.cad.InterruptionTokenSource();
+        Callable<String> call = () -> {
+            File outputFile = new File(outputFilePath);
+            LoadOptions opts = new LoadOptions();
+            opts.setSpecifiedEncoding(CodePages.SimpChinese);
+            Image cadImage = Image.load(inputFilePath, opts);
+            CadRasterizationOptions cadRasterizationOptions = new CadRasterizationOptions();
+            cadRasterizationOptions.setBackgroundColor(Color.getWhite());
+            cadRasterizationOptions.setPageWidth(1400);
+            cadRasterizationOptions.setPageHeight(650);
+            cadRasterizationOptions.setAutomaticLayoutsScaling(true);
+            cadRasterizationOptions.setNoScaling(false);
+            cadRasterizationOptions.setDrawType(1);
+            PdfOptions pdfOptions = new PdfOptions();
+            pdfOptions.setVectorRasterizationOptions(cadRasterizationOptions);
+            pdfOptions.setInterruptionToken(source.getToken());
+            OutputStream stream = null;
+            try {
+                stream = new FileOutputStream(outputFile);
+                cadImage.save(stream, pdfOptions);
+            } catch (IOException e) {
+                logger.error("PDFFileNotFoundException，inputFilePath：{}", inputFilePath, e);
+                return "null";
+            } finally {
+                if (stream != null) {   //关闭
+                    stream.close();
+                }
+                if (cadImage != null) {   //关闭
+                    cadImage.close();
+                }
+                source.interrupt();  //结束任务
+                source.dispose();
+            }
+            return "true";
+        };
+        // 手动控制线程
+        Future<String> result = pool.submit(call);
         try {
-            stream = new FileOutputStream(outputFile);
-            cadImage.save(stream, pdfOptions);
-        } catch (IOException e) {
-            logger.error("PDFFileNotFoundException，inputFilePath：{}", inputFilePath, e);
+            // 如果在超时时间内，没有数据返回：则抛出TimeoutException异常
+               result.get(40, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            System.out.println("InterruptedException发生");
+            return "null";
+        } catch (ExecutionException e) {
+            System.out.println("ExecutionException发生");
+            return "null";
+        } catch (TimeoutException e) {
+            System.out.println("TimeoutException发生，意味着线程超时报错");
             return "null";
         } finally {
-            if (stream != null) {   //关闭
-                stream.close();
-            }
-            if (cadImage != null) {   //关闭
-                cadImage.close();
-            }
+            source.interrupt();  //结束任务
+            source.dispose();
         }
         return "true";
     }
@@ -350,6 +378,14 @@ public class FileHandlerService {
         String suffix;
         FileType type;
         String fileName;
+        if(UrlEncoderUtils.hasUrlEncoded(url)){
+            try {
+                url = URLDecoder.decode(url, "UTF-8");
+                url = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         String fullFileName = WebUtils.getUrlParameterReg(url, "fullfilename");
         if (StringUtils.hasText(fullFileName)) {
             fileName = fullFileName;

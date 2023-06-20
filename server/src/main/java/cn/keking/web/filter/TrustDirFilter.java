@@ -1,6 +1,7 @@
 package cn.keking.web.filter;
 
 import cn.keking.config.ConfigConstants;
+import cn.keking.utils.UrlEncoderUtils;
 import cn.keking.utils.WebUtils;
 import io.mola.galimatias.GalimatiasParseException;
 import org.jodconverter.core.util.OSUtils;
@@ -12,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.*;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -42,6 +44,14 @@ public class TrustDirFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String url = WebUtils.getSourceUrl(request);
+        if(UrlEncoderUtils.hasUrlEncoded(url)){
+            try {
+                url = URLDecoder.decode(url, "UTF-8");
+                url = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         if (!allowPreview(url)) {
             response.getWriter().write(this.notTrustDirView);
             response.getWriter().close();
