@@ -340,7 +340,7 @@ public class FileHandlerService {
         Future<String> result = pool.submit(call);
         try {
             // 如果在超时时间内，没有数据返回：则抛出TimeoutException异常
-               result.get(40, TimeUnit.SECONDS);
+               result.get(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.out.println("InterruptedException发生");
             return "null";
