@@ -33,15 +33,26 @@ public class OfficeToPdfService {
             logger.error("创建目录【{}】失败，请检查目录权限！",outputFilePath_end);
         }
         LocalConverter.Builder builder;
+        Map<String, Object> filterData = new HashMap<>();
+        filterData.put("EncryptFile", true);
+        // filterData.put("PageRange", "1-5"); //限制页面
+      //  filterData.put("Watermark", "1-2");  //水印
+        filterData.put("Quality", "80"); //图片压缩
+        filterData.put("MaxImageResolution", "75"); //DPI
+        filterData.put("ExportBookmarks", true); //导出书签
+        filterData.put("ExportNotes", true); //批注作为PDF的注释
+        filterData.put("DocumentOpenPassword", fileAttribute.getFilePassword()); //给PDF添加密码
+        Map<String, Object> customProperties = new HashMap<>();
+        customProperties.put("FilterData", filterData);
         if (StringUtils.isNotBlank(fileAttribute.getFilePassword())) {
             Map<String, Object> loadProperties = new HashMap<>();
             loadProperties.put("Hidden", true);
             loadProperties.put("ReadOnly", true);
             loadProperties.put("UpdateDocMode", UpdateDocMode.NO_UPDATE);
             loadProperties.put("Password", fileAttribute.getFilePassword());
-            builder = LocalConverter.builder().loadProperties(loadProperties);
+            builder = LocalConverter.builder().loadProperties(loadProperties).storeProperties(customProperties);
         } else {
-            builder = LocalConverter.builder();
+            builder = LocalConverter.builder().storeProperties(customProperties);
         }
         builder.build().convert(inputFile).to(outputFile).execute();
     }

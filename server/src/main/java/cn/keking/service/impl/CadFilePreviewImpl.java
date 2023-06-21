@@ -3,16 +3,14 @@ package cn.keking.service.impl;
 import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.ReturnResponse;
+import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
-import cn.keking.service.FileHandlerService;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
 
 import static cn.keking.service.impl.OfficeFilePreviewImpl.getPreviewType;
 
@@ -61,7 +59,7 @@ public class CadFilePreviewImpl implements FilePreview {
                     e.printStackTrace();
                 }
                 if (imageUrls == null ) {
-                    return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
+                    return otherFilePreview.notSupportedFile(model, fileAttribute, "CAD转图片异常，请联系管理员");
                 }
                 //是否保留CAD源文件
                 if( ConfigConstants.getDeleteSourceFile()) {

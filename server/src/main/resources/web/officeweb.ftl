@@ -69,18 +69,17 @@
 	  <script src="xlsx/luckyexcel.umd.js"></script>
         <script>
             function tiaozhuan(){
-					var test = window.location.href;
-					 test = test.replace(new RegExp("&officePreviewType=xlsx",("gm")),"");
-  				    test = test+'&officePreviewType=html';
-　　          window.location.href=test;
-　        　}
+            var test = window.location.href;
+            test = test.replace(new RegExp("&officePreviewType=xlsx",("gm")),"");
+            test = test+'&officePreviewType=html';
+            window.location.href=test;
+            　}
      var url = '${finalUrl}';
     var baseUrl = '${baseUrl}'.endsWith('/') ? '${baseUrl}' : '${baseUrl}' + '/';
     if (!url.startsWith(baseUrl)) {
         url = baseUrl + 'getCorsFile?urlPath=' + encodeURIComponent(Base64.encode(url));
     }
                 let mask = document.getElementById("lucky-mask-demo");
-
                 function loadText() {
                             initWaterMark(); // 是否显示水印
                             var value = url;
@@ -94,7 +93,6 @@
                                     alert("读取excel文件内容失败!");
                                     return;
                                 }
-								// console.log(exportJson.sheets);
                                 mask.style.display = "none";
                                 window.luckysheet.destroy();
                                 window.luckysheet.create({
@@ -102,13 +100,9 @@
                                 lang: "zh",
                              showtoolbarConfig:{
 			                 image: true,
-			                 print: false,
+			                 print: false, //关闭打印按钮  启用也不能用 等以后看情况而定
+                             exportXlsx: false, //关闭导出按钮  启用也不能用  等以后看情况而定
 		                      },
-                           hook:{
-                           onTogglePager:function(range){
-					//	range.data = exportJson.sheets
-						},
-					},
 
                                allowCopy: true, // 是否允许拷贝
                                showtoolbar: true, // 是否显示工具栏
@@ -125,10 +119,16 @@
                                showColumnBar: false, // 是否显示列号区域
                                sheetFormulaBar: false, // 是否显示公式栏
                                enableAddBackTop: true,//返回头部按钮
-                               data:exportJson.sheets,
-                              title:exportJson.info.name,
-							  plugins: ['chart'],
-                              userInfo:exportJson.info.name.creator
+                               forceCalculation: false, //下面是导出插件 默认关闭
+                               enableAddRow: false, // 允许增加行
+                               plugins: [{ name: 'chart' }, { name: 'exportXlsx', config: { url: 'luckyToXlsx' } }, {
+                               name: 'print', config: {
+                               license: ''
+                               }
+                               }],
+                                    data:exportJson.sheets,
+                                    title:exportJson.info.name,
+                                    userInfo:exportJson.info.name.creator
                                 });
                             });
                     }
