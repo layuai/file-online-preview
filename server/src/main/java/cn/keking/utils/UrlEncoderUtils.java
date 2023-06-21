@@ -4,7 +4,7 @@ import java.util.BitSet;
 
 public class UrlEncoderUtils {
 
-    private static BitSet dontNeedEncoding;
+    private static final BitSet dontNeedEncoding;
 
     static {
         dontNeedEncoding = new BitSet(256);
@@ -36,9 +36,6 @@ public class UrlEncoderUtils {
      * 判断str是否urlEncoder.encode过<br>
      * 经常遇到这样的情况，拿到一个URL,但是搞不清楚到底要不要encode.<Br>
      * 不做encode吧，担心出错，做encode吧，又怕重复了<Br>
-     *
-     * @param str
-     * @return
      */
     public static boolean hasUrlEncoded(String str) {
 
@@ -51,7 +48,7 @@ public class UrlEncoderUtils {
         boolean needEncode = false;
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
-            if (dontNeedEncoding.get((int) c)) {
+            if (dontNeedEncoding.get(c)) {
                 continue;
             }
             if (c == '%' && (i + 2) < str.length()) {
@@ -72,9 +69,6 @@ public class UrlEncoderUtils {
 
     /**
      * 判断c是否是16进制的字符
-     *
-     * @param c
-     * @return
      */
     private static boolean isDigit16Char(char c) {
         return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');

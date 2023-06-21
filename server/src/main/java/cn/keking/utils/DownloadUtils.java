@@ -105,6 +105,9 @@ public class DownloadUtils {
                             }
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
+                        }finally {
+                            assert urlcon != null;
+                            urlcon.disconnect();
                         }
                     }
                 }
