@@ -1,5 +1,6 @@
 package cn.keking.web.controller;
 
+import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
@@ -57,6 +58,18 @@ public class OnlinePreviewController {
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
+            assert fileUrl != null;
+            String huanjing = req.getParameter("Huanjing");
+            if (null != huanjing && fileUrl.contains("http")){
+                // 判断环境
+                String[] split = fileUrl.split("lc-data");
+                if (huanjing.equals("office")) {
+                    fileUrl = ConfigConstants.getBaseFileUrlOffice()+"/lc-data"+split[1];
+                }
+                if (huanjing.equals("out")) {
+                    fileUrl = ConfigConstants.getBaseFileUrlOut()+"/lc-data"+split[1];
+                }
+            }
         } catch (Exception ex) {
             String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
             return otherFilePreview.notSupportedFile(model, errorMsg);

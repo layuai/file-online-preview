@@ -34,6 +34,8 @@ public class ConfigConstants {
     private static String baseUrl;
     private static String baseUrlOffice;
     private static String baseUrlOut;
+    private static String baseFileUrlOffice;
+    private static String baseFileUrlOut;
     private static String fileDir = ConfigUtils.getHomePath() + File.separator + "file" + File.separator;
     private static String localPreviewDir;
     private static CopyOnWriteArraySet<String> trustHostSet;
@@ -231,6 +233,31 @@ public class ConfigConstants {
     @Value("${base.url.out:default}")
     public void setBaseUrlOut(String baseUrlOut) {
         setBaseUrlOutValue(baseUrlOut);
+    }
+    public static String getBaseFileUrlOffice() {
+        return baseFileUrlOffice;
+    }
+
+    @Value("${base.file.url.office:default}")
+    public void setBaseFileUrlOffice(String baseFileUrlOffice) {
+        setBaseFileUrlOfficeValue(baseFileUrlOffice);
+    }
+
+    public static void setBaseFileUrlOfficeValue(String baseFileUrlOffice) {
+        ConfigConstants.baseFileUrlOffice = baseFileUrlOffice;
+    }
+
+    public static String getBaseFileUrlOut() {
+        return baseFileUrlOut;
+    }
+
+    @Value("${base.file.url.out:default}")
+    public void setBaseFileUrlOut(String baseFileUrlOut) {
+        setBaseFileUrlOutValue(baseFileUrlOut);
+    }
+
+    public static void setBaseFileUrlOutValue(String baseFileUrlOut) {
+        ConfigConstants.baseFileUrlOut = baseFileUrlOut;
     }
 
     public static void setBaseUrlOutValue(String baseUrlOut) {
