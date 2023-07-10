@@ -110,6 +110,26 @@ pdf预览模式预览效果如下
 ![cad文档预览2](https://kkview.cn/img/preview/preview-cad-pdf.png)  
 考虑说明篇幅原因，就不贴其他格式文件的预览效果了，感兴趣的可以参考下面的实例搭建下
 
+#### 10. Excel文件纯前端渲染效果
+
+![Excel文件纯前端渲染效果](https://kkview.cn/img/preview/preview-xlsx-web.png)  
+
+#### 11. 流程图bpmn文件预览效果
+
+![流程图bpmn文件预览效果](https://kkview.cn/img/preview/preview-bpmn.png)  
+
+#### 12. 3D模型文件预览效果：
+
+![3D模型文件预览效果](https://kkview.cn/img/preview/preview-3ds.png)  
+
+#### 13. dcm医疗数位影像文件预览效果：
+
+![dcm医疗数位影像文件预览效果](https://kkview.cn/img/preview/preview-dcm.png) 
+
+#### 14. drawio流程图预览效果：
+
+![dcdrawio流程图预览效果](https://kkview.cn/img/preview/preview-drawio.png) 
+
 ### 快速开始
 > 项目使用技术
 - spring boot： [spring boot开发参考指南](http://www.kailing.pub/PdfReader/web/viewer.html?file=springboot)
@@ -128,6 +148,81 @@ pdf预览模式预览效果如下
 ![输入图片说明](https://gitee.com/uploads/images/2017/1213/100221_ea15202e_492218.png "屏幕截图.png")
 
 ### 历史更新记录
+
+> 2023年07月05日，v4.3 版本发布 ：
+
+###新增功能：
+1. 新增dcm等医疗数位影像预 
+2. 新增drawio绘图预览
+3. 新增开启缓存的情况下重新生成的命令 &forceUpdatedCache=true
+4. 新增dwg CAD文件预览
+5. 新增PDF文件支持密码功能
+6. 新增PDF文件生成图片的dpi自定义配置
+7. 新增删除转换后OFFICE、CAD、TIFF、压缩包源文件配置 默认开启 节约磁盘空间
+8. 新增前端解析xlsx方法
+9. 新增pages,eps, iges , igs, dwt, dng, ifc, dwfx, stl, cf2, plt等格式支持 
+
+###优化：
+1. 调整生成的PDF文件 文件名称添加文件后缀 防止生成同名文件
+2. 调整SQL文件预览方式
+3. 优化OFD预览兼容性
+4. 美化TXT文本 分页框的显示
+5. 升级Linux、Docker版内置office为LibreOffice-7.5.3版本
+6. 升级Windows版内置office为LibreOffice-7.5.3 Portable版本
+7. 其他功能优化
+
+###修复：
+1. 修复反代情况下压缩包获取路径错误
+2. 修复预览图片的url中如果包含&会导致.click报错
+3. 修复OFD预览部分已知问题
+4. 修复预览压缩包时，如果点击的是文件目录（树节点），页面会报错
+5. 其他已知问题修复
+
+> 2023年04月18日，v4.2.1 版本发布 ：
+
+###更新日志：
+
+1. 修复 dwg 文件预览报空指针的 bug  
+
+> 2023年04月13日，v4.2.0 版本发布 ：
+
+###新增功能
+1. 新增 SVG 格式文件预览支持
+2. 新增加密的 Office 文件预览支持
+3. 新增加密的 zip、rar 等压缩包文件预览支持
+4. 新增 xmind 软件模型文件预览支持
+5. 新增 bpmn 工作流模型文件预览支持
+6. 新增 eml 邮件文件预览支持
+7. 新增 epub 电子书文件预览支持
+8. 新增 dotm,ett,xlt,xltm,wpt,dot,xlam,xla,dotx 等格式的办公文档预览支持
+9. 新增 obj, 3ds, stl, ply, gltf, glb, off, 3dm, fbx, dae, wrl, 3mf, ifc, brep, step, iges, fcstd, bim 等 3D 模型文件预览支持
+10. 新增可配置限制高风险文件上传的功能，比如 exe 文件
+11. 新增可配置站点的备案信息
+12. 新增演示站点删除文件需要密码的功能  
+
+###优化
+1. 文本文档预览加入缓存
+2. 美化 404、500 报错页
+3. 优化发票等 ofd 文件预览的印证渲染兼容性
+4. 移除 office-plugin 模块, 使用新版 jodconverter组件
+5. 优化 Excel 文件的预览效果
+6. 优化 CAD 文件的预览效果
+7. 更新 xstream 、junrar、pdfbox 等依赖的版本
+8. 更新 TIF 文件转换 PDF 的插件，添加转换缓存
+9. 优化演示页 UI 部署
+10. 压缩包文件预览支持目录
+
+###修复
+1. 修复部分接口 XSS 问题
+2. 修复控制台打印的演示地址不跟着 content-path 配置走的问题
+3. 修复 ofd 文件预览跨域问题
+4. 修复内部自签证书 https 协议 url 文件无法下载的问题
+5. 修复特殊符号的文件无法删除的问题
+6. 修复 PDF 转图片,内存无法回收导致的 OOM
+7. 修复 xlsx7.4 以上版本文件预览乱码的问题
+8. 修复 TrustHostFilter 未拦截跨域接口的问题，这是一个安全问题，有使用到 TrustHost 功能的务必升级
+9. 修复压缩包文件预览在 Linux 系统下文件名乱码的问题
+10. 修复 ofd 文件预览页码只能显示10页的问题
 
 > 2022年12月14日，v4.1.0 版本发布 ：
 
@@ -265,6 +360,9 @@ xmind  引用于 [ xmind-embed-viewer](https://github.com/xmindltd/xmind-embed-v
 epub   引用于 [ epub.js](https://github.com/futurepress/epub.js) 开源协议 BSD许可证  
 压缩包 引用于 [sevenzipjbinding](https://github.com/borisbrodski/sevenzipjbinding )开源协议LGPL  
 3D     引用于 [Online3DViewer](https://github.com/kovacsv/Online3DViewer )开源协议MIT  
+drawio 引用于 [drawio](https://github.com/jgraph/drawio )开源协议 Apache-2.0  
+bpmn流程图     引用于 [bpmn-js](https://github.com/bpmn-io/bpmn-js ) 自定义协议 保留水印 具体自行查看  
+dcm医疗数位影像  引用于 [dcmjs](https://github.com/dcmjs-org/dcmjs )开源协议MIT  
 
 ### 使用登记
 如果这个项目解决了你的实际问题，可在 https://gitee.com/kekingcn/file-online-preview/issues/IGSBV
