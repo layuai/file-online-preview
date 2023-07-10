@@ -126,9 +126,10 @@ public class DownloadUtils {
         }
         // 文件已在本地存在，跳过文件下载
         File realFile = new File(realPath);
-        if (realFile.exists()) {
+        Boolean forceUpdatedCache = fileAttribute.forceUpdatedCache();
+        if (BooleanUtils.isNotTrue(forceUpdatedCache) && realFile.exists()) {
             fileAttribute.setSkipDownLoad(true);
-            return "cunzhai";
+            return "文件已在本地存在";
         }
         return realPath;
     }
