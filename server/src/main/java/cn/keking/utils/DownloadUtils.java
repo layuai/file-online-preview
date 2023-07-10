@@ -124,11 +124,14 @@ public class DownloadUtils {
         if (!dirFile.exists() && !dirFile.mkdirs()) {
             logger.error("创建目录【{}】失败,可能是权限不够，请检查", fileDir);
         }
-        // 文件已在本地存在，跳过文件下载
-        File realFile = new File(realPath);
-        if (realFile.exists()) {
-            fileAttribute.setSkipDownLoad(true);
-            return "cunzhai";
+        Boolean forceUpdatedCache = fileAttribute.forceUpdatedCache(); //判断是否启用强制更新功能如果启用 文件必须重新下载
+        if (!forceUpdatedCache) {
+            // 文件已在本地存在，跳过文件下载
+            File realFile = new File(realPath);
+            if (realFile.exists()) {
+                fileAttribute.setSkipDownLoad(true);
+                return "cunzhai";
+            }
         }
         return realPath;
     }
