@@ -122,6 +122,40 @@
             <button id="getPic" type="button" class="btn btn-success">获取删除码</button>
         </div>
     </div>
+  <script>
+            window.onload = function(){
+                var windowUrl = window.URL || window.webkitURL; //处理浏览器兼容性
+                document.getElementById('getPic').onclick = function(e){
+                    //1、创建ajax对象
+                    var xhr = null;
+                    try{
+                        xhr = new XMLHttpRequest();
+                    }catch(error){
+                        xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    //2、调用open
+                    xhr.open("get", "/captcha", true);
+                    xhr.responseType = "blob";
+                    //3、调用send
+                    xhr.send();
+                    //4、等待数据响应
+                    xhr.onreadystatechange = function(){
+                        if(xhr.readyState == 4){
+                            //判断本次下载的状态码都是多少
+                            if(xhr.status == 200){
+                                var blob = this.response;
+                                $("#verImg").attr("src",windowUrl.createObjectURL(blob));
+                                //$('#verImg').attr('src', xhr.responseText);
+
+                                //  alert(windowUrl.createObjectURL(blob));
+                            }else{
+                                alert("Error:" + xhr.status);
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
     </#if>
     <#--  预览测试  -->
     <div class="panel panel-success">
@@ -173,41 +207,6 @@
         </div>
     </div>
 </#if>
-
-<script>
-    window.onload = function(){
-        var windowUrl = window.URL || window.webkitURL; //处理浏览器兼容性
-        document.getElementById('getPic').onclick = function(e){
-            //1、创建ajax对象
-            var xhr = null;
-            try{
-                xhr = new XMLHttpRequest();
-            }catch(error){
-                xhr = new ActiveXObject("Microsoft.XMLHTTP");
-            }
-            //2、调用open
-            xhr.open("get", "/captcha", true);
-            xhr.responseType = "blob";
-            //3、调用send
-            xhr.send();
-            //4、等待数据响应
-            xhr.onreadystatechange = function(){
-                if(xhr.readyState == 4){
-                    //判断本次下载的状态码都是多少
-                    if(xhr.status == 200){
-                        var blob = this.response;
-                        $("#verImg").attr("src",windowUrl.createObjectURL(blob));
-                        //$('#verImg').attr('src', xhr.responseText);
-
-                        //  alert(windowUrl.createObjectURL(blob));
-                    }else{
-                        alert("Error:" + xhr.status);
-                    }
-                }
-            }
-        }
-    }
-</script>
 <script>
     function deleteFile(fileName,password) {
         if(window.confirm('你确定要删除文件吗？')){

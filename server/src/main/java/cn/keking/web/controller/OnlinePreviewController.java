@@ -1,5 +1,6 @@
 package cn.keking.web.controller;
 
+import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
@@ -174,6 +175,9 @@ public class OnlinePreviewController {
      */
     @RequestMapping("/captcha")
     public void captcha(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if(!ConfigConstants.getDeleteCaptcha()){
+            return;
+        }
         response.setContentType("image/gif");
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
