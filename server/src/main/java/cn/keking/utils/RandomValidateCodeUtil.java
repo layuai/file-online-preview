@@ -57,15 +57,14 @@ public class RandomValidateCodeUtil {
         // randomCode用于保存随机产生的验证码，以便用户登录后进行验证。
         int red, green, blue;
         if (lx ==1){
-            String code = sessionCode;
             // 产生随机的颜色分量来构造颜色值，这样输出的每位数字的颜色值都将不同。
             red = random.nextInt(255);
             green = random.nextInt(255);
             blue = random.nextInt(255);
             // 用随机产生的颜色将验证码绘制到图像中。
             gd.setColor(new Color(red, green, blue));
-            gd.drawString(code, 1 * xx, codeY);
-            randomCode.append(code);
+            gd.drawString(sessionCode, xx, codeY);
+            randomCode.append(sessionCode);
         }else {
             // 随机产生codeCount数字的验证码。
             for (int i = 0; i < codeCount; i++) {

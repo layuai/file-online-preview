@@ -26,8 +26,6 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,7 +184,7 @@ public class OnlinePreviewController {
         try {
              sessionCode = request.getSession().getAttribute("code").toString();  //获取已经保存的验证码
         } catch (Exception e) {
-            sessionCode = "null";
+            sessionCode= null;
         }
         Object time = request.getSession().getAttribute("time");  //获取已经保存的时间
         if (ObjectUtils.isEmpty(time)){  //判断时间是否为空
@@ -200,7 +198,8 @@ public class OnlinePreviewController {
         long diff = date.getTime() - d1.getTime();
         long diffSeconds = diff / 1000 % 60;
         String ip=request.getRemoteAddr();
-        if (sessionCode == "null" || sessionCode.length() == 0 ||  diffSeconds > 50){   //判断验证码是否为空 为空重新生成  判断是否在有效时间内 默认50秒
+        ServletOutputStream sos = null;
+        if (ObjectUtils.isEmpty(sessionCode) ||  diffSeconds > 50){   //判断验证码是否为空 为空重新生成  判断是否在有效时间内 默认50秒
             Map<String, Object> codeMap = RandomValidateCodeUtil.generateCodeAndPic(ip,sessionCode,0);
             // 验证码存入session
             request.getSession().setAttribute("code", codeMap.get("code").toString());
@@ -212,13 +211,15 @@ public class OnlinePreviewController {
             response.setDateHeader("Expires", -1);
             response.setContentType("image/jpeg");
             // 将图像输出到Servlet输出流中。
-            ServletOutputStream sos;
             try {
                 sos = response.getOutputStream();
                 ImageIO.write((RenderedImage) codeMap.get("codePic"), "jpeg", sos);
                 sos.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                assert sos != null;
+                sos.close();
             }
         }else {
            // System.out.println("请输入你的姓名:");
@@ -229,13 +230,14 @@ public class OnlinePreviewController {
             response.setDateHeader("Expires", -1);
             response.setContentType("image/jpeg");
             // 将图像输出到Servlet输出流中。
-            ServletOutputStream sos;
             try {
                 sos = response.getOutputStream();
                 ImageIO.write((RenderedImage) codeMap.get("codePic"), "jpeg", sos);
-                sos.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                assert sos != null;
+                sos.close();
             }
 
         }
