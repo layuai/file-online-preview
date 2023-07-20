@@ -12,7 +12,7 @@ public class RandomValidateCodeUtil {
     private static final int height = 30;// 定义图片的height
     private static final int codeCount = 4;// 定义图片上显示验证码的个数
     private static final int xx = 18;
-    private static final int fontHeight = 30;
+    private static final int fontHeight = 28;
     private static final int codeY = 27;
     private static final char[] codeSequence = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R','T', 'U', 'V', 'W', 'X', 'Y', 'Z',
             'a','b','c','d','e','f','g','h','j','k','m','n','p','q','r','s','t','u','v','w','x','y', '2', '3', '4','5', '6', '7', '8', '9' };

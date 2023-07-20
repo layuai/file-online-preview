@@ -214,7 +214,6 @@ public class OnlinePreviewController {
             try {
                 sos = response.getOutputStream();
                 ImageIO.write((RenderedImage) codeMap.get("codePic"), "jpeg", sos);
-                sos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
