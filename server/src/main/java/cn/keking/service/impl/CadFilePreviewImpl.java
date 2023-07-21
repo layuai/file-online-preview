@@ -10,6 +10,7 @@ import cn.keking.utils.KkFileUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import static cn.keking.service.impl.OfficeFilePreviewImpl.getPreviewType;
@@ -52,14 +53,15 @@ public class CadFilePreviewImpl implements FilePreview {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }
             filePath = response.getContent();
-            String imageUrls = null;
+            String imageUrls;
             if (StringUtils.hasText(outFilePath)) {
                 try {
                     imageUrls =  fileHandlerService.cadToPdf(filePath, outFilePath,cadPreviewType);
                 } catch (Exception e) {
+                    imageUrls = null;
                     e.printStackTrace();
                 }
-                if (imageUrls == null ) {
+                if (ObjectUtils.isEmpty(imageUrls)) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
                 }
                 //是否保留CAD源文件

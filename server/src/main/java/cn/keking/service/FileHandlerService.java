@@ -148,7 +148,7 @@ public class FileHandlerService {
     /**
      cad定义线程池
      */
-    private static final ExecutorService pool = Executors.newFixedThreadPool(1);
+    private static final ExecutorService pool = Executors.newFixedThreadPool(3);
     /**
      * 对转换后的文件进行操作(改变编码方式)
      *
@@ -371,13 +371,13 @@ public class FileHandlerService {
             result.get(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.out.println("InterruptedException发生");
-            return "null";
+            return null;
         } catch (ExecutionException e) {
             System.out.println("ExecutionException发生");
-            return "null";
+            return null;
         } catch (TimeoutException e) {
             System.out.println("TimeoutException发生，意味着线程超时报错");
-            return "null";
+            return null;
         } finally {
             source.interrupt();  //结束任务
             source.dispose();
