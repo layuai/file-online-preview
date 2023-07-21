@@ -63,7 +63,7 @@ public class RandomValidateCodeUtil {
             blue = random.nextInt(255);
             // 用随机产生的颜色将验证码绘制到图像中。
             gd.setColor(new Color(red, green, blue));
-            gd.drawString(sessionCode, xx, codeY);
+            gd.drawString(sessionCode, 18, codeY);
             randomCode.append(sessionCode);
         }else {
             // 随机产生codeCount数字的验证码。
