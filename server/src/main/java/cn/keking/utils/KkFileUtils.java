@@ -119,7 +119,7 @@ public class KkFileUtils {
      * @return 文件后缀
      */
     public static String suffixFromFileName(String fileName) {
-        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
 
