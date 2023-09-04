@@ -9,6 +9,7 @@ import cn.keking.service.OfficeToPdfService;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.OfficeUtils;
+import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by kl on 2018/1/17.
@@ -60,10 +62,24 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!officePreviewType.equalsIgnoreCase("html")) {
             if (ConfigConstants.getOfficeTypeWeb() .equalsIgnoreCase("web")) {
                 if (suffix.equalsIgnoreCase("xlsx")) {
-                    model.addAttribute("pdfUrl", url);
+                    model.addAttribute("pdfUrl", KkFileUtils.htmlEscape(url));
                     return XLSX_FILE_PREVIEW_PAGE;
                 }
+                if (suffix.equalsIgnoreCase("csv")) {
+                    model.addAttribute("pdfUrl", KkFileUtils.htmlEscape(url));
+                    return CSV_FILE_PREVIEW_PAGE;
+                }
             }
+        }
+        if(forceUpdatedCache){ //如果使用了更新缓存命令 清空执行标记
+            FileHandlerService.AI_CONVERT_MAP.remove(pdfName, 1); //删除转换符号
+        }else if(Objects.equals(fileHandlerService.listConvertedFiles().get(pdfName), "error") ) //判断是否转换失败
+        {
+            return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]转换失败，请联系系统管理员");
+        }
+        if(FileHandlerService.AI_CONVERT_MAP.get(pdfName) != null)  //判断是否正在转换中
+        {
+            return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]正在转换中,请稍后刷新访问");
         }
         if (forceUpdatedCache|| !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
@@ -106,18 +122,20 @@ public class OfficeFilePreviewImpl implements FilePreview {
             } else {
                 if (StringUtils.hasText(outFilePath)) {
                     try {
+                        FileHandlerService.AI_CONVERT_MAP.put(pdfName, 1); //加入转换符号
                         officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
                     } catch (OfficeException e) {
                         if (isPwdProtectedOffice && !OfficeUtils.isCompatible(filePath, filePassword)) {
+                            FileHandlerService.AI_CONVERT_MAP.remove(pdfName, 1);  //有密码,删除转换符号
                             // 加密文件密码错误，提示重新输入
                             model.addAttribute("needFilePassword", true);
                             model.addAttribute("filePasswordError", true);
                             return EXEL_FILE_PREVIEW_PAGE;
                         }
-
+                        fileHandlerService.addConvertedFile(pdfName, "error");  //转换失败,加入失败提示
                         return otherFilePreview.notSupportedFile(model, fileAttribute, "抱歉，该文件版本不兼容，文件版本错误。");
                     }
-
+                    FileHandlerService.AI_CONVERT_MAP.remove(pdfName, 1);  //转换成功删除转换符号
                     if (isHtml) {
                         // 对转换后的文件进行操作(改变编码方式)
                         fileHandlerService.doActionConvertedFile(outFilePath);
