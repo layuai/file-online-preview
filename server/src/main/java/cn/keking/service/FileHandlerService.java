@@ -38,10 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
@@ -148,6 +145,12 @@ public class FileHandlerService implements InitializingBean {
         cacheService.putImgCache(fileKey, imgs);
     }
 
+    /**
+     * 记录是否转换
+     *
+     */
+
+    public static Map<String, Integer> AI_CONVERT_MAP =  new HashMap<>();
     /**
      cad定义线程池
      */
