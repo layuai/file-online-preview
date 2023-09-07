@@ -43,9 +43,9 @@ public class CompressFilePreviewImpl implements FilePreview {
 
         String ConvertRecords = FileHandlerService.queryRecords(forceUpdatedCache,fileName,fileHandlerService);
         if (Objects.equals(ConvertRecords, "error"))
-        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]转换失败，请联系系统管理员");
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]解压失败，请联系系统管理员");
         }else if (Objects.equals(ConvertRecords, "convert"))
-        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]正在转换中,请稍后刷新访问");
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]正在解压中,请稍后刷新访问");
         }
         String fileTree = null;
         // 判断文件名是否存在(redis缓存读取)
