@@ -65,7 +65,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
                     return XLSX_FILE_PREVIEW_PAGE;
                 }
                 if (suffix.equalsIgnoreCase("csv")) {
-                    model.addAttribute("pdfUrl", KkFileUtils.htmlEscape(url));
+                     model.addAttribute("csvUrl", KkFileUtils.htmlEscape(url));
                     return CSV_FILE_PREVIEW_PAGE;
                 }
             }
