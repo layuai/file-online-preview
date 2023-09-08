@@ -68,9 +68,12 @@ public class CompressFilePreviewImpl implements FilePreview {
                 }
             }
             if (!ObjectUtils.isEmpty(fileTree)) {
+                KkFileUtils.deleteDirectory(fileDir+fileName + "_/__MACOSX");  //清理macOSX系统产生的垃圾文件
                 //是否保留压缩包源文件
                 if (ConfigConstants.getDeleteSourceFile()) {
-                    KkFileUtils.deleteFileByPath(filePath);
+                    if (!url.contains("?fileKey=")) { //不删除解压后 二级压缩包源文件 方便使用更新缓存命令
+                        KkFileUtils.deleteFileByPath(filePath);
+                    }
                 }
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
@@ -82,9 +85,10 @@ public class CompressFilePreviewImpl implements FilePreview {
         } else {
             fileTree = fileHandlerService.getConvertedFile(fileName);
         }
-            model.addAttribute("fileName", fileName);
-            model.addAttribute("fileTree", fileTree);
-            return COMPRESS_FILE_PREVIEW_PAGE;
+        model.addAttribute("fileName", fileName);
+        model.addAttribute("fileTree", fileTree);
+        model.addAttribute("forceUpdatedCache", forceUpdatedCache);
+        return COMPRESS_FILE_PREVIEW_PAGE;
     }
     /**
      * 读取文件目录树

@@ -202,7 +202,11 @@ public class FileController {
             fileUrl = WebUtils.decodeUrl(urls);
         } catch (Exception ex) {
             String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
+            System.out.println(22);
             return ReturnResponse.failure(errorMsg);
+        }
+        if(fileUrl == null||fileUrl.length()<= 0){
+            return ReturnResponse.failure("地址不合法:");
         }
         String forceUpdatedCache = req.getParameter("forceUpdatedCache");  //加入强制更新方法
         if (KkFileUtils.isIllegalFileName(fileUrl)) {

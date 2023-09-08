@@ -59,27 +59,14 @@
 
     $(document).ready(function () {
         var url = '${fileTree}';
-        var forceUpdatedCache = '${forceUpdatedCache}';
-        if(forceUpdatedCache){
             $.ajax({
                 type: "get",
-                url: "${baseUrl}directory?urls="+encodeURIComponent(Base64.encode(url))+"&forceUpdatedCache=true",
+                url: "${baseUrl}directory?urls="+encodeURIComponent(Base64.encode(url))+"&forceUpdatedCache=${forceUpdatedCache}",
                 success: function (res) {
                     zTreeObj = $.fn.zTree.init($("#treeDemo"), settings, res); //初始化树
                     zTreeObj.expandAll(true);   //true 节点全部展开、false节点收缩
                 }
             });
-        }else{
-
-            $.ajax({
-                type: "get",
-                url: "${baseUrl}directory?urls="+encodeURIComponent(Base64.encode(url)),
-                success: function (res) {
-                    zTreeObj = $.fn.zTree.init($("#treeDemo"), settings, res); //初始化树
-                    zTreeObj.expandAll(true);   //true 节点全部展开、false节点收缩
-                }
-            });}
-
     });
 </script>
 </body>
