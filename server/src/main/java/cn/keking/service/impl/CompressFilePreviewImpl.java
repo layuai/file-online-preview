@@ -112,7 +112,7 @@ public class CompressFilePreviewImpl implements FilePreview {
         }
         List<ZtreeNodeVo> nodes = new ArrayList<>();
         File file = new File(fileDir+rootPath);
-        if(!file.exists() || file.length() == 0) {
+       if(!file.exists()) {
             return null;
         }
         ZtreeNodeVo node = traverse(file);
