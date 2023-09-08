@@ -202,7 +202,6 @@ public class FileController {
             fileUrl = WebUtils.decodeUrl(urls);
         } catch (Exception ex) {
             String errorMsg = String.format(BASE64_DECODE_ERROR_MSG, "url");
-            System.out.println(22);
             return ReturnResponse.failure(errorMsg);
         }
         if(fileUrl == null||fileUrl.length()<= 0){
