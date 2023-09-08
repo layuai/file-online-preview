@@ -1,12 +1,7 @@
 package cn.keking.utils;
-import cn.keking.config.ConfigConstants;
-import cn.keking.service.ZtreeNodeVo;
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,8 +10,6 @@ import java.util.regex.Pattern;
  * create : 2023-04-08
  **/
 public class RarUtils {
-    private static final String fileDir = ConfigConstants.getFileDir();
-
     public static byte[] getUTF8BytesFromGBKString(String gbkStr) {
         int n = gbkStr.length();
         byte[] utfBytes = new byte[3 * n];
@@ -96,35 +89,5 @@ public class RarUtils {
         }
         //表示不是乱码 返回false
         return false;
-    }
-
-    /**
-     * 读取文件目录树
-     */
-    public static List<ZtreeNodeVo> getTree(String rootPath) {
-        List<ZtreeNodeVo> nodes = new ArrayList<>();
-        File file = new File(fileDir+rootPath);
-        ZtreeNodeVo node = traverse(file);
-        nodes.add(node);
-        return nodes;
-    }
-    private static ZtreeNodeVo traverse(File file) {
-        ZtreeNodeVo pathNodeVo = new ZtreeNodeVo();
-        pathNodeVo.setId(file.getAbsolutePath().replace(fileDir, "").replace("\\", "/"));
-        pathNodeVo.setName(file.getName());
-        pathNodeVo.setPid(file.getParent().replace(fileDir, "").replace("\\", "/"));
-        if (file.isDirectory()) {
-            List<ZtreeNodeVo> subNodeVos = new ArrayList<>();
-            File[] subFiles = file.listFiles();
-            if (subFiles == null) {
-                return pathNodeVo;
-            }
-            for (File subFile : subFiles) {
-                ZtreeNodeVo subNodeVo = traverse(subFile);
-                subNodeVos.add(subNodeVo);
-            }
-            pathNodeVo.setChildren(subNodeVos);
-        }
-        return pathNodeVo;
     }
 }

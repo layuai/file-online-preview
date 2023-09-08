@@ -1,6 +1,7 @@
 package cn.keking.service;
+import java.io.Serializable;
 import java.util.List;
-public class ZtreeNodeVo {
+public class ZtreeNodeVo  implements Serializable {
     public String id;
     public String pid;
     public String name;

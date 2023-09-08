@@ -1,5 +1,6 @@
 package cn.keking.service.cache.impl;
 
+import cn.keking.service.ZtreeNodeVo;
 import cn.keking.service.cache.CacheService;
 import cn.keking.utils.ConfigUtils;
 import org.rocksdb.RocksDB;
@@ -48,6 +49,10 @@ public class CacheServiceRocksDBImpl implements CacheService {
                 Map<String, List<String>> initIMGCache = new HashMap<>();
                 db.put(FILE_PREVIEW_IMGS_KEY.getBytes(), toByteArray(initIMGCache));
             }
+            if (db.get(FILE_PREVIEW_COMPRESS_KEY.getBytes()) == null) {
+                Map<String, List<ZtreeNodeVo>> initCOMPRESSCache = new HashMap<>();
+                db.put(FILE_PREVIEW_COMPRESS_KEY.getBytes(), toByteArray(initCOMPRESSCache));
+            }
             if (db.get(FILE_PREVIEW_PDF_IMGS_KEY.getBytes()) == null) {
                 Map<String, Integer> initPDFIMGCache = new HashMap<>();
                 db.put(FILE_PREVIEW_PDF_IMGS_KEY.getBytes(), toByteArray(initPDFIMGCache));
@@ -65,6 +70,10 @@ public class CacheServiceRocksDBImpl implements CacheService {
 
     @Override
     public void initIMGCachePool(Integer capacity) {
+
+    }
+    @Override
+    public void initCompressCachePool(Integer capacity) {
 
     }
 
@@ -95,6 +104,17 @@ public class CacheServiceRocksDBImpl implements CacheService {
             Map<String, List<String>> imgCacheItem = getImgCache();
             imgCacheItem.put(key, value);
             db.put(FILE_PREVIEW_IMGS_KEY.getBytes(), toByteArray(imgCacheItem));
+        } catch (RocksDBException | IOException e) {
+            LOGGER.error("Put into RocksDB Exception" + e);
+        }
+    }
+
+    @Override
+    public void putCompressCache(String key, List<ZtreeNodeVo> value) {
+        try {
+            Map<String, List<ZtreeNodeVo>> compressCacheItem = getCompressCache();
+            compressCacheItem.put(key, value);
+            db.put(FILE_PREVIEW_COMPRESS_KEY.getBytes(), toByteArray(compressCacheItem));
         } catch (RocksDBException | IOException e) {
             LOGGER.error("Put into RocksDB Exception" + e);
         }
@@ -144,6 +164,34 @@ public class CacheServiceRocksDBImpl implements CacheService {
         Map<String, List<String>> map;
         try{
             map = (Map<String, List<String>>) toObject(db.get(FILE_PREVIEW_IMGS_KEY.getBytes()));
+            result = map.get(key);
+        } catch (RocksDBException | IOException | ClassNotFoundException e) {
+            LOGGER.error("Get from RocksDB Exception" + e);
+        }
+        return result;
+    }
+
+
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Map<String, List<ZtreeNodeVo>> getCompressCache() {
+        Map<String, List<ZtreeNodeVo>> result = new HashMap<>();
+        try{
+            result = (Map<String, List<ZtreeNodeVo>>) toObject(db.get(FILE_PREVIEW_COMPRESS_KEY.getBytes()));
+        } catch (RocksDBException | IOException | ClassNotFoundException e) {
+            LOGGER.error("Get from RocksDB Exception" + e);
+        }
+        return result;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ZtreeNodeVo> getCompressCache(String key) {
+        List<ZtreeNodeVo> result = new ArrayList<>();
+        Map<String, List<ZtreeNodeVo>> map;
+        try{
+            map = (Map<String, List<ZtreeNodeVo>>) toObject(db.get(FILE_PREVIEW_COMPRESS_KEY.getBytes()));
             result = map.get(key);
         } catch (RocksDBException | IOException | ClassNotFoundException e) {
             LOGGER.error("Get from RocksDB Exception" + e);
@@ -217,6 +265,7 @@ public class CacheServiceRocksDBImpl implements CacheService {
         try {
             cleanPdfCache();
             cleanImgCache();
+            cleanCOMPRESSCache();
             cleanPdfImgCache();
         } catch (IOException | RocksDBException e) {
             LOGGER.error("Clean Cache Exception" + e);
@@ -275,6 +324,11 @@ public class CacheServiceRocksDBImpl implements CacheService {
     private void cleanImgCache() throws IOException, RocksDBException {
         Map<String, List<String>> initIMGCache = new HashMap<>();
         db.put(FILE_PREVIEW_IMGS_KEY.getBytes(), toByteArray(initIMGCache));
+    }
+
+    private void cleanCOMPRESSCache() throws IOException, RocksDBException {
+        Map<String, List<String>> initCOMPRESSCache = new HashMap<>();
+        db.put(FILE_PREVIEW_COMPRESS_KEY.getBytes(), toByteArray(initCOMPRESSCache));
     }
 
     private void cleanPdfImgCache() throws IOException, RocksDBException {
