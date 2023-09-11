@@ -142,6 +142,11 @@ public class OfficeFilePreviewImpl implements FilePreview {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
         cacheFileName =   URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
+        try{
+            cacheFileName = URLEncoder.encode(cacheFileName, "UTF-8").replaceAll("\\+", "%20");
+        }catch (UnsupportedEncodingException e){
+            return otherFilePreview.notSupportedFile(model, fileAttribute, "抱歉，转换文件名出错");
+        }
         model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
