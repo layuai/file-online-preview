@@ -7,13 +7,16 @@ function isInSight(el) {
 }
 
 
-
+var loadedImgs = new Map();
 function checkImgs() {
     var index = 0;
     var imgs = document.querySelectorAll('.my-photo');
     for (var i = index; i < imgs.length; i++) {
         if (isInSight(imgs[i])) {
-            loadImg(imgs[i]);
+            if(!loadedImgs.has(i)) {
+                loadImg(imgs[i]);
+                loadedImgs.set(i, imgs[i]);
+            }
             index = i;
         }
     }
