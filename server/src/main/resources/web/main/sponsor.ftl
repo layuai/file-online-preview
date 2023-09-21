@@ -6,22 +6,9 @@
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
     <title>赞助开源</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="css/viewer.min.css"/>
-    <link rel="stylesheet" href="css/loading.css"/>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css"/>
-    <link rel="stylesheet" href="bootstrap-table/bootstrap-table.min.css"/>
-    <link rel="stylesheet" href="css/theme.css"/>
     <script type="text/javascript" src="js/jquery-3.6.1.min.js"></script>
-    <script type="text/javascript" src="js/jquery.form.min.js"></script>
     <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="bootstrap-table/bootstrap-table.min.js"></script>
-    <script type="text/javascript" src="js/base64.min.js"></script>
-    <style>
-        .alert {
-            width: 50%;
-        }
-    </style>
 </head>
 
 <body>
