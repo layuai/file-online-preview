@@ -333,7 +333,9 @@
                 title: '文件名'
             }, {
                 field: 'action',
-                title: '操作'
+                title: '操作',
+                align: 'center',
+                width: 160
             }]
         }).on('pre-body.bs.table', function (e, data) {
             // 每个data添加一列用来操作
