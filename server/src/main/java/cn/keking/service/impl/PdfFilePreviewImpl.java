@@ -42,7 +42,6 @@ public class PdfFilePreviewImpl implements FilePreview {
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         String fileName = fileAttribute.getName();
         String officePreviewType = fileAttribute.getOfficePreviewType();
-        String baseUrl = BaseUrlFilter.getBaseUrl();
         boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
         // 启用pdf添加水印配置
         boolean isWaterMark = "false".equals(ConfigConstants.getPdfWatermarkDisable()) && StringUtils.hasText(fileAttribute.getWatermarkTxt());
@@ -85,7 +84,7 @@ public class PdfFilePreviewImpl implements FilePreview {
             if (imageUrls == null || imageUrls.size() < 1) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
             }
-            model.addAttribute("imgurls", imageUrls);
+            model.addAttribute("imgUrls", imageUrls);
             model.addAttribute("currentUrl", imageUrls.get(0));
             if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType)) {
                 return OFFICE_PICTURE_FILE_PREVIEW_PAGE;

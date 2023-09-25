@@ -48,24 +48,51 @@
     </div>
     <div class="panel panel-success">
         <div class="panel-heading">
-            <h3 class="panel-title">2023年04月20日，v4.3.0-SNAPSHOT版本</h3>
+            <h3 class="panel-title">2023年07月10日，v4.4.0版本迭代开启 </h3>
         </div>
         <div class="panel-body">
             <div>
-                1.新增 dcm 等医疗数位影像预览<br>
-                2.新增 drawio 绘图预览<br>
-                3.新增开启缓存的情况下重新生成的命令 &forceUpdatedCache=true <br>
-                4.新增 dwf CAD文件预览 <br>
-                5.新增 PDF文件支持密码功能 <br>
-                6.修复反代情况下压缩包获取路径错误 <br>
-                7.新增:PDF文件生成图片的像素大小 <br>
-                8.修复预览图片的url中如果包含&会导致.click报错 <br>
-                9.新增:删除转换后OFFICE、CAD、TIFF、压缩包源文件 默认开启 节约磁盘空间 <br>
-                10.调整生成的PDF文件 文件名称添加文件后缀 防止生成同名文件 <br>
-                11.新增pages格式支持,调整SQL文件预览方式 <br>
-                12.OFD修复部分已知Bug，提高OFD兼容性处理。 <br>
-                13.新增前端解析xlsx方法(目前测试中还没放出代码)。 <br>
-                14.其他功能优化。 <br>
+                1. ofd修复部分已知问题. <br>
+                2. 更新xlsx前端解析组件 <br>
+                3. 修复 forceUpdatedCache 属性设置，但是本地缓存文件不更新缺陷 <br>
+                4. 配置文件新增启用 GZIP压缩 <br>
+                5. CAD格式新增支持 转换成svg tif 格式 <br>
+                6. CAD 转换新增 超时结束 新增线程管理 <br>
+                7. 删除功能 新增验证码方法 <br> 
+                8. 升级 CAD转换组件 <br> 
+                9. office 功能调整 支持批注 转换页码限制 生成水印等等 <br> 
+                10.新增xbrl格式 <br> 
+                11.修复PDF解密加密文件 转换成功后台报错问题  <br> 
+                12.支持 301重定向 及文件名被编码 <br> 
+                13.其他功能优化及已知问题修复 <br>
+            </div>
+        </div>
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">2023年07月04日，v4.3.0版本</h3>
+        </div>
+        <div class="panel-body">
+            <div>
+                1. 新增dcm等医疗数位影像预览<br>
+                2. 新增drawio绘图预览<br>
+                3. 新增开启缓存的情况下重新生成的命令 &forceUpdatedCache=true <br>
+                4. 新增dwg CAD文件预览 <br>
+                5. 新增PDF文件支持密码功能 <br>
+                6. 修复反代情况下压缩包获取路径错误 <br>
+                7. 新增PDF文件生成图片的dpi自定义配置 <br>
+                8. 修复预览图片的url中如果包含&会导致.click报错 <br>
+                9. 新增删除转换后OFFICE、CAD、TIFF、压缩包源文件配置 默认开启 节约磁盘空间 <br>
+                10. 调整生成的PDF文件 文件名称添加文件后缀 防止生成同名文件 <br>
+                11. 新增pages格式支持,调整SQL文件预览方式 <br>
+                12. OFD修复部分已知Bug，提高OFD兼容性处理。 <br>
+                13. 新增前端解析xlsx方法。 <br>
+                14. OFD修复部分文字未显示的问题，完善OFD兼容性处理 <br>
+                15. 美化TXT文本 分页框的显示 <br>
+                16. 修复预览压缩包时，如果点击的是文件目录（树节点），页面会报错 <br>
+                17. 升级Linux、Docker版内置office为LibreOffice-7.5.3版本
+                18. 升级Windows内置office为LibreOffice-7.5.3 Portable版本 <br>
+                19. 新增pages,eps, iges , igs, dwt, dng, ifc, dwfx, stl, cf2, plt等格式支持 <br>
+                20. 其他功能优化及已知问题修复 <br>
             </div>
         </div>
     <div class="panel panel-success">

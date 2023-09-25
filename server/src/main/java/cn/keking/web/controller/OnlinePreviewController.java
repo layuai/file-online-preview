@@ -23,8 +23,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,6 +56,7 @@ public class OnlinePreviewController {
 
     @GetMapping( "/onlinePreview")
     public String onlinePreview(String url, Model model, HttpServletRequest req) {
+
         String fileUrl;
         try {
             fileUrl = WebUtils.decodeUrl(url);
@@ -109,9 +113,11 @@ public class OnlinePreviewController {
             logger.error(String.format(BASE64_DECODE_ERROR_MSG, urlPath),ex);
             return;
         }
-        HttpURLConnection urlcon;
+        HttpURLConnection urlcon = null;
         InputStream inputStream = null;
-        if (urlPath.toLowerCase().startsWith("file:") || urlPath.toLowerCase().startsWith("file%3")) {
+        String urlStr;
+        assert urlPath != null;
+        if (!urlPath.toLowerCase().startsWith("http") && !urlPath.toLowerCase().startsWith("https") && !urlPath.toLowerCase().startsWith("ftp")) {
             logger.info("读取跨域文件异常，可能存在非法访问，urlPath：{}", urlPath);
             return;
         }
@@ -123,26 +129,49 @@ public class OnlinePreviewController {
                 urlcon.setConnectTimeout(30000);
                 urlcon.setReadTimeout(30000);
                 urlcon.setInstanceFollowRedirects(false);
-                if (urlcon.getResponseCode() == 302 || urlcon.getResponseCode() == 301) {
-                    urlcon.disconnect();
+                int responseCode = urlcon.getResponseCode();
+                if ( responseCode == 403  || responseCode == 500) { //403  500
+                    logger.error("读取跨域文件异常，url：{}，错误：{}", urlPath,responseCode);
+                    return ;
+                }
+                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) { //301 302
                     url =new URL(urlcon.getHeaderField("Location"));
                     urlcon=(HttpURLConnection)url.openConnection();
+                } if (responseCode  == 404 ) {  //404
+                    try {
+                        urlStr = URLDecoder.decode(urlPath, StandardCharsets.UTF_8.name());
+                        urlStr = URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
+                        url = WebUtils.normalizedURL(urlStr);
+                        urlcon=(HttpURLConnection)url.openConnection();
+                        urlcon.setConnectTimeout(30000);
+                        urlcon.setReadTimeout(30000);
+                        urlcon.setInstanceFollowRedirects(false);
+                        responseCode = urlcon.getResponseCode();
+                        if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) { //301 302
+                            url =new URL(urlcon.getHeaderField("Location"));
+                        }
+                        if(responseCode == 404 ||responseCode  == 403  || responseCode == 500 ){
+                            logger.error("读取跨域文件异常，url：{}，错误：{}", urlPath,responseCode);
+                            return ;
+                        }
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }finally {
+                        assert urlcon != null;
+                        urlcon.disconnect();
+                    }
                 }
-                if (urlcon.getResponseCode() == 404 || urlcon.getResponseCode() == 403 || urlcon.getResponseCode() == 500 ) {
-                    logger.error("读取跨域文件异常，url：{}", urlPath);
-                    return ;
-                } else {
                     if(urlPath.contains( ".svg")) {
                         response.setContentType("image/svg+xml");
                     }
                     inputStream=(url).openStream();
                     IOUtils.copy(inputStream, response.getOutputStream());
-                    urlcon.disconnect();
-                }
+
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
             } finally {
+                assert urlcon != null;
+                urlcon.disconnect();
                 IOUtils.closeQuietly(inputStream);
             }
         } else {
@@ -155,7 +184,6 @@ public class OnlinePreviewController {
                 IOUtils.copy(inputStream, response.getOutputStream());
             } catch (IOException | GalimatiasParseException e) {
                 logger.error("读取跨域文件异常，url：{}", urlPath);
-                return ;
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }

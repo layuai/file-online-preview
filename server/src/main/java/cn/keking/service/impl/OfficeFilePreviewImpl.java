@@ -65,11 +65,15 @@ public class OfficeFilePreviewImpl implements FilePreview {
         // 文件名称附加水印内容
         cacheFileName = isWaterMark ? fileAttribute.getWatermarkTxt() + "_" + cacheFileName : cacheFileName;
         String outFilePath = FILE_DIR + cacheFileName;
-        if(!officePreviewType.equalsIgnoreCase("html")){
-            if(officePreviewType.equalsIgnoreCase("web")|| ConfigConstants.getofficeTypeWeb() .equalsIgnoreCase("web") ){
-                if(suffix.equalsIgnoreCase("xlsx")){
-                    model.addAttribute("pdfUrl", url);
+        if (!officePreviewType.equalsIgnoreCase("html")) {
+            if (ConfigConstants.getOfficeTypeWeb() .equalsIgnoreCase("web")) {
+                if (suffix.equalsIgnoreCase("xlsx")) {
+                    model.addAttribute("pdfUrl", KkFileUtils.htmlEscape(url)); //特殊符号处理
                     return XLSX_FILE_PREVIEW_PAGE;
+                }
+                if (suffix.equalsIgnoreCase("csv")) {
+                    model.addAttribute("csvUrl", KkFileUtils.htmlEscape(url));
+                    return CSV_FILE_PREVIEW_PAGE;
                 }
             }
         }
@@ -178,7 +182,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (imageUrls == null || imageUrls.size() < 1) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
         }
-        model.addAttribute("imgurls", imageUrls);
+        model.addAttribute("imgUrls", imageUrls);
         model.addAttribute("currentUrl", imageUrls.get(0));
         if (officePreviewTypeImage.equals(officePreviewType)) {
             // PPT 图片模式使用专用预览页面

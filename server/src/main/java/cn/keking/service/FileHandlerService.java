@@ -9,12 +9,13 @@ import cn.keking.utils.EncodingDetects;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
-import com.aspose.cad.CodePages;
-import com.aspose.cad.Color;
-import com.aspose.cad.Image;
-import com.aspose.cad.LoadOptions;
+import com.aspose.cad.*;
+import com.aspose.cad.fileformats.tiff.enums.TiffExpectedFormat;
 import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.PdfOptions;
+import com.aspose.cad.imageoptions.SvgOptions;
+import com.aspose.cad.imageoptions.TiffOptions;
+import com.aspose.cad.internal.Exceptions.TimeoutException;
 import com.itextpdf.text.pdf.PdfReader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -24,9 +25,12 @@ import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 import org.apache.poi.EncryptedDocumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 /**
@@ -45,14 +50,14 @@ import java.util.stream.IntStream;
  * @date 2017/11/13
  */
 @Component
-public class FileHandlerService {
+@DependsOn(ConfigConstants.BEAN_NAME)
+public class FileHandlerService implements InitializingBean {
 
     private static final String PDF2JPG_IMAGE_FORMAT = ".jpg";
     private static final String PDF_PASSWORD_MSG = "password";
     private final Logger logger = LoggerFactory.getLogger(FileHandlerService.class);
     private final String fileDir = ConfigConstants.getFileDir();
     private final CacheService cacheService;
-
     @Value("${server.tomcat.uri-encoding:UTF-8}")
     private String uriEncoding;
 
@@ -143,6 +148,14 @@ public class FileHandlerService {
         cacheService.putImgCache(fileKey, imgs);
     }
 
+    /**
+     cad定义线程池
+     */
+    private ExecutorService pool = null;
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        pool = Executors.newFixedThreadPool(ConfigConstants.getCadThread());
+    }
     /**
      * 对转换后的文件进行操作(改变编码方式)
      *
@@ -259,7 +272,11 @@ public class FileHandlerService {
                 imageUrls.add(imageUrl);
             }
             try {
-                pdfReader =  new PdfReader(pdfFilePath);   //读取PDF文件
+                if (ObjectUtils.isEmpty(filePassword)){
+                    pdfReader =  new PdfReader(pdfFilePath);   //读取PDF文件
+                }else {
+                    pdfReader =  new PdfReader(pdfFilePath,filePassword.getBytes());   //读取PDF文件
+                }
             } catch (Exception e) {  //获取异常方法 判断是否有加密字符串
                 Throwable[] throwableArray = ExceptionUtils.getThrowables(e);
                 for (Throwable throwable : throwableArray) {
@@ -297,34 +314,79 @@ public class FileHandlerService {
      * @param outputFilePath pdf输出文件路径
      * @return 转换是否成功
      */
-    public String cadToPdf(String inputFilePath, String outputFilePath)  throws Exception  {
-        File outputFile = new File(outputFilePath);
-        LoadOptions opts = new LoadOptions();
-        opts.setSpecifiedEncoding(CodePages.SimpChinese);
-        com.aspose.cad.Image cadImage = Image.load(inputFilePath, opts);
-        CadRasterizationOptions cadRasterizationOptions = new CadRasterizationOptions();
-        cadRasterizationOptions.setBackgroundColor(Color.getWhite());
-        cadRasterizationOptions.setPageWidth(1400);
-        cadRasterizationOptions.setPageHeight(650);
-        cadRasterizationOptions.setAutomaticLayoutsScaling(true);
-        cadRasterizationOptions.setNoScaling(false);
-        cadRasterizationOptions.setDrawType(1);
-        PdfOptions pdfOptions = new PdfOptions();
-        pdfOptions.setVectorRasterizationOptions(cadRasterizationOptions);
-        OutputStream stream = null;
+    public String cadToPdf(String inputFilePath, String outputFilePath ,String  cadPreviewType)  throws Exception  {
+        final InterruptionTokenSource source = new InterruptionTokenSource();//CAD延时
+        Callable<String> call = () -> {
+            File outputFile = new File(outputFilePath);
+            LoadOptions opts = new LoadOptions();
+            opts.setSpecifiedEncoding(CodePages.SimpChinese);
+            Image cadImage = Image.load(inputFilePath, opts);
+            CadRasterizationOptions cadRasterizationOptions = new CadRasterizationOptions();
+            cadRasterizationOptions.setBackgroundColor(Color.getWhite());
+            cadRasterizationOptions.setPageWidth(1400);
+            cadRasterizationOptions.setPageHeight(650);
+            cadRasterizationOptions.setAutomaticLayoutsScaling(true);
+            cadRasterizationOptions.setNoScaling(false);
+            cadRasterizationOptions.setDrawType(1);
+            SvgOptions SvgOptions = null;
+            PdfOptions pdfOptions = null;
+            TiffOptions TiffOptions  = null;
+            switch (cadPreviewType) {  //新增格式方法
+                case "svg":
+                    SvgOptions = new SvgOptions();
+                    SvgOptions.setVectorRasterizationOptions(cadRasterizationOptions);
+                    SvgOptions.setInterruptionToken(source.getToken());
+                    break;
+                case "pdf":
+                    pdfOptions = new PdfOptions();
+                    pdfOptions.setVectorRasterizationOptions(cadRasterizationOptions);
+                    pdfOptions.setInterruptionToken(source.getToken());
+                    break;
+                case "tif":
+                    TiffOptions = new TiffOptions(TiffExpectedFormat.TiffJpegRgb);
+                    TiffOptions.setVectorRasterizationOptions(cadRasterizationOptions);
+                    TiffOptions.setInterruptionToken(source.getToken());
+                    break;
+            }
+            try (OutputStream stream = new FileOutputStream(outputFile)) {
+                switch (cadPreviewType) {
+                    case "svg":
+                        cadImage.save(stream, SvgOptions);
+                        break;
+                    case "pdf":
+                        cadImage.save(stream, pdfOptions);
+                        break;
+                    case "tif":
+                        cadImage.save(stream, TiffOptions);
+                        break;
+                }
+            } catch (IOException e) {
+                logger.error("PDFFileNotFoundException，inputFilePath：{}", inputFilePath, e);
+                return null;
+            } finally {
+                //关闭
+                if (cadImage != null) {   //关闭
+                    cadImage.dispose();
+                }
+                source.interrupt();  //结束任务
+            }
+            return "true";
+        };
+        Future<String> result = pool.submit(call);
         try {
-            stream = new FileOutputStream(outputFile);
-            cadImage.save(stream, pdfOptions);
-        } catch (IOException e) {
-            logger.error("PDFFileNotFoundException，inputFilePath：{}", inputFilePath, e);
-            return "null";
+            // 如果在超时时间内，没有数据返回：则抛出TimeoutException异常
+            result.get(Long.parseLong(ConfigConstants.getCadTimeout()), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            System.out.println("InterruptedException发生");
+            return null;
+        } catch (ExecutionException e) {
+            System.out.println("ExecutionException发生");
+            return null;
+        } catch (TimeoutException e) {
+            System.out.println("TimeoutException发生，意味着线程超时报错");
+            return null;
         } finally {
-            if (stream != null) {   //关闭
-                stream.close();
-            }
-            if (cadImage != null) {   //关闭
-                cadImage.close();
-            }
+            source.dispose();
         }
         return "true";
     }
@@ -355,6 +417,12 @@ public class FileHandlerService {
             fileName = fullFileName;
             type = FileType.typeFromFileName(fullFileName);
             suffix = KkFileUtils.suffixFromFileName(fullFileName);
+            // 移除fullfilename参数
+            if (url.indexOf("fullfilename=" + fullFileName + "&") > 0) {
+                url = url.replace("fullfilename=" + fullFileName + "&", "");
+            } else {
+                url = url.replace("fullfilename=" + fullFileName, "");
+            }
         } else {
             fileName = WebUtils.getFileNameFromURL(url);
             type = FileType.typeFromUrl(url);
@@ -402,6 +470,9 @@ public class FileHandlerService {
                 attribute.setUserToken(userToken);
             }
             this.setWatermarkAttribute(req, attribute);
+            String kkProxyAuthorization = req.getHeader( "kk-proxy-authorization");
+            attribute.setKkProxyAuthorization(kkProxyAuthorization);
+
         }
 
         return attribute;

@@ -16,7 +16,7 @@
         .img-area {
             text-align: center;
         }
-        img {
+        .my-photo {
             max-width: 98%;
             margin:0 auto;
             border-radius:3px;
@@ -24,7 +24,6 @@
             background:#FBFBFB;
             border:1px solid #ddd;
             margin:1px auto;
-            margin-left: 15px;
             padding:5px;
         }
 
@@ -32,14 +31,14 @@
 </head>
 <body>
 <div class="container">
-    <#list imgurls as img>
+    <#list imgUrls as img>
         <div class="img-area">
             <img class="my-photo" alt="loading"  data-src="${img}" src="images/loading.gif">
         </div>
     </#list>
 </div>
 <#if "false" == switchDisabled>
-    <img src="images/pdf.svg" width="63" height="63" style="position: fixed; cursor: pointer; top: 40%; right: 48px; z-index: 999;" alt="使用PDF预览" title="使用PDF预览" onclick="changePreviewType('pdf')"/>
+    <img src="images/pdf.svg" width="48" height="48" style="position: fixed; cursor: pointer; top: 40%; right: 48px; z-index: 999;" alt="使用PDF预览" title="使用PDF预览" onclick="changePreviewType('pdf')"/>
 </#if>
 <script>
     window.onload = function () {

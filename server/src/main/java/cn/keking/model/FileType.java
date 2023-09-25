@@ -21,32 +21,32 @@ public enum FileType {
     MEDIA("mediaFilePreviewImpl"),
     MARKDOWN("markdownFilePreviewImpl"),
     XML("xmlFilePreviewImpl"),
-    FLV("flvFilePreviewImpl"),
     CAD("cadFilePreviewImpl"),
     TIFF("tiffFilePreviewImpl"),
     OFD("ofdFilePreviewImpl"),
     EML("emlFilePreviewImpl"),
-    Online3D("online3DFilePreviewImpl"),
+    ONLINE3D("online3DFilePreviewImpl"),
     XMIND("xmindFilePreviewImpl"),
     SVG("svgFilePreviewImpl"),
-    Epub("epubFilePreviewImpl"),
+    EPUB("epubFilePreviewImpl"),
     BPMN("bpmnFilePreviewImpl"),
     DCM("dcmFilePreviewImpl"),
-    DRAWUI("drawioFilePreviewImpl");
+    DRAWIO("drawioFilePreviewImpl");
 
-    private static final String[] OFFICE_TYPES = {"docx", "wps", "doc", "docm", "xls", "xlsx", "csv" ,"xlsm", "ppt", "pptx", "vsd", "rtf", "odt", "wmf", "emf", "dps", "et", "ods", "ots", "tsv", "odp", "otp", "sxi", "ott", "vsdx", "fodt", "fods", "xltx","tga","psd","dotm","ett","xlt","xltm","wpt","dot","xlam","dotx","xla","pages"};
+    private static final String[] OFFICE_TYPES = {"docx", "wps", "doc", "docm", "xls", "xlsx", "csv" ,"xlsm", "ppt", "pptx", "vsd", "rtf", "odt", "wmf", "emf", "dps", "et", "ods", "ots", "tsv", "odp", "otp", "sxi", "ott", "vsdx", "fodt", "fods", "xltx","tga","psd","dotm","ett","xlt","xltm","wpt","dot","xlam","dotx","xla","pages", "eps"};
     private static final String[] PICTURE_TYPES = {"jpg", "jpeg", "png", "gif", "bmp", "ico", "jfif", "webp"};
     private static final String[] ARCHIVE_TYPES = {"rar", "zip", "jar", "7-zip", "tar", "gzip", "7z"};
-    private static final String[] Online3D_TYPES = {"obj", "3ds", "stl", "ply", "off", "3dm", "fbx", "dae", "wrl", "3mf", "ifc","glb","o3dv","gltf","stp","bim","fcstd","step","iges","brep"};
+    private static final String[] ONLINE3D_TYPES = {"obj", "3ds", "stl", "ply", "off", "3dm", "fbx", "dae", "wrl", "3mf", "ifc","glb","o3dv","gltf","stp","bim","fcstd","step","iges","brep"};
     private static final String[] EML_TYPES = {"eml"};
     private static final String[] XMIND_TYPES = {"xmind"};
-    private static final String[] Epub_TYPES = {"epub"};
+    private static final String[] EPUB_TYPES = {"epub"};
     private static final String[] DCM_TYPES = {"dcm"};
-    private static final String[] DRAWUI_TYPES = {"drawio"};
+    private static final String[] DRAWIO_TYPES = {"drawio"};
+    private static final String[] XML_TYPES = {"xml","xbrl"};
     private static final String[] TIFF_TYPES = {"tif", "tiff"};
     private static final String[] OFD_TYPES = {"ofd"};
     private static final String[] SVG_TYPES = {"svg"};
-    private static final String[] CAD_TYPES = {"dwg", "dxf", "dwf"};
+    private static final String[] CAD_TYPES = {"dwg", "dxf", "dwf", "iges", "igs", "dwt", "dng", "ifc", "dwfx", "stl", "cf2", "plt"};
     private static final String[] SSIM_TEXT_TYPES = ConfigConstants.getSimText();
     private static final String[] CODES = {"java", "c", "php", "go", "python", "py", "js", "html", "ftl", "css", "lua", "sh", "rb", "yaml", "yml", "json", "h", "cpp", "cs", "aspx", "jsp", "sql"};
     private static final String[] MEDIA_TYPES = ConfigConstants.getMedia();
@@ -87,8 +87,8 @@ public enum FileType {
         for (String svg : SVG_TYPES) {
             FILE_TYPE_MAPPER.put(svg, FileType.SVG);
         }
-        for (String epub : Epub_TYPES) {
-            FILE_TYPE_MAPPER.put(epub, FileType.Epub);
+        for (String epub : EPUB_TYPES) {
+            FILE_TYPE_MAPPER.put(epub, FileType.EPUB);
         }
         for (String eml : EML_TYPES) {
             FILE_TYPE_MAPPER.put(eml, FileType.EML);
@@ -96,19 +96,20 @@ public enum FileType {
         for (String xmind : XMIND_TYPES) {
             FILE_TYPE_MAPPER.put(xmind, FileType.XMIND);
         }
-        for (String online3D : Online3D_TYPES) {
-            FILE_TYPE_MAPPER.put(online3D, FileType.Online3D);
+        for (String online3D : ONLINE3D_TYPES) {
+            FILE_TYPE_MAPPER.put(online3D, FileType.ONLINE3D);
         }
         for (String dcm : DCM_TYPES) {
             FILE_TYPE_MAPPER.put(dcm, FileType.DCM);
         }
-        for (String drawio : DRAWUI_TYPES) {
-            FILE_TYPE_MAPPER.put(drawio, FileType.DRAWUI);
+        for (String drawio : DRAWIO_TYPES) {
+            FILE_TYPE_MAPPER.put(drawio, FileType.DRAWIO);
+        }
+        for (String xml : XML_TYPES) {
+            FILE_TYPE_MAPPER.put(xml, FileType.XML);
         }
         FILE_TYPE_MAPPER.put("md", FileType.MARKDOWN);
-        FILE_TYPE_MAPPER.put("xml", FileType.XML);
         FILE_TYPE_MAPPER.put("pdf", FileType.PDF);
-        FILE_TYPE_MAPPER.put("flv", FileType.FLV);
         FILE_TYPE_MAPPER.put("bpmn", FileType.BPMN);
     }
 

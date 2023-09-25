@@ -41,11 +41,17 @@ public class AttributeSetFilter implements Filter {
         request.setAttribute("pdfDownloadDisable", ConfigConstants.getPdfDownloadDisable());
         request.setAttribute("pdfBookmarkDisable", ConfigConstants.getPdfBookmarkDisable());
         request.setAttribute("pdfWatermarkDisable", ConfigConstants.getPdfWatermarkDisable());
+        request.setAttribute("pdfDisableEditing", ConfigConstants.getPdfDisableEditing());
         request.setAttribute("fileKey", httpRequest.getParameter("fileKey"));
         request.setAttribute("switchDisabled", ConfigConstants.getOfficePreviewSwitchDisabled());
         request.setAttribute("fileUploadDisable", ConfigConstants.getFileUploadDisable());
-        request.setAttribute("beiAn", ConfigConstants.getBeiAn());
+        request.setAttribute("beian", ConfigConstants.getBeian());
         request.setAttribute("size", ConfigConstants.maxSize());
+        request.setAttribute("deleteCaptcha", ConfigConstants.getDeleteCaptcha());
+        request.setAttribute("homePpageNumber", ConfigConstants.gethomePpageNumber());
+        request.setAttribute("homePagination", ConfigConstants.gethomePagination());
+        request.setAttribute("homePageSize", ConfigConstants.gethomePageSize());
+        request.setAttribute("homeSearch", ConfigConstants.gethomeSearch());
     }
 
     /**

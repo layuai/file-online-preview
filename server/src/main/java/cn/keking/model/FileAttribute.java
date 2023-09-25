@@ -30,6 +30,12 @@ public class FileAttribute {
     public Float watermarkWidth;
     public Float watermarkHeight;
     public Float watermarkAngle;
+    /**
+     * 代理请求到文件服务器的认证请求头，格式如下：
+     * {“username”:"test","password":"test"}
+     * 请求文件服务器时，会将 json 直接塞到请求头里
+     */
+    private String kkProxyAuthorization;
 
     public FileAttribute() {
     }
@@ -213,5 +219,11 @@ public class FileAttribute {
 
     public void setWatermarkAngle(Float watermarkAngle) {
         this.watermarkAngle = watermarkAngle;
+    public String getKkProxyAuthorization() {
+        return kkProxyAuthorization;
+    }
+
+    public void setKkProxyAuthorization(String kkProxyAuthorization) {
+        this.kkProxyAuthorization = kkProxyAuthorization;
     }
 }

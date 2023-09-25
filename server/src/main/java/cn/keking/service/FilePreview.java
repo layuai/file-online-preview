@@ -9,7 +9,6 @@ import org.springframework.ui.Model;
  */
 public interface FilePreview {
 
-    String FLV_FILE_PREVIEW_PAGE = "flv";
     String PDF_FILE_PREVIEW_PAGE = "pdf";
     String PPT_FILE_PREVIEW_PAGE = "ppt";
     String COMPRESS_FILE_PREVIEW_PAGE = "compress";
@@ -18,8 +17,8 @@ public interface FilePreview {
     String TIFF_FILE_PREVIEW_PAGE = "tiff";
     String OFD_FILE_PREVIEW_PAGE = "ofd";
     String SVG_FILE_PREVIEW_PAGE = "svg";
-    String Online3D_FILE_PAGE = "online3D";
-    String EpubFilePreviewImpl = "epub";
+    String ONLINE3D_PREVIEW_PAGE = "online3D";
+    String EPUB_PREVIEW_PAGE = "epub";
     String XMIND_FILE_PREVIEW_PAGE = "xmind";
     String EML_FILE_PREVIEW_PAGE = "eml";
     String OFFICE_PICTURE_FILE_PREVIEW_PAGE = "officePicture";
@@ -33,6 +32,7 @@ public interface FilePreview {
     String DRAWUI_FILE_PREVIEW_PAGE = "drawio";
     String NOT_SUPPORTED_FILE_PAGE = "fileNotSupported";
     String XLSX_FILE_PREVIEW_PAGE = "officeweb";
+    String CSV_FILE_PREVIEW_PAGE = "csv";
 
     String filePreviewHandle(String url, Model model, FileAttribute fileAttribute);
 }
