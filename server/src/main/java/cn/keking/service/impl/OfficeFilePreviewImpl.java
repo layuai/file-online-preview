@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -141,7 +142,11 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!isHtml && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, baseUrl, cacheFileName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-        cacheFileName =   URLEncoder.encode(cacheFileName).replaceAll("\\+", "%20");
+        try{
+            cacheFileName =   URLEncoder.encode(cacheFileName, "utf8").replaceAll("\\+", "%20");
+        } catch(UnsupportedEncodingException e) {
+
+        }
         model.addAttribute("pdfUrl", cacheFileName);
         return isHtml ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
