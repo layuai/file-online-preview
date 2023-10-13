@@ -59,7 +59,10 @@ public class SimTextFilePreviewImpl implements FilePreview {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        model.addAttribute("textData", Base64.encodeBase64String(fileData.getBytes()));
+        try {
+            model.addAttribute("textData", Base64.encodeBase64String(fileData.getBytes("utf8")));
+        } catch (UnsupportedEncodingException e) {
+        }
         return TXT_FILE_PREVIEW_PAGE;
     }
 

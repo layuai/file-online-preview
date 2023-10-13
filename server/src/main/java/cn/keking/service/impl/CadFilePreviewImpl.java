@@ -11,8 +11,20 @@ import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 
 import static cn.keking.service.impl.OfficeFilePreviewImpl.getPreviewType;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * @author chenjh
@@ -69,6 +81,23 @@ public class CadFilePreviewImpl implements FilePreview {
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
                     fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+                }
+                if("svg".equalsIgnoreCase(cadPreviewType)) {
+                    Document document = null;
+                    try{
+                        File f = new File(outFilePath);
+                        SAXReader saxReader = new SAXReader();
+                        document = saxReader.read(f);
+                        Element root = document.getRootElement();
+                        List list = root.elements("g");
+                        Element last = (Element)list.get(list.size() - 1);
+                        root.remove(last);
+                        XMLWriter writer = new XMLWriter(new FileWriter(f));
+                        writer.write(document);
+                        writer.close();
+                    }catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
