@@ -49,7 +49,7 @@ public class FtpUtils {
         FTPClient ftpClient = connect(host, port, username, password, controlEncoding);
         OutputStream outputStream = Files.newOutputStream(Paths.get(localFilePath));
         ftpClient.enterLocalPassiveMode();
-        boolean downloadResult = ftpClient.retrieveFile(URLDecoder.decode(remoteFilePath, ftpControlEncoding), outputStream);
+        boolean downloadResult = ftpClient.retrieveFile(URLDecoder.decode(remoteFilePath, "UTF-8"), outputStream);
         LOGGER.debug("FTP download result {}", downloadResult);
         outputStream.flush();
         outputStream.close();
