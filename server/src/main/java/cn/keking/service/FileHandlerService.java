@@ -36,6 +36,8 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -195,11 +197,13 @@ public class FileHandlerService implements InitializingBean {
      * @param index 图片索引
      * @return 图片访问地址
      */
-    private String getPdf2jpgUrl(String pdfName, int index) {
+    private String getPdf2jpgUrl(String pdfName, int index,String fileKey) {
         String baseUrl = BaseUrlFilter.getBaseUrl();
         String pdfFolder = pdfName.substring(0, pdfName.length() - 4);
         String urlPrefix;
-
+        if (!ObjectUtils.isEmpty(fileKey)) { //压缩包文件 直接赋予路径 不予下载
+            pdfFolder = "kkpackage"+pdfFolder;
+        }
         try {
             urlPrefix = baseUrl + URLEncoder.encode(pdfFolder, uriEncoding).replaceAll("\\+", "%20");
         } catch (UnsupportedEncodingException e) {
@@ -215,14 +219,14 @@ public class FileHandlerService implements InitializingBean {
      * @param pdfName pdf文件名称
      * @return 图片访问集合
      */
-    private List<String> loadPdf2jpgCache(String pdfFilePath, String pdfName) {
+    private List<String> loadPdf2jpgCache(String pdfFilePath, String pdfName,String fileKey) {
         List<String> imageUrls = new ArrayList<>();
         Integer imageCount = this.getPdf2jpgCache(pdfFilePath);
         if (Objects.isNull(imageCount)) {
             return imageUrls;
         }
         IntStream.range(0, imageCount).forEach(i -> {
-            String imageUrl = this.getPdf2jpgUrl(pdfName, i);
+            String imageUrl = this.getPdf2jpgUrl(pdfName, i,fileKey);
             imageUrls.add(imageUrl);
         });
         return imageUrls;
@@ -237,12 +241,17 @@ public class FileHandlerService implements InitializingBean {
      */
     public List<String> pdf2jpg(String pdfFilePath, String pdfName, FileAttribute fileAttribute) throws Exception {
         boolean forceUpdatedCache = fileAttribute.forceUpdatedCache();
+        String fileKey = fileAttribute.getFileKey();
+        String ysbpdfFilePath = null;
+        if (!ObjectUtils.isEmpty(fileKey)) { //压缩包文件 PDF文件路径修改
+            ysbpdfFilePath =  pdfFilePath.replace(fileDir, fileDir+"kkpackage"); //压缩包里面文件PDF 生成路径替换
+        }
         String filePassword = fileAttribute.getFilePassword();
         String pdfPassword = null;
         PDDocument doc = null;
         PdfReader pdfReader = null;
         if (!forceUpdatedCache) {
-            List<String> cacheResult = this.loadPdf2jpgCache(pdfFilePath, pdfName);
+            List<String> cacheResult = this.loadPdf2jpgCache(pdfFilePath, pdfName,fileKey);
             if (!CollectionUtils.isEmpty(cacheResult)) {
                 return cacheResult;
             }
@@ -257,8 +266,8 @@ public class FileHandlerService implements InitializingBean {
             doc.setResourceCache(new NotResourceCache());
             int pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
-            int index = pdfFilePath.lastIndexOf(".");
-            String folder = pdfFilePath.substring(0, index);
+            int index = ysbpdfFilePath.lastIndexOf(".");
+            String folder = ysbpdfFilePath.substring(0, index);
             File path = new File(folder);
             if (!path.exists() && !path.mkdirs()) {
                 logger.error("创建转换文件【{}】目录失败，请检查目录权限！", folder);
@@ -268,7 +277,7 @@ public class FileHandlerService implements InitializingBean {
                 imageFilePath = folder + File.separator + pageIndex + PDF2JPG_IMAGE_FORMAT;
                 BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, ConfigConstants.getPdf2JpgDpi(), ImageType.RGB);
                 ImageIOUtil.writeImage(image, imageFilePath, ConfigConstants.getPdf2JpgDpi());
-                String imageUrl = this.getPdf2jpgUrl(pdfName, pageIndex);
+                String imageUrl = this.getPdf2jpgUrl(pdfName, pageIndex,fileKey);
                 imageUrls.add(imageUrl);
             }
             try {
@@ -413,6 +422,7 @@ public class FileHandlerService implements InitializingBean {
         FileType type;
         String fileName;
         String fullFileName = WebUtils.getUrlParameterReg(url, "fullfilename");
+        String fileKey = WebUtils.getUrlParameterReg(url, "kkCompressfileKey"); //压缩包指定特殊符号
         if (StringUtils.hasText(fullFileName)) {
             fileName = fullFileName;
             type = FileType.typeFromFileName(fullFileName);
@@ -428,12 +438,14 @@ public class FileHandlerService implements InitializingBean {
             type = FileType.typeFromUrl(url);
             suffix = WebUtils.suffixFromUrl(url);
         }
-        if (url.contains("?fileKey=")) {
-            String[] strs = url.split("=");  //处理解压后有反代情况下 文件的路径
-            String  urlStrr = getSubString(url, strs[1]);
-            urlStrr =  urlStrr.substring(0,urlStrr.lastIndexOf("?"));
-            fileName = strs[1] + urlStrr.trim();
-            attribute.setSkipDownLoad(true);
+        if (!ObjectUtils.isEmpty(fileKey)) {  //判断是否使用特定压缩包符号
+            try {
+                URL urll = new URL(url);
+                fileName = urll.getPath(); //压缩包类型文件 获取解压后的绝对地址 不在执行重复下载方法
+                attribute.setSkipDownLoad(true);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
         url = WebUtils.encodeUrlFileName(url);
         fileName = KkFileUtils.htmlEscape(fileName);  //文件名处理
@@ -444,7 +456,6 @@ public class FileHandlerService implements InitializingBean {
         if (req != null) {
             String officePreviewType = req.getParameter("officePreviewType");
             String forceUpdatedCache = req.getParameter("forceUpdatedCache");
-            String fileKey = WebUtils.getUrlParameterReg(url, "fileKey");
             if (StringUtils.hasText(officePreviewType)) {
                 attribute.setOfficePreviewType(officePreviewType);
             }
