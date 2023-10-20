@@ -1,5 +1,6 @@
 package cn.keking.service.cache.impl;
 
+import cn.keking.service.ZtreeNodeVo;
 import cn.keking.service.cache.CacheService;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
@@ -25,6 +26,7 @@ public class CacheServiceJDKImpl implements CacheService {
 
     private Map<String, String> pdfCache;
     private Map<String, List<String>> imgCache;
+    private Map<String, List<ZtreeNodeVo>> CompressCache;
     private Map<String, Integer> pdfImagesCache;
     private Map<String, String> mediaConvertCache;
     private static final int QUEUE_SIZE = 500000;
@@ -34,6 +36,7 @@ public class CacheServiceJDKImpl implements CacheService {
     public void initCache(){
         initPDFCachePool(CacheService.DEFAULT_PDF_CAPACITY);
         initIMGCachePool(CacheService.DEFAULT_IMG_CAPACITY);
+        initCompressCachePool(CacheService.DEFAULT_COMPRESS_CAPACITY);
         initPdfImagesCachePool(CacheService.DEFAULT_PDFIMG_CAPACITY);
         initMediaConvertCachePool(CacheService.DEFAULT_MEDIACONVERT_CAPACITY);
     }
@@ -46,6 +49,10 @@ public class CacheServiceJDKImpl implements CacheService {
     @Override
     public void putImgCache(String key, List<String> value) {
         imgCache.put(key, value);
+    }
+    @Override
+    public void putCompressCache(String key, List<ZtreeNodeVo> value) {
+        CompressCache.put(key, value);
     }
 
     @Override
@@ -69,6 +76,19 @@ public class CacheServiceJDKImpl implements CacheService {
             return new ArrayList<>();
         }
         return imgCache.get(key);
+    }
+
+    @Override
+    public Map<String, List<ZtreeNodeVo>> getCompressCache() {
+        return CompressCache;
+    }
+
+    @Override
+    public List<ZtreeNodeVo> getCompressCache(String key) {
+        if(StringUtils.isEmpty(key)){
+            return new ArrayList<>();
+        }
+        return CompressCache.get(key);
     }
 
     @Override
@@ -100,6 +120,7 @@ public class CacheServiceJDKImpl implements CacheService {
     public void cleanCache() {
         initPDFCachePool(CacheService.DEFAULT_PDF_CAPACITY);
         initIMGCachePool(CacheService.DEFAULT_IMG_CAPACITY);
+        initCompressCachePool(CacheService.DEFAULT_COMPRESS_CAPACITY);
         initPdfImagesCachePool(CacheService.DEFAULT_PDFIMG_CAPACITY);
     }
 
@@ -123,6 +144,12 @@ public class CacheServiceJDKImpl implements CacheService {
     @Override
     public void initIMGCachePool(Integer capacity) {
         imgCache = new ConcurrentLinkedHashMap.Builder<String, List<String>>()
+                .maximumWeightedCapacity(capacity).weigher(Weighers.singleton())
+                .build();
+    }
+    @Override
+    public void initCompressCachePool(Integer capacity) {
+        CompressCache = new ConcurrentLinkedHashMap.Builder<String, List<ZtreeNodeVo>>()
                 .maximumWeightedCapacity(capacity).weigher(Weighers.singleton())
                 .build();
     }

@@ -147,7 +147,19 @@ public class FileHandlerService implements InitializingBean {
     public void putImgCache(String fileKey, List<String> imgs) {
         cacheService.putImgCache(fileKey, imgs);
     }
+    /**
+     * 获取压缩包文件缓存树
+     */
+    public List<ZtreeNodeVo> getCompressCache(String fileKey) {
+        return cacheService.getCompressCache(fileKey);
+    }
 
+    /**
+     * 添加压缩包文件缓存树
+     */
+    public void putCompressCache(String fileKey, List<ZtreeNodeVo> imgs) {
+        cacheService.putCompressCache(fileKey, imgs);
+    }
     /**
      cad定义线程池
      */

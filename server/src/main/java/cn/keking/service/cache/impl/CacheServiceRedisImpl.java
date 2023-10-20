@@ -1,5 +1,6 @@
 package cn.keking.service.cache.impl;
 
+import cn.keking.service.ZtreeNodeVo;
 import cn.keking.service.cache.CacheService;
 import org.redisson.Redisson;
 import org.redisson.api.RBlockingQueue;
@@ -32,6 +33,8 @@ public class CacheServiceRedisImpl implements CacheService {
     @Override
     public void initIMGCachePool(Integer capacity) { }
     @Override
+    public void initCompressCachePool(Integer capacity) { }
+    @Override
     public void initPdfImagesCachePool(Integer capacity) { }
 
     @Override
@@ -48,6 +51,12 @@ public class CacheServiceRedisImpl implements CacheService {
     @Override
     public void putImgCache(String key, List<String> value) {
         RMapCache<String, List<String>> convertedList = redissonClient.getMapCache(FILE_PREVIEW_IMGS_KEY);
+        convertedList.fastPut(key, value);
+    }
+
+    @Override
+    public void putCompressCache(String key, List<ZtreeNodeVo> value) {
+        RMapCache<String, List<ZtreeNodeVo>> convertedList = redissonClient.getMapCache(FILE_PREVIEW_COMPRESS_KEY);
         convertedList.fastPut(key, value);
     }
 
@@ -70,6 +79,17 @@ public class CacheServiceRedisImpl implements CacheService {
     @Override
     public List<String> getImgCache(String key) {
         RMapCache<String, List<String>> convertedList = redissonClient.getMapCache(FILE_PREVIEW_IMGS_KEY);
+        return convertedList.get(key);
+    }
+
+    @Override
+    public Map<String, List<ZtreeNodeVo>>  getCompressCache() {
+        return redissonClient.getMapCache(FILE_PREVIEW_COMPRESS_KEY);
+    }
+
+    @Override
+    public List<ZtreeNodeVo> getCompressCache(String key) {
+        RMapCache<String, List<ZtreeNodeVo>> convertedList = redissonClient.getMapCache(FILE_PREVIEW_COMPRESS_KEY);
         return convertedList.get(key);
     }
 
