@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by kl on 2018/1/17.
@@ -69,6 +70,12 @@ public class OfficeFilePreviewImpl implements FilePreview {
                 }
             }
         }
+        String ConvertRecords = FileHandlerService.queryRecords(forceUpdatedCache,pdfName,fileHandlerService);
+        if (Objects.equals(ConvertRecords, "error"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]转换失败，请联系系统管理员");
+        }else if (Objects.equals(ConvertRecords, "convert"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]正在转换中,请稍后刷新访问");
+        }
         if (forceUpdatedCache|| !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
         ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
@@ -110,18 +117,20 @@ public class OfficeFilePreviewImpl implements FilePreview {
             } else {
                 if (StringUtils.hasText(outFilePath)) {
                     try {
+                        FileHandlerService.ConvertingMap.put(pdfName, pdfName);  //添加转换符号
                         officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
                     } catch (OfficeException e) {
                         if (isPwdProtectedOffice && !OfficeUtils.isCompatible(filePath, filePassword)) {
+                            FileHandlerService.ConvertingMap.remove(pdfName, pdfName);  //加密文件删除缓存转换符号
                             // 加密文件密码错误，提示重新输入
                             model.addAttribute("needFilePassword", true);
                             model.addAttribute("filePasswordError", true);
                             return EXEL_FILE_PREVIEW_PAGE;
                         }
-
+                        fileHandlerService.addConvertedFile(pdfName, "error");  //失败加入缓存
                         return otherFilePreview.notSupportedFile(model, fileAttribute, "抱歉，该文件版本不兼容，文件版本错误。");
                     }
-
+                    FileHandlerService.ConvertingMap.remove(pdfName, pdfName);  //转换成功删除缓存转换符号
                     if (isHtml) {
                         // 对转换后的文件进行操作(改变编码方式)
                         fileHandlerService.doActionConvertedFile(outFilePath);

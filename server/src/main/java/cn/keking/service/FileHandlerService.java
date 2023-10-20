@@ -38,10 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
@@ -499,5 +496,23 @@ public class FileHandlerService implements InitializingBean {
      */
     public String getConvertedMedias(String key) {
         return cacheService.getMediaConvertCache(key);
+    }
+    /**
+     * 记录是否转换
+     */
+    public static Map<String, String> ConvertingMap =  new HashMap<>();
+    public static String queryRecords(boolean forceUpdatedCache, String pdfName, FileHandlerService fileHandlerService) {
+        if(forceUpdatedCache){ //如果使用了更新缓存命令 清空执行标记
+            ConvertingMap.remove(pdfName, pdfName); //删除转换符号
+        }else if(Objects.equals(fileHandlerService.listConvertedFiles().get(pdfName), "error")) //判断是否转换失败
+        {
+            return "error";
+        }
+        if(Objects.equals(ConvertingMap.get(pdfName), pdfName))  //判断是否正在转换中
+        {
+            return "convert";
+        }else {
+            return null;
+        }
     }
 }

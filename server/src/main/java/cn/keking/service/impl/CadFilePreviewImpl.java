@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
+
 import static cn.keking.service.impl.OfficeFilePreviewImpl.getPreviewType;
 
 /**
@@ -44,6 +46,12 @@ public class CadFilePreviewImpl implements FilePreview {
         String cadPreviewType = ConfigConstants.getCadPreviewType();
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".")) + suffix +"." + cadPreviewType ; //生成文件添加类型后缀 防止同名文件
         String outFilePath = FILE_DIR + pdfName;
+        String ConvertRecords = FileHandlerService.queryRecords(forceUpdatedCache,pdfName,fileHandlerService);
+        if (Objects.equals(ConvertRecords, "error"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]转换失败，请联系系统管理员");
+        }else if (Objects.equals(ConvertRecords, "convert"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]正在转换中,请稍后刷新访问");
+        }
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
         if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
             String filePath;
@@ -55,13 +63,15 @@ public class CadFilePreviewImpl implements FilePreview {
             String imageUrls = null;
             if (StringUtils.hasText(outFilePath)) {
                 try {
+                    FileHandlerService.ConvertingMap.put(pdfName, pdfName);  //添加转换符号
                     imageUrls =  fileHandlerService.cadToPdf(filePath, outFilePath,cadPreviewType);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 if (imageUrls == null ) {
-                    return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
+                    return otherFilePreview.notSupportedFile(model, fileAttribute, "CAD转换异常，请联系管理员");
                 }
+                FileHandlerService.ConvertingMap.remove(pdfName, pdfName);  //转换成功删除缓存转换符号
                 //是否保留CAD源文件
                 if( ConfigConstants.getDeleteSourceFile()) {
                     KkFileUtils.deleteFileByPath(filePath);
