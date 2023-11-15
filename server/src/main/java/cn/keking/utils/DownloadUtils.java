@@ -86,7 +86,7 @@ public class DownloadUtils {
         }
         try {
             URL url = WebUtils.normalizedURL(urlStr);
-            // 此处去除fullfilename参数，防止传到对面服务直接报错
+            // 此处去除fullfilename参数
             urlStr = cleanQuery(URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name()));
 
             if (!fileAttribute.getSkipDownLoad()) {
@@ -101,7 +101,6 @@ public class DownloadUtils {
                           proxyAuthorizationMap.entrySet().forEach(entry-> request.getHeaders().set(entry.getKey(), entry.getValue()));
                         }
                     };
-                    // 此处去除fullfilename参数，防止传到对面服务直接报错
                     urlStr = URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
                     restTemplate.execute(urlStr, HttpMethod.GET, requestCallback, fileResponse -> {
                         FileUtils.copyToFile(fileResponse.getBody(), realFile);
