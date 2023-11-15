@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static cn.keking.utils.KkFileUtils.isFtpUrl;
 import static cn.keking.utils.KkFileUtils.isHttpUrl;
@@ -84,6 +86,9 @@ public class DownloadUtils {
         }
         try {
             URL url = WebUtils.normalizedURL(urlStr);
+            // 此处去除fullfilename参数，防止传到对面服务直接报错
+            urlStr = cleanQuery(URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name()));
+
             if (!fileAttribute.getSkipDownLoad()) {
                 if (isHttpUrl(url)) {
                     File realFile = new File(realPath);
@@ -96,6 +101,7 @@ public class DownloadUtils {
                           proxyAuthorizationMap.entrySet().forEach(entry-> request.getHeaders().set(entry.getKey(), entry.getValue()));
                         }
                     };
+                    // 此处去除fullfilename参数，防止传到对面服务直接报错
                     urlStr = URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
                     restTemplate.execute(urlStr, HttpMethod.GET, requestCallback, fileResponse -> {
                         FileUtils.copyToFile(fileResponse.getBody(), realFile);
@@ -127,6 +133,18 @@ public class DownloadUtils {
         }
     }
 
+    /**
+     * 去除fullfilename参数
+     *
+     * @param urlStr
+     * @return
+     */
+    private static String cleanQuery(String urlStr) {
+        // 去除特定参数字段
+        Pattern pattern = Pattern.compile("(&fullfilename=[^&]*)");
+        Matcher matcher = pattern.matcher(urlStr);
+        return matcher.replaceAll("");
+    }
 
     /**
      * 获取真实文件绝对路径
