@@ -23,11 +23,13 @@ import java.util.regex.Pattern;
 
 import static cn.keking.utils.KkFileUtils.isFtpUrl;
 import static cn.keking.utils.KkFileUtils.isHttpUrl;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
+
 /**
  * @author yudian-it
  */
@@ -87,7 +89,7 @@ public class DownloadUtils {
         try {
             URL url = WebUtils.normalizedURL(urlStr);
             // 此处去除fullfilename参数
-            urlStr = cleanQuery(URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name()));
+            urlStr = cleanQueryParam(URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name()));
 
             if (!fileAttribute.getSkipDownLoad()) {
                 if (isHttpUrl(url)) {
@@ -95,10 +97,10 @@ public class DownloadUtils {
                     RequestCallback requestCallback = request -> {
                         request.getHeaders()
                                 .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
-                       String proxyAuthorization = fileAttribute.getKkProxyAuthorization();
-                        if(StringUtils.hasText(proxyAuthorization)){
-                          Map<String,String>  proxyAuthorizationMap = mapper.readValue(proxyAuthorization, Map.class);
-                          proxyAuthorizationMap.entrySet().forEach(entry-> request.getHeaders().set(entry.getKey(), entry.getValue()));
+                        String proxyAuthorization = fileAttribute.getKkProxyAuthorization();
+                        if (StringUtils.hasText(proxyAuthorization)) {
+                            Map<String, String> proxyAuthorizationMap = mapper.readValue(proxyAuthorization, Map.class);
+                            proxyAuthorizationMap.entrySet().forEach(entry -> request.getHeaders().set(entry.getKey(), entry.getValue()));
                         }
                     };
                     urlStr = URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
@@ -138,7 +140,7 @@ public class DownloadUtils {
      * @param urlStr
      * @return
      */
-    private static String cleanQuery(String urlStr) {
+    public static String cleanQueryParam(String urlStr) {
         // 去除特定参数字段
         Pattern pattern = Pattern.compile("(&fullfilename=[^&]*)");
         Matcher matcher = pattern.matcher(urlStr);
