@@ -71,6 +71,8 @@ public class DownloadUtils {
             return response;
         }
         assert urlStr != null;
+        // 在此重写文件名后缀(getRelFilePath方法中一样，否则realPath返回cunzhai,拼接文件名时,存在文件名后缀大小写导致Linux出现文件名不存在问题)
+        fileName = fileName.replace(fileName.substring(fileName.lastIndexOf(".") + 1), fileAttribute.getSuffix());
         if (urlStr.contains("?fileKey=")) {
             response.setContent(fileDir + fileName);
             response.setMsg(fileName);
