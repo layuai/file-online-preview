@@ -20,6 +20,16 @@ public class FileAttribute {
     private Boolean skipDownLoad = false;
     private Boolean forceUpdatedCache = false;
 
+    public String watermarkTxt;
+    public Integer watermarkXSpace;
+    public Integer watermarkYSpace;
+    public String watermarkFont;
+    public String watermarkFontsize;
+    public String watermarkColor;
+    public Float watermarkAlpha;
+    public Float watermarkWidth;
+    public Float watermarkHeight;
+    public Float watermarkAngle;
     /**
      * 代理请求到文件服务器的认证请求头，格式如下：
      * {“username”:"test","password":"test"}
@@ -131,6 +141,84 @@ public class FileAttribute {
         this.forceUpdatedCache = forceUpdatedCache;
     }
 
+    public String getWatermarkTxt() {
+        return watermarkTxt;
+    }
+
+    public void setWatermarkTxt(String watermarkTxt) {
+        this.watermarkTxt = watermarkTxt;
+    }
+
+    public Integer getWatermarkXSpace() {
+        return watermarkXSpace;
+    }
+
+    public void setWatermarkXSpace(Integer watermarkXSpace) {
+        this.watermarkXSpace = watermarkXSpace;
+    }
+
+    public Integer getWatermarkYSpace() {
+        return watermarkYSpace;
+    }
+
+    public void setWatermarkYSpace(Integer watermarkYSpace) {
+        this.watermarkYSpace = watermarkYSpace;
+    }
+
+    public String getWatermarkFont() {
+        return watermarkFont;
+    }
+
+    public void setWatermarkFont(String watermarkFont) {
+        this.watermarkFont = watermarkFont;
+    }
+
+    public String getWatermarkFontsize() {
+        return watermarkFontsize;
+    }
+
+    public void setWatermarkFontsize(String watermarkFontsize) {
+        this.watermarkFontsize = watermarkFontsize;
+    }
+
+    public String getWatermarkColor() {
+        return watermarkColor;
+    }
+
+    public void setWatermarkColor(String watermarkColor) {
+        this.watermarkColor = watermarkColor;
+    }
+
+    public Float getWatermarkAlpha() {
+        return watermarkAlpha;
+    }
+
+    public void setWatermarkAlpha(Float watermarkAlpha) {
+        this.watermarkAlpha = watermarkAlpha;
+    }
+
+    public Float getWatermarkWidth() {
+        return watermarkWidth;
+    }
+
+    public void setWatermarkWidth(Float watermarkWidth) {
+        this.watermarkWidth = watermarkWidth;
+    }
+
+    public Float getWatermarkHeight() {
+        return watermarkHeight;
+    }
+
+    public void setWatermarkHeight(Float watermarkHeight) {
+        this.watermarkHeight = watermarkHeight;
+    }
+
+    public Float getWatermarkAngle() {
+        return watermarkAngle;
+    }
+
+    public void setWatermarkAngle(Float watermarkAngle) {
+        this.watermarkAngle = watermarkAngle;
     public String getKkProxyAuthorization() {
         return kkProxyAuthorization;
     }

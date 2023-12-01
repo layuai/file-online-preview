@@ -41,6 +41,7 @@ public class ConfigConstants {
     private static String pdfPrintDisable;
     private static String pdfDownloadDisable;
     private static String pdfBookmarkDisable;
+    private static String pdfWatermarkDisable;
     private static Boolean fileUploadDisable;
     private static String tifPreviewType;
     private static String beian;
@@ -83,6 +84,7 @@ public class ConfigConstants {
     public static final String DEFAULT_PDF_PRINT_DISABLE = "true";
     public static final String DEFAULT_PDF_DOWNLOAD_DISABLE = "true";
     public static final String DEFAULT_PDF_BOOKMARK_DISABLE = "true";
+    public static final String DEFAULT_PDF_WATERMARK_DISABLE = "true";
     public static final String DEFAULT_PDF_DISABLE_EDITING = "true";
     public static final String DEFAULT_FILE_UPLOAD_DISABLE = "false";
     public static final String DEFAULT_TIF_PREVIEW_TYPE = "tif";
@@ -361,6 +363,18 @@ public class ConfigConstants {
         ConfigConstants.pdfBookmarkDisable = pdfBookmarkDisable;
     }
 
+    public static String getPdfWatermarkDisable() {
+        return pdfWatermarkDisable;
+    }
+
+    @Value("${pdf.watermark.disable:true}")
+    public void setPdfWatermarkDisable(String pdfWatermarkDisable) {
+        setPdfWatermarkDisableValue(pdfWatermarkDisable);
+    }
+
+    public static void setPdfWatermarkDisableValue(String pdfWatermarkDisable) {
+        ConfigConstants.pdfWatermarkDisable = pdfWatermarkDisable;
+    }
 
     public static String getPdfDisableEditing() {
         return pdfDisableEditing;

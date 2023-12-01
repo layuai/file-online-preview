@@ -51,6 +51,7 @@ public class ConfigRefreshComponent {
                 String pdfPrintDisable;
                 String pdfDownloadDisable;
                 String pdfBookmarkDisable;
+                String pdfWatermarkDisable;
                 String pdfDisableEditing;
                 boolean fileUploadDisable;
                 String tifPreviewType;
@@ -99,6 +100,7 @@ public class ConfigRefreshComponent {
                     pdfPrintDisable = properties.getProperty("pdf.print.disable", ConfigConstants.DEFAULT_PDF_PRINT_DISABLE);
                     pdfDownloadDisable = properties.getProperty("pdf.download.disable", ConfigConstants.DEFAULT_PDF_DOWNLOAD_DISABLE);
                     pdfBookmarkDisable = properties.getProperty("pdf.bookmark.disable", ConfigConstants.DEFAULT_PDF_BOOKMARK_DISABLE);
+                    pdfWatermarkDisable = properties.getProperty("pdf.watermark.disable", ConfigConstants.DEFAULT_PDF_WATERMARK_DISABLE);
                     pdfDisableEditing = properties.getProperty("pdf.disable.editing", ConfigConstants.DEFAULT_PDF_DISABLE_EDITING);
                     fileUploadDisable = Boolean.parseBoolean(properties.getProperty("file.upload.disable", ConfigConstants.DEFAULT_FILE_UPLOAD_DISABLE));
                     tifPreviewType = properties.getProperty("tif.preview.type", ConfigConstants.DEFAULT_TIF_PREVIEW_TYPE);
@@ -141,6 +143,7 @@ public class ConfigRefreshComponent {
                     ConfigConstants.setPdfPrintDisableValue(pdfPrintDisable);
                     ConfigConstants.setPdfDownloadDisableValue(pdfDownloadDisable);
                     ConfigConstants.setPdfBookmarkDisableValue(pdfBookmarkDisable);
+                    ConfigConstants.setPdfWatermarkDisableValue(pdfWatermarkDisable);
                     ConfigConstants.setPdfDisableEditingValue(pdfDisableEditing);
                     ConfigConstants.setFileUploadDisableValue(fileUploadDisable);
                     ConfigConstants.setTifPreviewTypeValue(tifPreviewType);

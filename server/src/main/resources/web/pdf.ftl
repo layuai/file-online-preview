@@ -53,9 +53,13 @@
         window.location.href = url;
     }
 
-    /*初始化水印*/
     window.onload = function () {
-        initWaterMark();
+        /*初始化水印*/
+        // 如果禁用转换添加水印,则显示页面水印
+        let pdfWatermarkDisable = '${pdfWatermarkDisable}';
+        if(pdfWatermarkDisable === 'true') {
+            initWaterMark();
+        }
     }
 </script>
 </html>

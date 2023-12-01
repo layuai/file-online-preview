@@ -6,12 +6,18 @@ import cn.keking.model.ReturnResponse;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
+import cn.keking.utils.PdfUtil;
+import cn.keking.web.filter.BaseUrlFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -21,7 +27,7 @@ import java.util.List;
  */
 @Service
 public class PdfFilePreviewImpl implements FilePreview {
-
+    private final Logger logger = LoggerFactory.getLogger(PdfFilePreviewImpl.class);
     private final FileHandlerService fileHandlerService;
     private final OtherFilePreviewImpl otherFilePreview;
     private static final String FILE_DIR = ConfigConstants.getFileDir();
@@ -37,16 +43,24 @@ public class PdfFilePreviewImpl implements FilePreview {
         String fileName = fileAttribute.getName();
         String officePreviewType = fileAttribute.getOfficePreviewType();
         boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
+        // 启用pdf添加水印配置
+        boolean isWaterMark = "false".equals(ConfigConstants.getPdfWatermarkDisable()) && StringUtils.hasText(fileAttribute.getWatermarkTxt());
         String pdfName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "pdf";
+        // 文件名称附加水印内容
+        pdfName = isWaterMark ? fileAttribute.getWatermarkTxt() + "_" + pdfName : pdfName;
         String outFilePath = FILE_DIR + pdfName;
         if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType)) {
             //当文件不存在时，就去下载
             if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, pdfName);
                 if (response.isFailure()) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                 }
                 outFilePath = response.getContent();
+                // 启用pdf添加水印配置
+                if (isWaterMark) {
+                    PdfUtil.addWaterMark(outFilePath, fileAttribute);
+                }
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
                     fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
@@ -85,13 +99,44 @@ public class PdfFilePreviewImpl implements FilePreview {
                     if (response.isFailure()) {
                         return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                     }
-                    model.addAttribute("pdfUrl", fileHandlerService.getRelativePath(response.getContent()));
+                    outFilePath = response.getContent();
+                    // 启用pdf添加水印配置
+                    if (isWaterMark) {
+                        PdfUtil.addWaterMark(outFilePath, fileAttribute);
+                    }
+                    model.addAttribute("pdfUrl", fileHandlerService.getRelativePath(outFilePath));
                     if (ConfigConstants.isCacheEnabled()) {
                         // 加入缓存
                         fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
                     }
                 } else {
-                    pdfName =   URLEncoder.encode(pdfName).replaceAll("\\+", "%20");
+                    try {
+                        pdfName = URLEncoder.encode(pdfName, "UTF-8").replaceAll("\\+", "%20");
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("UnsupportedEncodingException", e);
+                    }
+                    model.addAttribute("pdfUrl", pdfName);
+                }
+            } else if (url != null && isWaterMark) {
+                // 是http开头，远程文件添加水印，需下载到本地
+                if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
+                    ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, pdfName);
+                    if (response.isFailure()) {
+                        return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
+                    }
+                    outFilePath = response.getContent();
+                    PdfUtil.addWaterMark(outFilePath, fileAttribute);
+                    model.addAttribute("pdfUrl", fileHandlerService.getRelativePath(outFilePath));
+                    if (ConfigConstants.isCacheEnabled()) {
+                        // 加入缓存
+                        fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
+                    }
+                } else {
+                    try {
+                        pdfName = URLEncoder.encode(pdfName, "UTF-8").replaceAll("\\+", "%20");
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("UnsupportedEncodingException", e);
+                    }
                     model.addAttribute("pdfUrl", pdfName);
                 }
             } else {

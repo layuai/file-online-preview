@@ -469,12 +469,40 @@ public class FileHandlerService implements InitializingBean {
             if (StringUtils.hasText(userToken)) {
                 attribute.setUserToken(userToken);
             }
+            this.setWatermarkAttribute(req, attribute);
             String kkProxyAuthorization = req.getHeader( "kk-proxy-authorization");
             attribute.setKkProxyAuthorization(kkProxyAuthorization);
 
         }
 
         return attribute;
+    }
+
+    /**
+     * 设置水印属性
+     * @param request request
+     */
+    private void setWatermarkAttribute(HttpServletRequest request, FileAttribute attribute) {
+        String watermarkTxt= (String) request.getAttribute("watermarkTxt");
+        attribute.setWatermarkTxt(watermarkTxt);
+        Integer watermarkXSpace = Integer.valueOf((String) request.getAttribute("watermarkXSpace"));
+        attribute.setWatermarkXSpace(watermarkXSpace);
+        Integer watermarkYSpace = Integer.valueOf((String) request.getAttribute("watermarkYSpace"));
+        attribute.setWatermarkYSpace(watermarkYSpace);
+        String watermarkFont = (String) request.getAttribute("watermarkFont");
+        attribute.setWatermarkFont(watermarkFont);
+        String watermarkFontsize = (String) request.getAttribute("watermarkFontsize");
+        attribute.setWatermarkFontsize(watermarkFontsize);
+        String watermarkColor = (String) request.getAttribute("watermarkColor");
+        attribute.setWatermarkColor(watermarkColor);
+        Float watermarkAlpha = Float.valueOf((String) request.getAttribute("watermarkAlpha"));
+        attribute.setWatermarkAlpha(watermarkAlpha);
+        Float watermarkWidth = Float.valueOf((String) request.getAttribute("watermarkWidth"));
+        attribute.setWatermarkWidth(watermarkWidth);
+        Float watermarkHeight = Float.valueOf((String) request.getAttribute("watermarkHeight"));
+        attribute.setWatermarkHeight(watermarkHeight);
+        Float watermarkAngle = Float.valueOf((String) request.getAttribute("watermarkAngle"));
+        attribute.setWatermarkAngle(watermarkAngle);
     }
 
     /**

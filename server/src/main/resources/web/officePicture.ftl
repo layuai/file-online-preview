@@ -43,7 +43,11 @@
 <script>
     window.onload = function () {
         /*初始化水印*/
-        initWaterMark();
+        // 如果禁用转换添加水印,则显示页面水印
+        let pdfWatermarkDisable = '${pdfWatermarkDisable}';
+        if(pdfWatermarkDisable === 'true') {
+            initWaterMark();
+        }
         checkImgs();
     };
     window.onscroll = throttle(checkImgs);
