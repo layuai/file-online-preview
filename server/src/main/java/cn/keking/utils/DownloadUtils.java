@@ -18,14 +18,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static cn.keking.utils.KkFileUtils.isFtpUrl;
 import static cn.keking.utils.KkFileUtils.isHttpUrl;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
+
 /**
  * @author yudian-it
  */
@@ -84,16 +88,19 @@ public class DownloadUtils {
         }
         try {
             URL url = WebUtils.normalizedURL(urlStr);
+            // 此处去除fullfilename参数
+            urlStr = cleanQueryParam(URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name()));
+
             if (!fileAttribute.getSkipDownLoad()) {
                 if (isHttpUrl(url)) {
                     File realFile = new File(realPath);
                     RequestCallback requestCallback = request -> {
                         request.getHeaders()
                                 .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
-                       String proxyAuthorization = fileAttribute.getKkProxyAuthorization();
-                        if(StringUtils.hasText(proxyAuthorization)){
-                          Map<String,String>  proxyAuthorizationMap = mapper.readValue(proxyAuthorization, Map.class);
-                          proxyAuthorizationMap.entrySet().forEach(entry-> request.getHeaders().set(entry.getKey(), entry.getValue()));
+                        String proxyAuthorization = fileAttribute.getKkProxyAuthorization();
+                        if (StringUtils.hasText(proxyAuthorization)) {
+                            Map<String, String> proxyAuthorizationMap = mapper.readValue(proxyAuthorization, Map.class);
+                            proxyAuthorizationMap.entrySet().forEach(entry -> request.getHeaders().set(entry.getKey(), entry.getValue()));
                         }
                     };
                     urlStr = URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
@@ -127,6 +134,18 @@ public class DownloadUtils {
         }
     }
 
+    /**
+     * 去除fullfilename参数
+     *
+     * @param urlStr
+     * @return
+     */
+    public static String cleanQueryParam(String urlStr) {
+        // 去除特定参数字段
+        Pattern pattern = Pattern.compile("(&fullfilename=[^&]*)");
+        Matcher matcher = pattern.matcher(urlStr);
+        return matcher.replaceAll("");
+    }
 
     /**
      * 获取真实文件绝对路径
