@@ -39,6 +39,14 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public FilterRegistrationBean<UrlCheckFilter> getUrlCheckFilter() {
+        UrlCheckFilter filter = new UrlCheckFilter();
+        FilterRegistrationBean<UrlCheckFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(filter);
+        return registrationBean;
+    }
+
+    @Bean
     public FilterRegistrationBean<TrustHostFilter> getTrustHostFilter() {
         Set<String> filterUri = new HashSet<>();
         filterUri.add("/onlinePreview");
