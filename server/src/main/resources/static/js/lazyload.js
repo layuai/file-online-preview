@@ -7,7 +7,8 @@ function isInSight(el) {
 }
 
 
-
+// 获取视口的高度
+var viewportHeight = window.innerHeight;
 function checkImgs() {
     var index = 0;
     var imgs = document.querySelectorAll('.my-photo');
@@ -15,6 +16,12 @@ function checkImgs() {
         if (isInSight(imgs[i])) {
             loadImg(imgs[i]);
             index = i;
+            var scrollDistance = window.scrollY;    	   
+            if (scrollDistance >= viewportHeight) {
+                viewportHeight += (fullHeight * 2);
+                // 刷新水印
+                initWaterMark();
+    	    } 
         }
     }
 }
