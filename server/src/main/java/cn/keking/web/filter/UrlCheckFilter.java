@@ -38,7 +38,7 @@ public class UrlCheckFilter implements Filter {
 
         final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-        String requestURI = httpServletRequest.getRequestURI().replace(httpServletRequest.getContextPath(), "");
+        String requestURI = httpServletRequest.getRequestURI().substring(httpServletRequest.getContextPath().length());
         if(requestURI.contains("//") || (requestURI.endsWith("/") && !requestURI.equals("/"))) {
             String html = this.illegalRequest.replace("${request_path}", requestURI);
             response.getWriter().write(html);
