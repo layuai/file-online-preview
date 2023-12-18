@@ -37,8 +37,8 @@ public class UrlCheckFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        String requestURI = httpServletRequest.getRequestURI();
 
+        String requestURI = httpServletRequest.getRequestURI().replace(httpServletRequest.getContextPath(), "");
         if(requestURI.contains("//") || (requestURI.endsWith("/") && !requestURI.equals("/"))) {
             String html = this.illegalRequest.replace("${request_path}", requestURI);
             response.getWriter().write(html);
