@@ -453,13 +453,16 @@ public class FileHandlerService implements InitializingBean {
             suffix = WebUtils.suffixFromUrl(url);
         }
         if (!ObjectUtils.isEmpty(fileKey)) {  //判断是否使用特定压缩包符号
+             String[] strs = url.split("=");  //处理解压后有反代情况下 文件的路径
+                String  urlStrr = getSubString(url, strs[1]);
+                urlStrr =  urlStrr.substring(0,urlStrr.lastIndexOf("?"));
+                fileName = strs[1] + urlStrr.trim();
             try {
-                URL urll = new URL(url);
-                fileName = urll.getPath(); //压缩包类型文件 获取解压后的绝对地址 不在执行重复下载方法
-                attribute.setSkipDownLoad(true);
-            } catch (MalformedURLException e) {
+               fileName =  URLDecoder.decode(fileName, StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+                attribute.setSkipDownLoad(true);
         }
         url = WebUtils.encodeUrlFileName(url);
         if(UrlEncoderUtils.hasUrlEncoded(fileName) && UrlEncoderUtils.hasUrlEncoded(suffix)){  //判断文件名是否转义
