@@ -36,13 +36,13 @@ public class CommonPreviewImpl implements FilePreview {
             ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, null);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
-            } else {
-                String file = fileHandlerService.getRelativePath(response.getContent());
-                model.addAttribute("currentUrl", file);
             }
+            String file = fileHandlerService.getRelativePath(response.getContent());
+            model.addAttribute("currentUrl", file);
+            return file;
         } else {
             model.addAttribute("currentUrl", url);
         }
-        return null;
+        return url;
     }
 }

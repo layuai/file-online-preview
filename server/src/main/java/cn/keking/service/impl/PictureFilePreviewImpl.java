@@ -28,7 +28,6 @@ public class PictureFilePreviewImpl extends CommonPreviewImpl {
     public String filePreviewHandle(String url, Model model, FileAttribute fileAttribute) {
         url= KkFileUtils.htmlEscape(url);
         List<String> imgUrls = new ArrayList<>();
-        imgUrls.add(url);
         String fileKey = fileAttribute.getFileKey();
         List<String> zipImgUrls = fileHandlerService.getImgCache(fileKey);
         if (!CollectionUtils.isEmpty(zipImgUrls)) {
@@ -36,6 +35,8 @@ public class PictureFilePreviewImpl extends CommonPreviewImpl {
         }
         // 不是http开头，浏览器不能直接访问，需下载到本地
         super.filePreviewHandle(url, model, fileAttribute);
+        url = super.filePreviewHandle(url, model, fileAttribute);
+        imgUrls.add(url);
         model.addAttribute("imgUrls", imgUrls);
         return PICTURE_FILE_PREVIEW_PAGE;
     }
