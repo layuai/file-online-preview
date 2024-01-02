@@ -26,7 +26,8 @@ else
             [ -z "$PID" ] && exit 2
             echo "正在停止进程：${PID}..."
             ## 正常停止进程
-            kill -15 "${PID}" && echo "进程：${PID}停止成功！"
+            #kill -15 "${PID}" && echo "进程：${PID}停止成功！"
+            ps -ef |grep "${PID}" |grep -v grep|awk '{print$2}'| xargs kill -15 && echo "进程：${PID}及子进程停止成功！"
         done
         # 关闭所有进程后，重置pid。
         cat /dev/null > "$PID_FILE"
