@@ -163,7 +163,14 @@ public class WebUtils {
             return url;
         }
         try {
-            encodedFileName = URLEncoder.encode(noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex), "UTF-8");
+            String originFileName =noQueryUrl.substring(fileNameStartIndex, fileNameEndIndex);
+            //判断文件名是否已经进行过url编码 已编码的跳过
+            boolean isEncode = UrlEncoderUtils.hasUrlEncoded(originFileName);
+            if (isEncode) {
+                encodedFileName=originFileName;
+            }else {
+                encodedFileName = URLEncoder.encode(originFileName, "UTF-8");
+            }
         } catch (UnsupportedEncodingException e) {
             return null;
         }
