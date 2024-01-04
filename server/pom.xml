@@ -125,7 +125,7 @@
 
         <!-- 编码检测-JUniversalCharDet-->
         <dependency>
-            <groupId>com.googlecode.juniversalchardet</groupId>
+            <groupId>com.github.albfernandez</groupId>
             <artifactId>juniversalchardet</artifactId>
             <version>${juniversalchardet.version}</version>
         </dependency>
