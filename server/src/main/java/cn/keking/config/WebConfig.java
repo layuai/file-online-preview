@@ -31,17 +31,17 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public FilterRegistrationBean<ChinesePathFilter> getChinesePathFilter() {
-        ChinesePathFilter filter = new ChinesePathFilter();
-        FilterRegistrationBean<ChinesePathFilter> registrationBean = new FilterRegistrationBean<>();
+    public FilterRegistrationBean<UrlCheckFilter> getUrlCheckFilter() {
+        UrlCheckFilter filter = new UrlCheckFilter();
+        FilterRegistrationBean<UrlCheckFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(filter);
         return registrationBean;
     }
 
     @Bean
-    public FilterRegistrationBean<UrlCheckFilter> getUrlCheckFilter() {
-        UrlCheckFilter filter = new UrlCheckFilter();
-        FilterRegistrationBean<UrlCheckFilter> registrationBean = new FilterRegistrationBean<>();
+    public FilterRegistrationBean<ChinesePathFilter> getChinesePathFilter() {
+        ChinesePathFilter filter = new ChinesePathFilter();
+        FilterRegistrationBean<ChinesePathFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(filter);
         return registrationBean;
     }

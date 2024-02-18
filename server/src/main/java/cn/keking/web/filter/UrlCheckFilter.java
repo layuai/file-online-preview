@@ -1,48 +1,37 @@
 package cn.keking.web.filter;
 
-
-import cn.keking.web.controller.OnlinePreviewController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.FileCopyUtils;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @date 2023/11/30
  */
 public class UrlCheckFilter implements Filter {
 
-    private final Logger logger = LoggerFactory.getLogger(OnlinePreviewController.class);
-
-    private String illegalRequest;
-
-    @Override
-    public void init(FilterConfig filterConfig) {
-        ClassPathResource classPathResource = new ClassPathResource("web/illegalRequest.html");
-        try {
-            classPathResource.getInputStream();
-            byte[] bytes = FileCopyUtils.copyToByteArray(classPathResource.getInputStream());
-            this.illegalRequest = new String(bytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.error("", e);
-        }
-    }
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String servletPath = httpServletRequest.getServletPath();
-        if(servletPath.contains("//") || (servletPath.endsWith("/") && !servletPath.equals("/"))) {
-            String html = this.illegalRequest.replace("${request_path}", servletPath);
-            response.getWriter().write(html);
-            response.getWriter().close();
-        }else {
+
+        boolean redirect = false;
+
+        // servletPath 中不能包含 //
+        if (servletPath.contains("//")) {
+            servletPath = servletPath.replaceAll("//+", "/");
+            redirect = true;
+        }
+
+        // 不能以 / 结尾，同时考虑 **首页** 的特殊性
+        if (servletPath.endsWith("/") && servletPath.length() > 1) {
+            servletPath = servletPath.substring(0, servletPath.length() - 1);
+            redirect = true;
+        }
+        if (redirect) {
+            ((HttpServletResponse) response).sendRedirect(httpServletRequest.getContextPath() + servletPath + "?" + httpServletRequest.getQueryString());
+        } else {
             chain.doFilter(request, response);
         }
     }
