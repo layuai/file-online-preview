@@ -1,5 +1,7 @@
 package cn.keking.web.filter;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +32,19 @@ public class UrlCheckFilter implements Filter {
             redirect = true;
         }
         if (redirect) {
-            ((HttpServletResponse) response).sendRedirect(httpServletRequest.getContextPath() + servletPath + "?" + httpServletRequest.getQueryString());
+            String redirectUrl;
+            if (StringUtils.isBlank(BaseUrlFilter.getBaseUrl())) {
+                // 正常 BaseUrlFilter 有限此 Filter 执行，不会执行到此
+                redirectUrl = httpServletRequest.getContextPath() + servletPath;
+            } else {
+                if (BaseUrlFilter.getBaseUrl().endsWith("/") && servletPath.startsWith("/")) {
+                    // BaseUrlFilter.getBaseUrl() 以 / 结尾，servletPath 以 / 开头，需再去除一次 //
+                    redirectUrl = BaseUrlFilter.getBaseUrl() + servletPath.substring(1);
+                } else {
+                    redirectUrl = BaseUrlFilter.getBaseUrl() + servletPath;
+                }
+            }
+            ((HttpServletResponse) response).sendRedirect(redirectUrl + "?" + httpServletRequest.getQueryString());
         } else {
             chain.doFilter(request, response);
         }
