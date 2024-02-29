@@ -447,6 +447,12 @@ public class FileHandlerService implements InitializingBean {
             originFileName = WebUtils.getFileNameFromURL(url);
             type = FileType.typeFromUrl(url);
             suffix = WebUtils.suffixFromUrl(url);
+            // 移除fullfilename参数
+            if (url.indexOf("&fullfilename=/" + originFileName + "&") > 0) {
+                url = url.replace("&fullfilename=/" + originFileName + "&", "");
+            } else {
+                url = url.replace("&fullfilename=/" + originFileName, "");
+            }
         }
         boolean isCompressFile = !ObjectUtils.isEmpty(compressFileKey);
         if (isCompressFile) {  //判断是否使用特定压缩包符号
