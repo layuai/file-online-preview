@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import cn.keking.utils.DownloadUtils;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -121,6 +123,9 @@ public class OnlinePreviewController {
             logger.info("读取跨域文件异常，可能存在非法访问，urlPath：{}", urlPath);
             return;
         }
+        // 清理url中内置参数
+        urlPath = DownloadUtils.cleanQueryParam(urlPath);
+
         logger.info("下载跨域pdf文件url：{}", urlPath);
         if (!urlPath.toLowerCase().startsWith("ftp:")){
             try {
