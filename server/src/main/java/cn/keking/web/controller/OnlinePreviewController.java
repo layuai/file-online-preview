@@ -128,16 +128,12 @@ public class OnlinePreviewController {
                 urlcon=(HttpURLConnection)url.openConnection();
                 urlcon.setConnectTimeout(30000);
                 urlcon.setReadTimeout(30000);
-                urlcon.setInstanceFollowRedirects(false);
                 int responseCode = urlcon.getResponseCode();
                 if ( responseCode == 403  || responseCode == 500) { //403  500
                     logger.error("读取跨域文件异常，url：{}，错误：{}", urlPath,responseCode);
                     return ;
                 }
-                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) { //301 302
-                    url =new URL(urlcon.getHeaderField("Location"));
-                    urlcon=(HttpURLConnection)url.openConnection();
-                } if (responseCode  == 404 ) {  //404
+                if (responseCode  == 404 ) {  //404
                     try {
                         urlStr = URLDecoder.decode(urlPath, StandardCharsets.UTF_8.name());
                         urlStr = URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name());
@@ -145,11 +141,7 @@ public class OnlinePreviewController {
                         urlcon=(HttpURLConnection)url.openConnection();
                         urlcon.setConnectTimeout(30000);
                         urlcon.setReadTimeout(30000);
-                        urlcon.setInstanceFollowRedirects(false);
                         responseCode = urlcon.getResponseCode();
-                        if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) { //301 302
-                            url =new URL(urlcon.getHeaderField("Location"));
-                        }
                         if(responseCode == 404 ||responseCode  == 403  || responseCode == 500 ){
                             logger.error("读取跨域文件异常，url：{}，错误：{}", urlPath,responseCode);
                             return ;
