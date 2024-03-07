@@ -467,13 +467,6 @@ public class FileHandlerService implements InitializingBean {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-        }else {
-            try {
-                url = URLEncoder.encode(url, uriEncoding).replaceAll("\\+", "%20"); //对url进行编码
-                url = url.replaceAll("%3A", ":").replaceAll("%2F", "/").replaceAll("%3F", "?").replaceAll("%26", "&"); //恢复被编码的冒号和反斜杠
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
         }
         originFileName = KkFileUtils.htmlEscape(originFileName);  //文件名处理
         boolean isHtmlView = suffix.equalsIgnoreCase("xls") || suffix.equalsIgnoreCase("xlsx") || suffix.equalsIgnoreCase("csv") || suffix.equalsIgnoreCase("xlsm") || suffix.equalsIgnoreCase("xlt") || suffix.equalsIgnoreCase("xltm") || suffix.equalsIgnoreCase("et") || suffix.equalsIgnoreCase("ett") || suffix.equalsIgnoreCase("xlam");

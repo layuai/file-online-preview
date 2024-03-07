@@ -7,6 +7,7 @@ import cn.keking.service.FileHandlerService;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.KkFileUtils;
+import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -70,6 +71,7 @@ public class CadFilePreviewImpl implements FilePreview {
                 }
             }
         }
+        cacheName=  WebUtils.encodeFileName(cacheName); //文件名编码输出
         if ("tif".equalsIgnoreCase(cadPreviewType)) {
             model.addAttribute("currentUrl", cacheName);
             return TIFF_FILE_PREVIEW_PAGE;
