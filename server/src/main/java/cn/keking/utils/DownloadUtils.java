@@ -49,12 +49,10 @@ public class DownloadUtils {
      * @param fileName      文件名
      * @return 本地文件绝对路径
      */
-    public static ReturnResponse<String> downLoad(FileAttribute fileAttribute, String fileName) {
+    public static ReturnResponse<String> downLoad(String urlStr,FileAttribute fileAttribute, String fileName) {
         // 忽略ssl证书
-        String urlStr = null;
         try {
             SslUtils.ignoreSsl();
-            urlStr = fileAttribute.getUrl().replaceAll("\\+", "%20").replaceAll(" ", "%20");
         } catch (Exception e) {
             logger.error("忽略SSL证书异常:", e);
         }

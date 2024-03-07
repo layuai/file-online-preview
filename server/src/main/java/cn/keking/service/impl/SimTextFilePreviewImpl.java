@@ -37,7 +37,7 @@ public class SimTextFilePreviewImpl implements FilePreview {
         boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
         String filePath = fileAttribute.getOriginFilePath();
         if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(fileName) || !ConfigConstants.isCacheEnabled()) {
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+            ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, fileName);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }

@@ -53,7 +53,7 @@ public class MediaFilePreviewImpl implements FilePreview {
         }
         if (!url.toLowerCase().startsWith("http") || checkNeedConvert(mediaTypes)) {  //不是http协议的 //   开启转换方式并是支持转换格式的
             if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(cacheName) || !ConfigConstants.isCacheEnabled()) {  //查询是否开启缓存
-                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+                ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, fileName);
                 if (response.isFailure()) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                 }

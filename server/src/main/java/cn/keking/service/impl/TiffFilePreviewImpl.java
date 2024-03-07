@@ -39,7 +39,7 @@ public class TiffFilePreviewImpl implements FilePreview {
         boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
         if ("jpg".equalsIgnoreCase(tifPreviewType) || "pdf".equalsIgnoreCase(tifPreviewType)) {
             if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(cacheName) || !ConfigConstants.isCacheEnabled()) {
-                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+                ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, fileName);
                 if (response.isFailure()) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                 }
@@ -107,7 +107,7 @@ public class TiffFilePreviewImpl implements FilePreview {
         // 不是http开头，浏览器不能直接访问，需下载到本地
         if (url != null && !url.toLowerCase().startsWith("http")) {
             if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(fileName) || !ConfigConstants.isCacheEnabled()) {
-                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+                ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, fileName);
                 if (response.isFailure()) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                 }

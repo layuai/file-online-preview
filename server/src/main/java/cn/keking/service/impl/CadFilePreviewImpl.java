@@ -45,7 +45,7 @@ public class CadFilePreviewImpl implements FilePreview {
         String outFilePath = fileAttribute.getOutFilePath();
         // 判断之前是否已转换过，如果转换过，直接返回，否则执行转换
         if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(cacheName) || !ConfigConstants.isCacheEnabled()) {
-            ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+            ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, fileName);
             if (response.isFailure()) {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }

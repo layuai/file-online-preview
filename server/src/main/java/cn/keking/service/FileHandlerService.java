@@ -37,8 +37,6 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -432,7 +430,8 @@ public class FileHandlerService implements InitializingBean {
         String outFilePath; //生成文件的路径
         String originFilePath; //原始文件路径
         String fullFileName = WebUtils.getUrlParameterReg(url, "fullfilename");
-        String compressFileKey = WebUtils.getUrlParameterReg(url, "kkCompressfileKey"); //压缩包指定特殊符号
+        String compressFileKey = WebUtils.getUrlParameterReg(url, "kkCompressfileKey"); //压缩包获取文件名
+        String compressFilePath = WebUtils.getUrlParameterReg(url, "kkCompressfilepath"); //压缩包获取文件路径
         if (StringUtils.hasText(fullFileName)) {
             originFileName = fullFileName;
             type = FileType.typeFromFileName(fullFileName);
@@ -453,22 +452,25 @@ public class FileHandlerService implements InitializingBean {
             try {
                 // http://127.0.0.1:8012/各类型文件1 - 副本.zip_/各类型文件/正常预览/PPT转的PDF.pdf?kkCompressfileKey=各类型文件1 - 副本.zip_
                 // http://127.0.0.1:8012/preview/各类型文件1 - 副本.zip_/各类型文件/正常预览/PPT转的PDF.pdf?kkCompressfileKey=各类型文件1 - 副本.zip_ 获取路径就会错误 需要下面的方法
-                URL urll = new URL(url);
-                String _Path = urll.getPath(); //获取url路径
-                String urlStrr = getSubString(_Path, compressFileKey); //反代情况下添加前缀,只获取有压缩包字符的路径
+                String urlStrr = getSubString(compressFilePath, compressFileKey); //反代情况下添加前缀,只获取有压缩包字符的路径
                 originFileName = compressFileKey + urlStrr.trim(); //拼接完整路径
                 originFileName = URLDecoder.decode(originFileName, uriEncoding); //压缩包文件中文编码问题
                 attribute.setSkipDownLoad(true);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
-        url = WebUtils.encodeUrlFileName(url);
-        if (UrlEncoderUtils.hasUrlEncoded(originFileName)) {  //判断文件名是否转义
+       // url = WebUtils.encodeUrlFileName(url);
+        if (UrlEncoderUtils.hasUrlEncoded(originFileName)) {  //判断文件名是否转义  已经转义的文件名不进行二次转义
             try {
-                originFileName = URLDecoder.decode(originFileName, uriEncoding).replaceAll("\\+", "%20");
+                originFileName = URLDecoder.decode(originFileName, uriEncoding);  //转义的文件名 恢复原名
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }else {
+            try {
+                url = URLEncoder.encode(url, uriEncoding).replaceAll("\\+", "%20"); //对url进行编码
+                url = url.replaceAll("%3A", ":").replaceAll("%2F", "/").replaceAll("%3F", "?").replaceAll("%26", "&"); //恢复被编码的冒号和反斜杠
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
