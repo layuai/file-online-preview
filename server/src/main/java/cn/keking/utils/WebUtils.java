@@ -62,7 +62,7 @@ public class WebUtils {
      * @param urlStr
      * @return
      */
-    public static String cleanQueryParam(String urlStr) {
+    public static String cleanFullfilenameParam(String urlStr) {
         // 去除特定参数字段
         Pattern pattern = Pattern.compile("(&fullfilename=[^&]*)");
         Matcher matcher = pattern.matcher(urlStr);
@@ -72,11 +72,11 @@ public class WebUtils {
     /**
      * 对URL进行编码
      */
-    public static String  URLEncoderencode(String urlStr) {
+    public static String  urlEncoderencode(String urlStr) {
 
         String fullFileName = getUrlParameterReg(urlStr, "fullfilename");  //获取文件名
         if (!ObjectUtils.isEmpty(fullFileName)) {  //判断是否启用了 流接入方法
-            urlStr = cleanQueryParam(urlStr);   //去掉流接入 拼接命令
+            urlStr = cleanFullfilenameParam(urlStr);   //去掉流接入 拼接命令
         }
         try {
             urlStr = URLEncoder.encode(urlStr, "UTF-8").replaceAll("\\+", "%20");

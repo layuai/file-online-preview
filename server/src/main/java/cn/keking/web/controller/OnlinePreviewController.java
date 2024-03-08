@@ -68,7 +68,7 @@ public class OnlinePreviewController {
         model.addAttribute("file", fileAttribute);
         FilePreview filePreview = previewFactory.get(fileAttribute);
         logger.info("预览文件url：{}，previewType：{}", fileUrl, fileAttribute.getType());
-        String fileUrll = WebUtils.URLEncoderencode(fileUrl); //对url 编码并取消流接入符号
+        String fileUrll = WebUtils.urlEncoderencode(fileUrl); //对url 编码并取消流接入符号
         return filePreview.filePreviewHandle(fileUrll, model, fileAttribute);
     }
 
