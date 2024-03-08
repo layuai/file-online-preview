@@ -6,6 +6,7 @@ import cn.keking.model.ReturnResponse;
 import cn.keking.service.FilePreview;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.service.FileHandlerService;
+import cn.keking.utils.WebUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class PdfFilePreviewImpl implements FilePreview {
         if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType)) {
             //当文件不存在时，就去下载
             if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-                ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, pdfName);
+                ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, pdfName);
                 if (response.isFailure()) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                 }
@@ -78,7 +79,7 @@ public class PdfFilePreviewImpl implements FilePreview {
             // 不是http开头，浏览器不能直接访问，需下载到本地
             if (url != null && !url.toLowerCase().startsWith("http")) {
                 if (!fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
-                    ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, pdfName);
+                    ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, pdfName);
                     if (response.isFailure()) {
                         return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                     }
@@ -88,7 +89,7 @@ public class PdfFilePreviewImpl implements FilePreview {
                         fileHandlerService.addConvertedFile(pdfName, fileHandlerService.getRelativePath(outFilePath));
                     }
                 } else {
-                    model.addAttribute("pdfUrl", pdfName);
+                    model.addAttribute("pdfUrl",  WebUtils.encodeFileName(pdfName));
                 }
             } else {
                 model.addAttribute("pdfUrl", url);

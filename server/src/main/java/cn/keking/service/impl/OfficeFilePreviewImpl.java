@@ -9,6 +9,7 @@ import cn.keking.service.OfficeToPdfService;
 import cn.keking.utils.DownloadUtils;
 import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.OfficeUtils;
+import cn.keking.utils.WebUtils;
 import cn.keking.web.filter.BaseUrlFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.EncryptedDocumentException;
@@ -69,7 +70,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         }
         if (forceUpdatedCache|| !fileHandlerService.listConvertedFiles().containsKey(cacheName) || !ConfigConstants.isCacheEnabled()) {
         // 下载远程文件到本地，如果文件在本地已存在不会重复下载
-        ReturnResponse<String> response = DownloadUtils.downLoad(fileAttribute, fileName);
+        ReturnResponse<String> response = DownloadUtils.downLoad(url,fileAttribute, fileName);
         if (response.isFailure()) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
         }
@@ -111,7 +112,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
         if (!isHtmlView && baseUrl != null && (OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType))) {
             return getPreviewType(model, fileAttribute, officePreviewType, cacheName, outFilePath, fileHandlerService, OFFICE_PREVIEW_TYPE_IMAGE, otherFilePreview);
         }
-        model.addAttribute("pdfUrl", cacheName);
+        model.addAttribute("pdfUrl", WebUtils.encodeFileName(cacheName));
         return isHtmlView ? EXEL_FILE_PREVIEW_PAGE : PDF_FILE_PREVIEW_PAGE;
     }
 

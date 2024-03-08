@@ -4,31 +4,23 @@ import cn.keking.config.ConfigConstants;
 import cn.keking.model.FileAttribute;
 import cn.keking.model.ReturnResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.mola.galimatias.GalimatiasParseException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
-
-import static cn.keking.utils.KkFileUtils.isFtpUrl;
-import static cn.keking.utils.KkFileUtils.isHttpUrl;
 
 /**
  * @author yudian-it
@@ -49,12 +41,10 @@ public class DownloadUtils {
      * @param fileName      文件名
      * @return 本地文件绝对路径
      */
-    public static ReturnResponse<String> downLoad(FileAttribute fileAttribute, String fileName) {
+    public static ReturnResponse<String> downLoad(String urlStr,FileAttribute fileAttribute, String fileName) {
         // 忽略ssl证书
-        String urlStr = null;
         try {
             SslUtils.ignoreSsl();
-            urlStr = fileAttribute.getUrl().replaceAll("\\+", "%20").replaceAll(" ", "%20");
         } catch (Exception e) {
             logger.error("忽略SSL证书异常:", e);
         }
@@ -86,9 +76,8 @@ public class DownloadUtils {
             return response;
         }
         try {
-            URL url = WebUtils.normalizedURL(urlStr);
             if (!fileAttribute.getSkipDownLoad()) {
-                if (isHttpUrl(url)) {
+                if (!urlStr.toLowerCase().startsWith("ftp")) {
                     File realFile = new File(realPath);
                     SimpleClientHttpRequestFactory httpFactory = new SimpleClientHttpRequestFactory();
                     //连接超时10秒，默认无限制，单位：毫秒
@@ -116,20 +105,17 @@ public class DownloadUtils {
                             response.setMsg("下载失败:" + e);
                             return response;
                     }
-                } else if (isFtpUrl(url)) {
+                } else {
                     String ftpUsername = WebUtils.getUrlParameterReg(fileAttribute.getUrl(), URL_PARAM_FTP_USERNAME);
                     String ftpPassword = WebUtils.getUrlParameterReg(fileAttribute.getUrl(), URL_PARAM_FTP_PASSWORD);
                     String ftpControlEncoding = WebUtils.getUrlParameterReg(fileAttribute.getUrl(), URL_PARAM_FTP_CONTROL_ENCODING);
                     FtpUtils.download(fileAttribute.getUrl(), realPath, ftpUsername, ftpPassword, ftpControlEncoding);
-                } else {
-                    response.setCode(1);
-                    response.setMsg("url不能识别url" + urlStr);
                 }
             }
             response.setContent(realPath);
             response.setMsg(fileName);
             return response;
-        } catch (IOException | GalimatiasParseException e) {
+        } catch (IOException e) {
             logger.error("文件下载失败，url：{}", urlStr);
             response.setCode(1);
             response.setContent(null);

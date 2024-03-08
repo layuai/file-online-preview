@@ -460,10 +460,10 @@ public class FileHandlerService implements InitializingBean {
                 e.printStackTrace();
             }
         }
-        url = WebUtils.encodeUrlFileName(url);
-        if (UrlEncoderUtils.hasUrlEncoded(originFileName)) {  //判断文件名是否转义
+       // url = WebUtils.encodeUrlFileName(url);
+        if (UrlEncoderUtils.hasUrlEncoded(originFileName)) {  //判断文件名是否转义  已经转义的文件名不进行二次转义
             try {
-                originFileName = URLDecoder.decode(originFileName, uriEncoding).replaceAll("\\+", "%20");
+                originFileName = URLDecoder.decode(originFileName, uriEncoding);  //转义的文件名 恢复原名
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
