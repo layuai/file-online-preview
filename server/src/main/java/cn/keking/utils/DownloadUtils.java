@@ -17,6 +17,11 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -87,6 +92,8 @@ public class DownloadUtils {
         }
         try {
             URL url = WebUtils.normalizedURL(urlStr);
+            // 此处去除fullfilename参数
+            urlStr = cleanQueryParam(URLDecoder.decode(urlStr, StandardCharsets.UTF_8.name()));
             if (!fileAttribute.getSkipDownLoad()) {
                 if (isHttpUrl(url)) {
                     File realFile = new File(realPath);
@@ -140,7 +147,18 @@ public class DownloadUtils {
             return response;
         }
     }
-
+    /**
+     * 去除fullfilename参数
+     *
+     * @param urlStr
+     * @return
+     */
+    public static String cleanQueryParam(String urlStr) {
+        // 去除特定参数字段
+        Pattern pattern = Pattern.compile("(&fullfilename=[^&]*)");
+        Matcher matcher = pattern.matcher(urlStr);
+        return matcher.replaceAll("");
+    }
 
     /**
      * 获取真实文件绝对路径
