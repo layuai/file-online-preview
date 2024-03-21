@@ -268,15 +268,13 @@ public class WebUtils {
      */
     public static String decodeUrl(String source) {
         String url = decodeBase64String(source, StandardCharsets.UTF_8);
-        if(url.contains("base64")){
-            url= "KK提醒您: 接入方法错误未使用BASE64";
-        }else  if(url.contains("base641")){
-            url=  "KK提醒您: BASE64解码异常,确认是否是正确的base64";
-        }else  if (!isValidUrl(url)){
-            url=  "KK提醒您:请正确使用url(必须包含http https ftp file 协议";
+        if (! StringUtils.isNotBlank(url)){
+            return null;
         }
+
         return url;
     }
+
     /**
      * 将 Base64 字符串使用指定字符集解码
      * @param source 原始 Base64 字符串
@@ -292,11 +290,8 @@ public class WebUtils {
         try {
             return new String(Base64Utils.decodeFromString(source.replaceAll(" ", "+").replaceAll("\n", "")), charsets);
         } catch (Exception e) {
-          //  LOGGER.error("url解码异常，其他错误", e);
-            if (e.getMessage().toLowerCase().contains(BASE64_MSG) ) {
-                return "base64";
-            }else  if (e.getMessage().contains("Last unit does not have enough valid bits"))  {
-               return "base641";
+            if (e.getMessage().toLowerCase().contains(BASE64_MSG)) {
+                LOGGER.error("url解码异常，接入方法错误未使用BASE64");
             }else {
                 LOGGER.error("url解码异常，其他错误", e);
             }
