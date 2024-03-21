@@ -395,13 +395,13 @@ public class FileHandlerService implements InitializingBean {
                     result.get(Long.parseLong(ConfigConstants.getCadTimeout()), TimeUnit.SECONDS);
                     // 如果在超时时间内，没有数据返回：则抛出TimeoutException异常
                 } catch (InterruptedException e) {
-                    System.out.println("在睡着时被打断");
+                   logger.error("文件异常：{}", e);
                     return null;
                 } catch (ExecutionException e) {
-                    System.out.println("在尝试取得任务结果时出错");
+                    logger.error("在尝试取得任务结果时出错：{}", e);
                     return null;
                 } catch (TimeoutException e) {
-                    System.out.println("时间超时");
+                    logger.error("时间超时：{}", e);
                     return null;
                 } finally {
                     source.interrupt();  //结束任务
@@ -483,7 +483,7 @@ public class FileHandlerService implements InitializingBean {
         try {
             cacheFilePrefixName = originFileName.substring(0, originFileName.lastIndexOf(".")) + suffix + "."; //这里统一文件名处理 下面更具类型 各自添加后缀
         } catch (Exception e) {
-            System.out.println("获取文件名后缀错误!");
+             logger.error("获取文件名后缀错误：{}", e);
             //  e.printStackTrace();
         }
         String cacheFileName = this.getCacheFileName(type, originFileName, cacheFilePrefixName, isHtmlView, isCompressFile);
