@@ -486,6 +486,10 @@ public class FileHandlerService implements InitializingBean {
             logger.error("获取文件名后缀错误：", e);
             //  e.printStackTrace();
         }
+        if (KkFileUtils.isIllegalFileName(originFileName)) {
+            System.out.println("非法路径,不允许访问");
+            return null;
+        }
         String cacheFileName = this.getCacheFileName(type, originFileName, cacheFilePrefixName, isHtmlView, isCompressFile);
         outFilePath = fileDir + cacheFileName;
         originFilePath = fileDir + originFileName;
