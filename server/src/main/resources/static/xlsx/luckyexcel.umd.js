@@ -9134,9 +9134,12 @@ function () {
             for (var p in inp) {
               out[inp[p]] = p.slice(stt);
             }
-
-            emf_1.FromEMF.Parse(files[fileKey], wrt);
-            this.images[fileKey] = wrt.canvas.toDataURL("image/png");
+                try {
+                 emf_1.FromEMF.Parse(files[fileKey], wrt);
+                 this.images[fileKey] = wrt.canvas.toDataURL("image/png");
+            } catch (UnsupportedEncodingException e) {
+                 this.images[fileKey] = files[fileKey];
+            }
           } else {
             this.images[fileKey] = files[fileKey];
           }
@@ -14149,5 +14152,3 @@ exports.WorkSheet = WorkSheet;
 
 },{"./BorderInfo":24,"./Workcell":26,"xlsx-js-style":11}]},{},[23])(23)
 });
-
-//# sourceMappingURL=luckyexcel.umd.js.map
