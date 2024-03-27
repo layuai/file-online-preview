@@ -304,7 +304,7 @@ public class FileHandlerService implements InitializingBean {
             }
             throw new Exception(e);
         } finally {
-              image.flush();
+             // image.flush();
             if (doc != null) {   //关闭
                 doc.close();
             }
