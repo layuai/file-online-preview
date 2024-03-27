@@ -14149,5 +14149,3 @@ exports.WorkSheet = WorkSheet;
 
 },{"./BorderInfo":24,"./Workcell":26,"xlsx-js-style":11}]},{},[23])(23)
 });
-
-//# sourceMappingURL=luckyexcel.umd.js.map
