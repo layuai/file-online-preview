@@ -16,6 +16,7 @@ import com.aspose.cad.fileformats.tiff.enums.TiffExpectedFormat;
 import com.aspose.cad.imageoptions.*;
 import com.itextpdf.text.pdf.PdfReader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -239,6 +240,7 @@ public class FileHandlerService implements InitializingBean {
         String pdfPassword = null;
         PDDocument doc = null;
         PdfReader pdfReader = null;
+        BufferedImage image = null;
         if (!forceUpdatedCache) {
             List<String> cacheResult = this.loadPdf2jpgCache(pdfFilePath);
             if (!CollectionUtils.isEmpty(cacheResult)) {
@@ -251,10 +253,11 @@ public class FileHandlerService implements InitializingBean {
             if (!pdfFile.exists()) {
                 return null;
             }
-            doc = PDDocument.load(pdfFile, filePassword);
+            doc = PDDocument.load(pdfFile, filePassword, MemoryUsageSetting.setupTempFileOnly());
             doc.setResourceCache(new NotResourceCache());
             int pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
+            pdfRenderer.setSubsamplingAllowed(true);
             int index = pdfFilePath.lastIndexOf(".");
             String folder = pdfFilePath.substring(0, index);
             File path = new File(folder);
@@ -264,7 +267,7 @@ public class FileHandlerService implements InitializingBean {
             String imageFilePath;
             for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
                 imageFilePath = folder + File.separator + pageIndex + PDF2JPG_IMAGE_FORMAT;
-                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, ConfigConstants.getPdf2JpgDpi(), ImageType.RGB);
+                image = pdfRenderer.renderImageWithDPI(pageIndex, ConfigConstants.getPdf2JpgDpi(), ImageType.RGB);
                 ImageIOUtil.writeImage(image, imageFilePath, ConfigConstants.getPdf2JpgDpi());
                 String imageUrl = this.getPdf2jpgUrl(pdfFilePath, pageIndex);
                 imageUrls.add(imageUrl);
@@ -301,6 +304,7 @@ public class FileHandlerService implements InitializingBean {
             }
             throw new Exception(e);
         } finally {
+              image.flush();
             if (doc != null) {   //关闭
                 doc.close();
             }
