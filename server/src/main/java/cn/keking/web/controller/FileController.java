@@ -110,7 +110,7 @@ public class FileController {
         long timeDifference = DateUtils.calculateCurrentTimeDifference(captchaGenerateTime);
 
         // 验证码为空，且生成验证码超过50秒，重新生成验证码
-        if (timeDifference > 50 && ObjectUtils.isEmpty(captchaCode)) {
+        if (timeDifference > 50 || ObjectUtils.isEmpty(captchaCode)) {
             captchaCode = CaptchaUtil.generateCaptchaCode();
             // 更新验证码
             WebUtils.setSessionAttr(request, CAPTCHA_CODE, captchaCode);
