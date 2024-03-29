@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.*;
@@ -42,8 +43,12 @@ public class TrustDirFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String url = WebUtils.getSourceUrl(request);
+        if (ObjectUtils.isEmpty(url)){
+            url = "KK提醒您:地址不能为空" ;
+        }
         if (!allowPreview(url)) {
-            response.getWriter().write(this.notTrustDirView);
+            String html = this.notTrustDirView.replace("${current_host}", url);
+            response.getWriter().write(html);
             response.getWriter().close();
         } else {
             chain.doFilter(request, response);
