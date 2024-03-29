@@ -162,6 +162,8 @@ public class FileHandlerService implements InitializingBean {
     public void doActionConvertedFile(String outFilePath) {
         String charset = EncodingDetects.getJavaEncode(outFilePath);
         StringBuilder sb = new StringBuilder();
+        BufferedWriter writer = null;
+        FileOutputStream fos = null;
         try (InputStream inputStream = new FileInputStream(outFilePath); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
             String line;
             while (null != (line = reader.readLine())) {
@@ -178,10 +180,20 @@ public class FileHandlerService implements InitializingBean {
             e.printStackTrace();
         }
         // 重新写入文件
-        try (FileOutputStream fos = new FileOutputStream(outFilePath); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8))) {
+        try  {
+            fos = new FileOutputStream(outFilePath);
+            writer = new BufferedWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8));
             writer.write(sb.toString());
+            writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                fos.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
