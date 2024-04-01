@@ -51,12 +51,12 @@
     };
     function chooseNode(event, treeId, treeNode) {
         if (!treeNode.isParent) {
-            var path = '${baseUrl}' + treeNode.id +  "?kkCompressfileKey=" + encodeURIComponent('${fileTree}')+"&kkCompressfilepath=" + encodeURIComponent(treeNode.id)+"&fullfilename="+encodeURIComponent(treeNode.name);
+            var path = '${baseUrl}' + encodeURIComponent(treeNode.id) + "?kkCompressfileKey=" + encodeURIComponent('${fileTree}')+"&kkCompressfilepath=" + encodeURIComponent(treeNode.id)+"&fullfilename="+encodeURIComponent(treeNode.name);
             location.href = "${baseUrl}onlinePreview?url=" + encodeURIComponent(Base64.encode(path));
         }
     }
     $(document).ready(function () {
-    var url = '${fileTree}';
+    var url = "http://"+'${fileTree}';  //添加http协议方法
        $.ajax({
             type: "get",
             url: "${baseUrl}directory?urls="+encodeURIComponent(Base64.encode(url)),
