@@ -118,7 +118,7 @@ public class OfficeFilePreviewImpl implements FilePreview {
     static String getPreviewType(Model model, FileAttribute fileAttribute, String officePreviewType, String pdfName, String outFilePath, FileHandlerService fileHandlerService, String officePreviewTypeImage, OtherFilePreviewImpl otherFilePreview) {
         String suffix = fileAttribute.getSuffix();
         boolean isPPT = suffix.equalsIgnoreCase("ppt") || suffix.equalsIgnoreCase("pptx");
-        List<String> imageUrls = null;
+        List<String> imageUrls;
         try {
             imageUrls =  fileHandlerService.pdf2jpg(outFilePath,outFilePath, pdfName, fileAttribute);
         } catch (Exception e) {
@@ -131,8 +131,6 @@ public class OfficeFilePreviewImpl implements FilePreview {
                     }
                 }
             }
-        }
-        if (imageUrls == null || imageUrls.size() < 1) {
             return otherFilePreview.notSupportedFile(model, fileAttribute, "office转图片异常，请联系管理员");
         }
         model.addAttribute("imgUrls", imageUrls);

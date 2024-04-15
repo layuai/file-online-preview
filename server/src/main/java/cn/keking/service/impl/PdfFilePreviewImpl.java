@@ -64,9 +64,6 @@ public class PdfFilePreviewImpl implements FilePreview {
                 }
                 return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
             }
-            if (imageUrls == null || imageUrls.size() < 1) {
-                return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
-            }
             model.addAttribute("imgUrls", imageUrls);
             model.addAttribute("currentUrl", imageUrls.get(0));
             if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType)) {

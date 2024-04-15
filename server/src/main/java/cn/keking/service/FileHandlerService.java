@@ -14,8 +14,8 @@ import com.aspose.cad.*;
 import com.aspose.cad.fileformats.cad.CadDrawTypeMode;
 import com.aspose.cad.fileformats.tiff.enums.TiffExpectedFormat;
 import com.aspose.cad.imageoptions.*;
-import com.itextpdf.text.pdf.PdfReader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -238,7 +238,8 @@ public class FileHandlerService implements InitializingBean {
         String filePassword = fileAttribute.getFilePassword();
         String pdfPassword = null;
         PDDocument doc = null;
-        PdfReader pdfReader = null;
+        BufferedImage  image  = null;
+        int pageCount;
         if (!forceUpdatedCache) {
             List<String> cacheResult = this.loadPdf2jpgCache(pdfFilePath);
             if (!CollectionUtils.isEmpty(cacheResult)) {
@@ -251,10 +252,11 @@ public class FileHandlerService implements InitializingBean {
             if (!pdfFile.exists()) {
                 return null;
             }
-            doc = PDDocument.load(pdfFile, filePassword);
+            doc = PDDocument.load(pdfFile, filePassword, MemoryUsageSetting.setupTempFileOnly());
             doc.setResourceCache(new NotResourceCache());
-            int pageCount = doc.getNumberOfPages();
+            pageCount = doc.getNumberOfPages();
             PDFRenderer pdfRenderer = new PDFRenderer(doc);
+            pdfRenderer.setSubsamplingAllowed(true);
             int index = pdfFilePath.lastIndexOf(".");
             String folder = pdfFilePath.substring(0, index);
             File path = new File(folder);
@@ -264,46 +266,32 @@ public class FileHandlerService implements InitializingBean {
             String imageFilePath;
             for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
                 imageFilePath = folder + File.separator + pageIndex + PDF2JPG_IMAGE_FORMAT;
-                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, ConfigConstants.getPdf2JpgDpi(), ImageType.RGB);
+                image = pdfRenderer.renderImageWithDPI(pageIndex, ConfigConstants.getPdf2JpgDpi(), ImageType.RGB);
                 ImageIOUtil.writeImage(image, imageFilePath, ConfigConstants.getPdf2JpgDpi());
                 String imageUrl = this.getPdf2jpgUrl(pdfFilePath, pageIndex);
                 imageUrls.add(imageUrl);
             }
-            try {
-                if (!ObjectUtils.isEmpty(filePassword)) {  //获取到密码 判断是否是加密文件
-                    pdfReader = new PdfReader(fileNameFilePath);   //读取PDF文件 通过异常获取该文件是否有密码字符
-                }
-            } catch (Exception e) {  //获取异常方法 判断是否有加密字符串
-                Throwable[] throwableArray = ExceptionUtils.getThrowables(e);
-                for (Throwable throwable : throwableArray) {
-                    if (throwable instanceof IOException || throwable instanceof EncryptedDocumentException) {
-                        if (e.getMessage().toLowerCase().contains(PDF_PASSWORD_MSG)) {
-                            pdfPassword = PDF_PASSWORD_MSG;  //查询到该文件是密码文件 输出带密码的值
-                        }
+            image.flush();
+        } catch (IOException e) {
+            Throwable[] throwableArray = ExceptionUtils.getThrowables(e);
+            for (Throwable throwable : throwableArray) {
+                if (throwable instanceof IOException || throwable instanceof EncryptedDocumentException) {
+                    if (e.getMessage().toLowerCase().contains(PDF_PASSWORD_MSG)) {
+                        pdfPassword = PDF_PASSWORD_MSG;  //查询到该文件是密码文件 输出带密码的值
                     }
                 }
-                if (!PDF_PASSWORD_MSG.equals(pdfPassword)) {  //该文件异常 错误原因非密码原因输出错误
-                    logger.error("Convert pdf exception, pdfFilePath：{}", pdfFilePath, e);
-                }
-
-            } finally {
-                if (pdfReader != null) {   //关闭
-                    pdfReader.close();
-                }
             }
-
-            if (usePasswordCache || !PDF_PASSWORD_MSG.equals(pdfPassword)) {   //加密文件  判断是否启用缓存命令
-                this.addPdf2jpgCache(pdfFilePath, pageCount);
-            }
-        } catch (IOException e) {
-            if (!e.getMessage().contains(PDF_PASSWORD_MSG)) {
-                logger.error("Convert pdf to jpg exception, pdfFilePath：{}", pdfFilePath, e);
+            if (!PDF_PASSWORD_MSG.equals(pdfPassword)) {  //该文件异常 错误原因非密码原因输出错误
+                logger.error("Convert pdf exception, pdfFilePath：{}", pdfFilePath, e);
             }
             throw new Exception(e);
         } finally {
             if (doc != null) {   //关闭
                 doc.close();
             }
+        }
+        if (usePasswordCache || ObjectUtils.isEmpty(filePassword)) {   //加密文件  判断是否启用缓存命令
+            this.addPdf2jpgCache(pdfFilePath, pageCount);
         }
         return imageUrls;
     }
