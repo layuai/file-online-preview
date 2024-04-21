@@ -535,6 +535,24 @@ public class FileHandlerService implements InitializingBean {
     }
 
     /**
+     * 获取请求的page参数
+     *
+     * @param req req
+     * @return 页码
+     */
+    public int getPageAttribute(HttpServletRequest req) {
+        int page = 1;
+        String pageParam= req.getParameter("page");
+
+        // 内容存在且纯整数
+        if(StringUtils.hasText(pageParam) && pageParam.matches("-?\\d+")) {
+            page = Integer.parseInt(pageParam);
+        }
+
+        return page;
+    }
+
+    /**
      * 获取缓存的文件名
      *
      * @return 文件名

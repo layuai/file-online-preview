@@ -10,6 +10,7 @@ import cn.keking.utils.KkFileUtils;
 import cn.keking.utils.WebUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.opensagres.xdocreport.core.io.IOUtils;
+import jodd.util.StringUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -75,6 +76,10 @@ public class OnlinePreviewController {
         }
         FileAttribute fileAttribute = fileHandlerService.getFileAttribute(fileUrl, req);  //这里不在进行URL 处理了
         model.addAttribute("file", fileAttribute);
+
+        int page = fileHandlerService.getPageAttribute(req);
+        model.addAttribute("page", page);
+
         FilePreview filePreview = previewFactory.get(fileAttribute);
         logger.info("预览文件url：{}，previewType：{}", fileUrl, fileAttribute.getType());
         fileUrl =WebUtils.urlEncoderencode(fileUrl);

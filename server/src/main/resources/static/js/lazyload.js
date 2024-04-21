@@ -65,3 +65,10 @@ function refresh(fn, remaining, context, args, previous, now) {
         previous = now;
     }
 }
+
+function slideToPage(page) {
+    // console.log(page)
+    // window.location.hash="#page"+page;
+    const targetElement = document.querySelector("#page"+page);
+    targetElement?.scrollIntoView({ behavior: 'auto'});
+}

@@ -30,10 +30,10 @@
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="container">
     <#list imgUrls as img>
         <div class="img-area">
-            <img class="my-photo" alt="loading"  data-src="${img}" src="images/loading.gif">
+            <img class="my-photo" alt="loading" id="page${img_index+1}" data-src="${img}" src="images/loading.gif">
         </div>
     </#list>
 </div>
@@ -46,7 +46,11 @@
         initWaterMark();
         checkImgs();
     };
+    /*初始化到指定页码*/
+    slideToPage(${page});
+
     window.onscroll = throttle(checkImgs);
+
     function changePreviewType(previewType) {
         var url = window.location.href;
         if (url.indexOf("officePreviewType=image") !== -1) {
