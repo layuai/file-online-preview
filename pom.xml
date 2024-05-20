@@ -22,7 +22,7 @@
         <antlr.version>2.7.7</antlr.version>
         <concurrentlinkedhashmap.version>1.4.2</concurrentlinkedhashmap.version>
         <rocksdb.version>5.17.2</rocksdb.version>
-        <pdfbox.version>2.0.29</pdfbox.version>
+        <pdfbox.version>3.0.2</pdfbox.version>
         <jai-imageio.version>1.4.0</jai-imageio.version>
         <jbig2-imageio.version>3.0.4</jbig2-imageio.version>
         <galimatias.version>0.2.1</galimatias.version>
@@ -32,7 +32,7 @@
         <ffmpeg.version>4.2.1-1.5.2</ffmpeg.version>
         <itextpdf.version>5.5.13.3</itextpdf.version>
         <httpclient.version>3.1</httpclient.version>
-        <aspose-cad.version>23.9</aspose-cad.version>
+        <aspose-cad.version>24.3</aspose-cad.version>
         <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <juniversalchardet.version>1.0.3</juniversalchardet.version>
         <httpcomponents.version>4.5.14</httpcomponents.version>
