@@ -260,6 +260,7 @@ public class FileHandlerService implements InitializingBean {
             logger.error("创建转换文件【{}】目录失败，请检查目录权限！", folder);
         }
         try {
+            putConvertingMap(pdfName, pdfName); //添加转换符号
             doc = Loader.loadPDF(pdfFile, filePassword);
             doc.setResourceCache(new NotResourceCache());
             pageCount[0] = doc.getNumberOfPages();
@@ -318,6 +319,7 @@ public class FileHandlerService implements InitializingBean {
             //关闭
             doc.close();
         }
+        removeConvertingMap(pdfName, pdfName); //删除转换符号
         if (usePasswordCache || ObjectUtils.isEmpty(filePassword)) {   //加密文件  判断是否启用缓存命令
             this.addPdf2jpgCache(pdfFilePath, pageCount[0]);
         }
@@ -601,5 +603,40 @@ public class FileHandlerService implements InitializingBean {
      */
     public String getConvertedMedias(String key) {
         return cacheService.getMediaConvertCache(key);
+    }
+
+    /**
+     * 记录是否转换
+     */
+
+    private static final ConcurrentHashMap<String, String> ConvertingMap = new ConcurrentHashMap<>();
+
+    public static void putConvertingMap(String key, String value){
+        ConvertingMap.put(key, value);
+    }
+
+    public static void removeConvertingMap(String key, String value){
+        ConvertingMap.remove(key, value);
+    }
+    public static String  getConvertingMap (String key){
+        return ConvertingMap.get(key);
+    }
+
+    public static String queryRecords(boolean forceUpdatedCache, String pdfName, FileHandlerService fileHandlerService) {
+        if(forceUpdatedCache){ //如果使用了更新缓存命令 清空执行标记
+            removeConvertingMap(pdfName, pdfName); //删除转换符号
+        }else if(Objects.equals(fileHandlerService.getConvertedFile(pdfName), "error")) //判断是否转换失败
+        {
+            return "error";
+        }else if(Objects.equals(fileHandlerService.getConvertedFile(pdfName), "timeout")) //判断是否转换失败
+        {
+            return "timeout";
+        }
+        if(Objects.equals(getConvertingMap(pdfName), pdfName))  //判断是否正在转换中
+        {
+            return "convert";
+        }else {
+            return null;
+        }
     }
 }

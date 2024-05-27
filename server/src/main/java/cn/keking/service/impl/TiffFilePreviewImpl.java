@@ -45,20 +45,23 @@ public class TiffFilePreviewImpl implements FilePreview {
                 String filePath = response.getContent();
                 if ("pdf".equalsIgnoreCase(tifPreviewType)) {
                     try {
-                       ConvertPicUtil.convertJpg2Pdf(filePath, outFilePath);
+                        FileHandlerService.putConvertingMap(cacheName, cacheName);  //添加转换符号
+                        ConvertPicUtil.convertJpg2Pdf(filePath, outFilePath);
                     } catch (Exception e) {
                         if (e.getMessage().contains("Bad endianness tag (not 0x4949 or 0x4d4d)") ) {
                             model.addAttribute("imgUrls", url);
                             model.addAttribute("currentUrl", url);
                             return PICTURE_FILE_PREVIEW_PAGE;
                         }else {
+                            fileHandlerService.addConvertedFile(cacheName, "error");  //失败加入缓存
                             return otherFilePreview.notSupportedFile(model, fileAttribute, "TIF转pdf异常，请联系系统管理员!" );
                         }
                     }
                     //是否保留TIFF源文件
                     if (!fileAttribute.isCompressFile() && ConfigConstants.getDeleteSourceFile()) {
-                      //  KkFileUtils.deleteFileByPath(filePath);
+                        //  KkFileUtils.deleteFileByPath(filePath);
                     }
+                    FileHandlerService.removeConvertingMap(cacheName, cacheName);  //转换成功删除缓存转换符号
                     if (ConfigConstants.isCacheEnabled()) {
                         // 加入缓存
                         fileHandlerService.addConvertedFile(cacheName, fileHandlerService.getRelativePath(outFilePath));
@@ -69,6 +72,7 @@ public class TiffFilePreviewImpl implements FilePreview {
                     // 将tif转换为jpg，返回转换后的文件路径、文件名的list
                     List<String> listPic2Jpg;
                     try {
+                        FileHandlerService.putConvertingMap(cacheName, cacheName);  //添加转换符号
                         listPic2Jpg = ConvertPicUtil.convertTif2Jpg(filePath, outFilePath,forceUpdatedCache);
                     } catch (Exception e) {
                         if (e.getMessage().contains("Bad endianness tag (not 0x4949 or 0x4d4d)") ) {
@@ -76,6 +80,8 @@ public class TiffFilePreviewImpl implements FilePreview {
                             model.addAttribute("currentUrl", url);
                             return PICTURE_FILE_PREVIEW_PAGE;
                         }else {
+                            FileHandlerService.removeConvertingMap(cacheName, cacheName);  //转换成功删除缓存转换符号
+                            fileHandlerService.addConvertedFile(cacheName, "error");  //失败加入缓存
                             return otherFilePreview.notSupportedFile(model, fileAttribute, "TIF转JPG异常，请联系系统管理员!" );
                         }
                     }
@@ -83,6 +89,7 @@ public class TiffFilePreviewImpl implements FilePreview {
                     if(!fileAttribute.isCompressFile() &&  ConfigConstants.getDeleteSourceFile()) {
                         KkFileUtils.deleteFileByPath(filePath);
                     }
+                    FileHandlerService.removeConvertingMap(cacheName, cacheName);  //转换成功删除缓存转换符号
                     if (ConfigConstants.isCacheEnabled()) {
                         // 加入缓存
                         fileHandlerService.putImgCache(cacheName, listPic2Jpg);

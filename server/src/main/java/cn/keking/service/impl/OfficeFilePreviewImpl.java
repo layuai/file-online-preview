@@ -82,16 +82,25 @@ public class OfficeFilePreviewImpl implements FilePreview {
             } else {
                 if (StringUtils.hasText(outFilePath)) {
                     try {
+                        FileHandlerService.putConvertingMap(cacheName, cacheName);  //添加转换符号
                         officeToPdfService.openOfficeToPDF(filePath, outFilePath, fileAttribute);
                     } catch (OfficeException e) {
+                        FileHandlerService.removeConvertingMap(cacheName, cacheName);  //  删除转换标记
                         if (isPwdProtectedOffice && !OfficeUtils.isCompatible(filePath, filePassword)) {
                             // 加密文件密码错误，提示重新输入
                             model.addAttribute("needFilePassword", true);
                             model.addAttribute("filePasswordError", true);
                             return EXEL_FILE_PREVIEW_PAGE;
                         }
+                        if (e.getMessage().contains("timeout")) {
+                            System.out.println("OFFICE:"+fileName);
+                            fileHandlerService.addConvertedFile(cacheName, "timeout");  //转换超时错误加入缓存
+                            return otherFilePreview.notSupportedFile(model, fileAttribute, "OFFICE超时异常，请联系管理员");
+                        }
+                        fileHandlerService.addConvertedFile(cacheName, "error");  //转换错误加入缓存
                         return otherFilePreview.notSupportedFile(model, fileAttribute, "抱歉，该文件版本不兼容，文件版本错误。");
                     }
+                    FileHandlerService.removeConvertingMap(cacheName, cacheName);  // 删除转换标记
                     if (isHtmlView) {
                         // 对转换后的文件进行操作(改变编码方式)
                         fileHandlerService.doActionConvertedFile(outFilePath);

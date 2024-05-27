@@ -58,19 +58,18 @@ public class MediaFilePreviewImpl implements FilePreview {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
                 }
                 String filePath = response.getContent();
-                String convertedUrl = null;
                 try {
                     if (mediaTypes) {
-                        convertedUrl = convertToMp4(filePath, outFilePath, fileAttribute);
-                    } else {
-                        convertedUrl = outFilePath;  //其他协议的  不需要转换方式的文件 直接输出
+                        FileHandlerService.putConvertingMap(cacheName, cacheName);  //添加转换符号
+                        convertToMp4(filePath, outFilePath, fileAttribute);
                     }
                 } catch (Exception e) {
+                    FileHandlerService.removeConvertingMap(cacheName, cacheName);  //转换失败 删除转换符合
+                    fileHandlerService.addConvertedFile(cacheName, "error");  //失败加入缓存
                     e.printStackTrace();
-                }
-                if (convertedUrl == null) {
                     return otherFilePreview.notSupportedFile(model, fileAttribute, "视频转换异常，请联系管理员");
                 }
+                FileHandlerService.removeConvertingMap(cacheName, cacheName);  //转换成功删除缓存转换符号
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
                     fileHandlerService.addConvertedFile(cacheName, fileHandlerService.getRelativePath(outFilePath));

@@ -52,8 +52,10 @@ public class CompressFilePreviewImpl implements FilePreview {
             }
             String filePath = response.getContent();
             try {
+                FileHandlerService.putConvertingMap(fileName, fileName);  //添加转换符号
                 fileTree = compressFileReader.unRar(filePath, filePassword, fileName, fileAttribute);
             } catch (Exception e) {
+                FileHandlerService.removeConvertingMap(fileName, fileName);  //转换失败，或者有密码的不记录转换符号
                 logger.error("Error processing RAR file: " + e.getMessage(), e);
                 Throwable[] throwableArray = ExceptionUtils.getThrowables(e);
                 for (Throwable throwable : throwableArray) {
@@ -64,12 +66,14 @@ public class CompressFilePreviewImpl implements FilePreview {
                         }
                     }
                 }
+                fileHandlerService.addConvertedFile(fileName, "error");  //失败加入缓存
             }
             if (!ObjectUtils.isEmpty(fileTree)) {
                 //是否保留压缩包源文件
                 if (!fileAttribute.isCompressFile() && ConfigConstants.getDeleteSourceFile()) {
                     KkFileUtils.deleteFileByPath(filePath);
                 }
+                FileHandlerService.removeConvertingMap(fileName, fileName);  //转换成功删除缓存转换符号
                 if (ConfigConstants.isCacheEnabled()) {
                     // 加入缓存
                     fileHandlerService.addConvertedFile(fileName, fileTree);
