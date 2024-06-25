@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
@@ -19,6 +20,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -270,10 +272,16 @@ public class WebUtils {
      */
     public static String decodeUrl(String source) {
         String url = decodeBase64String(source, StandardCharsets.UTF_8);
-        if (! StringUtils.isNotBlank(url)){
-            return null;
+        if (ObjectUtils.isEmpty(url)){
+            url = "KK提醒您:地址不能为空" ;
         }
-
+        if (Objects.equals(url, "base64")) {
+            url = "KK提醒您:接入方法错误未使用BASE64";
+        } else if (Objects.equals(url, "base641")) {
+            url = "KK提醒您:KKBASE64解码异常,确认是否正确使用BASE64编码";
+        } else if (!isValidUrl(url)) {
+            url = "KK提醒您:请正确使用URL(必须包括https ftp file 协议)" ;
+        }
         return url;
     }
 
@@ -294,10 +302,11 @@ public class WebUtils {
         } catch (Exception e) {
             if (e.getMessage().toLowerCase().contains(BASE64_MSG)) {
                 LOGGER.error("url解码异常，接入方法错误未使用BASE64");
+                return "base64";
             }else {
                 LOGGER.error("url解码异常，其他错误", e);
+                return "base641";
             }
-            return null;
         }
     }
 
