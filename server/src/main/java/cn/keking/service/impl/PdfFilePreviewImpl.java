@@ -36,6 +36,9 @@ public class PdfFilePreviewImpl implements FilePreview {
         boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();  //是否启用强制更新命令
         String outFilePath = fileAttribute.getOutFilePath();  //生成的文件路径
         String originFilePath = fileAttribute.getOriginFilePath();  //原始文件路径
+        if("demo.pdf".equals(pdfName)){   //禁止demo.pdf文件名  防止覆盖到demo目录
+            return otherFilePreview.notSupportedFile(model, fileAttribute, "不能使用该文件名，请更换其他文件名在进行转换");
+        }
         if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType) || OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_ALL_IMAGES.equals(officePreviewType)) {
             //当文件不存在时，就去下载
             if (forceUpdatedCache || !fileHandlerService.listConvertedFiles().containsKey(pdfName) || !ConfigConstants.isCacheEnabled()) {
@@ -51,8 +54,14 @@ public class PdfFilePreviewImpl implements FilePreview {
             }
             List<String> imageUrls;
             try {
+                FileHandlerService.putConvertingMap(pdfName, pdfName);  //添加转换符号
                 imageUrls = fileHandlerService.pdf2jpg(originFilePath,outFilePath, pdfName, fileAttribute);
             } catch (Exception e) {
+                if (e.getMessage().contains("overtime")) {
+                    fileHandlerService.addConvertedFile(pdfName, "timeout");  //失败加入缓存
+                    System.out.println("pdf转图片超时:"+pdfName);
+                    return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片超时异常，请联系管理员");
+                }
                 Throwable[] throwableArray = ExceptionUtils.getThrowables(e);
                 for (Throwable throwable : throwableArray) {
                     if (throwable instanceof IOException || throwable instanceof EncryptedDocumentException) {
@@ -62,11 +71,11 @@ public class PdfFilePreviewImpl implements FilePreview {
                         }
                     }
                 }
+                FileHandlerService.removeConvertingMap(pdfName, pdfName);  //删除缓存转换符号
+                fileHandlerService.addConvertedFile(pdfName, "error");  //失败加入缓存
                 return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
             }
-            if (imageUrls == null || imageUrls.size() < 1) {
-                return otherFilePreview.notSupportedFile(model, fileAttribute, "pdf转图片异常，请联系管理员");
-            }
+            FileHandlerService.removeConvertingMap(pdfName, pdfName);  //删除缓存转换符号
             model.addAttribute("imgUrls", imageUrls);
             model.addAttribute("currentUrl", imageUrls.get(0));
             if (OfficeFilePreviewImpl.OFFICE_PREVIEW_TYPE_IMAGE.equals(officePreviewType)) {

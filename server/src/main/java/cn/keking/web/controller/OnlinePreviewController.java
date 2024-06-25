@@ -36,6 +36,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static cn.keking.service.FilePreview.PICTURE_FILE_PREVIEW_PAGE;
 
@@ -80,6 +81,17 @@ public class OnlinePreviewController {
         fileUrl =WebUtils.urlEncoderencode(fileUrl);
         if (ObjectUtils.isEmpty(fileUrl)) {
             return otherFilePreview.notSupportedFile(model, "非法路径,不允许访问");
+        }
+        String fileName = fileAttribute.getName();
+        String cacheName =  fileAttribute.getCacheName();
+        boolean forceUpdatedCache=fileAttribute.forceUpdatedCache();
+        String ConvertRecords = FileHandlerService.queryRecords(forceUpdatedCache,cacheName,fileHandlerService);
+        if (Objects.equals(ConvertRecords, "error"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]转换失败，请联系系统管理员");
+        }else if (Objects.equals(ConvertRecords, "timeout"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "timeout");
+        }else if (Objects.equals(ConvertRecords, "convert"))
+        { return otherFilePreview.notSupportedFile(model, fileAttribute, "文件["+fileName+"]正在转换中,请稍后刷新访问");
         }
         return filePreview.filePreviewHandle(fileUrl, model, fileAttribute);  //统一在这里处理 url
     }

@@ -50,16 +50,22 @@ public class CadFilePreviewImpl implements FilePreview {
                 return otherFilePreview.notSupportedFile(model, fileAttribute, response.getMsg());
             }
             String filePath = response.getContent();
-            String imageUrls = null;
             if (StringUtils.hasText(outFilePath)) {
                 try {
-                    imageUrls = fileHandlerService.cadToPdf(filePath, outFilePath, cadPreviewType, fileAttribute);
+                    FileHandlerService.putConvertingMap(cacheName, cacheName);  //添加转换符号
+                    fileHandlerService.cadToPdf(filePath, outFilePath, cadPreviewType, fileAttribute);
                 } catch (Exception e) {
+                    FileHandlerService.removeConvertingMap(cacheName, cacheName);  // 删除转换标记
+                    if (e.getMessage().contains("overtime")) {
+                        System.out.println("CAD转换超时:"+cacheName);
+                        fileHandlerService.addConvertedFile(cacheName, "timeout");  //转换超时错误加入缓存
+                        return otherFilePreview.notSupportedFile(model, fileAttribute, "CAD转换超时异常，请联系管理员");
+                    }
                     e.printStackTrace();
-                }
-                if (imageUrls == null) {
+                    fileHandlerService.addConvertedFile(cacheName, "error");  //失败加入缓存
                     return otherFilePreview.notSupportedFile(model, fileAttribute, "CAD转换异常，请联系管理员");
                 }
+                FileHandlerService.removeConvertingMap(fileName, fileName);  //转换成功删除缓存转换符号
                 //是否保留CAD源文件
                 if (!fileAttribute.isCompressFile() && ConfigConstants.getDeleteSourceFile()) {
                     KkFileUtils.deleteFileByPath(filePath);
