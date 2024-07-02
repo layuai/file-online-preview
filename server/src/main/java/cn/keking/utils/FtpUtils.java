@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -24,6 +24,7 @@ public class FtpUtils {
 
     public static FTPClient connect(String host, int port, String username, String password, String controlEncoding) throws IOException {
         FTPClient ftpClient = new FTPClient();
+        ftpClient.setControlEncoding(controlEncoding);
         ftpClient.connect(host, port);
         if (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
             ftpClient.login(username, password);
@@ -32,7 +33,6 @@ public class FtpUtils {
         if (!FTPReply.isPositiveCompletion(reply)) {
             ftpClient.disconnect();
         }
-        ftpClient.setControlEncoding(controlEncoding);
         ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
         return ftpClient;
     }
@@ -49,7 +49,7 @@ public class FtpUtils {
         FTPClient ftpClient = connect(host, port, username, password, controlEncoding);
         OutputStream outputStream = Files.newOutputStream(Paths.get(localFilePath));
         ftpClient.enterLocalPassiveMode();
-        boolean downloadResult = ftpClient.retrieveFile(new String(remoteFilePath.getBytes(controlEncoding), StandardCharsets.ISO_8859_1), outputStream);
+        boolean downloadResult = ftpClient.retrieveFile(URLDecoder.decode(remoteFilePath, "UTF-8"), outputStream);
         LOGGER.debug("FTP download result {}", downloadResult);
         outputStream.flush();
         outputStream.close();
